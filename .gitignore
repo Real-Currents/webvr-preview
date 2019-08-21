@@ -1,0 +1,6 @@
+.DS_Store
+.idea
+app.js
+data
+node_modules
+package-lock.json
