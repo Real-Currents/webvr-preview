@@ -1,7 +1,7 @@
 import { gl, mat4 }  from 'gl-matrix';
 
-let cubeRotation: number = 0.0;
 const canvas: HTMLCanvasElement = window.document.createElement('canvas');
+let cubeRotation: number = 0.0;
 
 main();
 
