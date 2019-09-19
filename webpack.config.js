@@ -66,7 +66,7 @@ module.exports = {
                             'firefox',
                 ],
                 files: [{
-                    match: [ './modules/*.ts' ],
+                    match: [ '**/*.js' ],
                     fn: function(event, file) {
                         if (event === "change") {
                             setTimeout(function () {
@@ -78,6 +78,7 @@ module.exports = {
                 }],
                 injectChanges: true,
                 notify: true,
+                open: false,
                 host: 'localhost',
                 port: 3000,
                 server: {
