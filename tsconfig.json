@@ -20,6 +20,7 @@
         "main.ts"
     ],
     "include": [
+        "node_modules/webgl-strict-types/index.d.ts",
         "**/*.ts"
     ],
     "exclude": [

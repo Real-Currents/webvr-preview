@@ -3,7 +3,9 @@ import { gl, mat4 }  from 'gl-matrix';
 let cubeRotation: number = 0.0;
 
 export default function createContext (canvas: HTMLCanvasElement) {
-    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    const gl: WebGLRenderingContext = (
+      (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')
+    ) as any as WebGLRenderingContextStrict) as any as WebGLRenderingContext;
 
     // If we don't have a GL context, give up now
 
