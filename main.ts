@@ -1,4 +1,4 @@
-import createContext from './modules/basic/webgl-context';
+import createContext from './modules/basic/webvr';
 
 const canvas: HTMLCanvasElement = window.document.createElement('canvas');
 
