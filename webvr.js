@@ -71,7 +71,6 @@ function main() {
 
   var then = 0;
 
-
   // Draw the scene repeatedly
   function renderCallback(now) {
     if (inVR) {
@@ -305,7 +304,6 @@ function drawScene(gl, programInfo, buffers, projectionMatrix, viewMatrix) {
   // Set the drawing position to the "identity" point, which is
   // the center of the scene.
   const modelViewMatrix = mat4.create();
-
 
   // Now move the drawing position a bit to where we want to
   // start drawing the square.

@@ -1,4 +1,4 @@
-import createContext from './modules/basic/webvr';
+import createContext from './modules/basic/webvr-context';
 
 const canvas: HTMLCanvasElement = window.document.createElement('canvas');
 
@@ -25,5 +25,5 @@ function main () {
     window.document.body.style.margin = '0px';
     window.document.body.style.overflow = 'hidden';
 
-    createContext(canvas);
+    const gl: WebGLRenderingContext = createContext(canvas);
 }

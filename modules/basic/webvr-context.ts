@@ -1,8 +1,10 @@
 import { gl, mat4 }  from 'gl-matrix';
 
 let cubeRotation: number = 0.0;
+let inVR = false;
+let vrDisplay;
 
-export default function createContext (canvas: HTMLCanvasElement) {
+export default function createContext (canvas: HTMLCanvasElement): WebGLRenderingContext {
     const gl: WebGLRenderingContext = (
       (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')
     ) as any as WebGLRenderingContextStrict) as any as WebGLRenderingContext;
@@ -69,6 +71,10 @@ export default function createContext (canvas: HTMLCanvasElement) {
 
     // Draw the scene repeatedly
     function renderCallback(now) {
+        if (inVR) {
+            return;
+        }
+
         now *= 0.001;  // convert to seconds
         const deltaTime = now - then;
         then = now;
@@ -84,19 +90,82 @@ export default function createContext (canvas: HTMLCanvasElement) {
     (<any>window).vrButton = document.createElement('button');
     (<any>window).vrButton.innerHTML = 'Enter VR';
     (<any>window).vrButton.onclick = function enterVR() {
-          // if (vrDisplay != null) {
-          //     inVR = true;
-          //     // hand the canvas to the WebVR API
-          //     vrDisplay.requestPresent([{ source: canvas }]);
-          //
-          //     // requestPresent() will request permission to enter VR mode,
-          //     // and once the user has done this our `vrdisplaypresentchange`
-          //     // callback will be triggered
-          // }
+      // if (vrDisplay != null) {
+      //     inVR = true;
+      //     // hand the canvas to the WebVR API
+      //     vrDisplay.requestPresent([{ source: canvas }]);
+      //
+      //     // requestPresent() will request permission to enter VR mode,
+      //     // and once the user has done this our `vrdisplaypresentchange`
+      //     // callback will be triggered
+      // }
     };
     (<any>window).vrButton.style = 'position: absolute; bottom: 20px; right:50px;';
 
     window.document.body.append((<any>window).vrButton);
+
+    return gl;
+}
+
+// Set up the VR display and callbacks
+function vrSetup(canvas, gl, programInfo, buffers, noVRRender) {
+    if (!navigator.getVRDisplays) {
+        alert("Your browser does not support WebVR");
+        return;
+    }
+    navigator.getVRDisplays().then(displays => {
+        if (displays.length === 0) {
+            return;
+        }
+        vrDisplay = displays[displays.length - 1];
+
+        // optional, but recommended
+        vrDisplay.depthNear = 0.1;
+        vrDisplay.depthFar = 100.0;
+    });
+
+    window.addEventListener('vrdisplaypresentchange', () => {
+        // no VR display, exit
+        if (vrDisplay == null)
+            return;
+
+        // are we entering or exiting VR?
+        if (vrDisplay.isPresenting) {
+            // We should make our canvas the size expected
+            // by WebVR
+            const eye = vrDisplay.getEyeParameters("left");
+            // multiply by two since we're rendering both eyes side
+            // by side
+            canvas.width = eye.renderWidth * 2;
+            canvas.height = eye.renderHeight;
+
+            var then = 0;
+
+            const vrCallback = (now) => {
+                if (vrDisplay == null || !inVR) {
+                    return;
+                }
+
+                // reregister callback if we're still in VR
+                vrDisplay.requestAnimationFrame(vrCallback);
+
+                // calculate time delta for rotation
+                now *= 0.001;  // convert to seconds
+                const deltaTime = now - then;
+                then = now;
+
+                // render scene
+                // renderVR(gl, programInfo, buffers, deltaTime);
+            };
+            // register callback
+            vrDisplay.requestAnimationFrame(vrCallback);
+        } else {
+            inVR = false;
+            canvas.width = 640;
+            canvas.height = 480;
+            requestAnimationFrame(noVRRender);
+        }
+    });
 }
 
 //
@@ -193,6 +262,7 @@ function drawScene(gl, programInfo, buffers, deltaTime) {
     mat4.translate(modelViewMatrix,     // destination matrix
         modelViewMatrix,     // matrix to translate
         [-0.0, 0.0, -6.0]);  // amount to translate
+
     mat4.rotate(modelViewMatrix,  // destination matrix
         modelViewMatrix,  // matrix to rotate
         cubeRotation,     // amount to rotate in radians
