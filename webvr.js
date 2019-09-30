@@ -71,7 +71,6 @@ function main() {
 
   var then = 0;
 
-
   // Draw the scene repeatedly
   function renderCallback(now) {
     if (inVR) {
@@ -112,6 +111,7 @@ function vrSetup(gl, programInfo, buffers, noVRRender) {
     alert("Your browser does not support WebVR");
     return;
   }
+
   navigator.getVRDisplays().then(displays => {
       if (displays.length === 0) {
           return;
@@ -266,7 +266,7 @@ function render(gl, programInfo, buffers, deltaTime) {
 
     // In non-VR mode the triangle just rotates,
     // so we make that part of the view matrix
-    viewMatrix = mat4.create();
+    var viewMatrix = mat4.create();
 
 
     cubeRotation += deltaTime;
@@ -305,7 +305,6 @@ function drawScene(gl, programInfo, buffers, projectionMatrix, viewMatrix) {
   // Set the drawing position to the "identity" point, which is
   // the center of the scene.
   const modelViewMatrix = mat4.create();
-
 
   // Now move the drawing position a bit to where we want to
   // start drawing the square.
