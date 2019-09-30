@@ -111,6 +111,7 @@ function vrSetup(gl, programInfo, buffers, noVRRender) {
     alert("Your browser does not support WebVR");
     return;
   }
+
   navigator.getVRDisplays().then(displays => {
       if (displays.length === 0) {
           return;
@@ -265,7 +266,7 @@ function render(gl, programInfo, buffers, deltaTime) {
 
     // In non-VR mode the triangle just rotates,
     // so we make that part of the view matrix
-    viewMatrix = mat4.create();
+    var viewMatrix = mat4.create();
 
 
     cubeRotation += deltaTime;

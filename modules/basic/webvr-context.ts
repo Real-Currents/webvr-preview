@@ -12,7 +12,7 @@ export default function createContext (canvas: HTMLCanvasElement): WebGLRenderin
     // If we don't have a GL context, give up now
 
     if (!gl) {
-        alert('Unable to initialize WebGL. Your browser or machine may not support it.');
+        window.alert('Unable to initialize WebGL. Your browser or machine may not support it.');
         return;
     }
 
@@ -69,36 +69,60 @@ export default function createContext (canvas: HTMLCanvasElement): WebGLRenderin
 
     let then = 0;
 
-    // Draw the scene repeatedly
-    function renderCallback(now) {
+    const nonVRCallback = (now) => {
         if (inVR) {
+            return;
+
+        } else {
+            // Draw the scene repeatedly, if using normal webgl
+            now *= 0.001;  // convert to seconds
+            const deltaTime = now - then;
+            then = now;
+
+            drawScene(gl, programInfo, buffers, deltaTime);
+
+            window.requestAnimationFrame(nonVRCallback);
+        }
+    };
+
+    const vrCallback = (now) => {
+        if (vrDisplay == null || !inVR) {
             return;
         }
 
+        // reregister callback if we're still in VR
+        vrDisplay.requestAnimationFrame(vrCallback);
+
+        // calculate time delta for rotation
         now *= 0.001;  // convert to seconds
         const deltaTime = now - then;
         then = now;
 
-        drawScene(gl, programInfo, buffers, deltaTime);
+        // render scene
+        renderVR(canvas, gl, programInfo, buffers, deltaTime);
+    };
+    // register callback
 
-        requestAnimationFrame(renderCallback);
-    }
+    // Ensure VR is all set up
+    vrSetup(canvas, gl, programInfo, buffers, nonVRCallback, vrCallback);
 
     // Start rendering
-    requestAnimationFrame(renderCallback);
+    window.requestAnimationFrame(nonVRCallback);
 
     (<any>window).vrButton = document.createElement('button');
     (<any>window).vrButton.innerHTML = 'Enter VR';
     (<any>window).vrButton.onclick = function enterVR() {
-      // if (vrDisplay != null) {
-      //     inVR = true;
-      //     // hand the canvas to the WebVR API
-      //     vrDisplay.requestPresent([{ source: canvas }]);
-      //
-      //     // requestPresent() will request permission to enter VR mode,
-      //     // and once the user has done this our `vrdisplaypresentchange`
-      //     // callback will be triggered
-      // }
+        console.log('Enter VR');
+
+        if (vrDisplay != null) {
+          inVR = true;
+          // hand the canvas to the WebVR API
+          vrDisplay.requestPresent([{ source: canvas }]);
+
+          // requestPresent() will request permission to enter VR mode,
+          // and once the user has done this our `vrdisplaypresentchange`
+          // callback will be triggered
+      }
     };
     (<any>window).vrButton.style = 'position: absolute; bottom: 20px; right:50px;';
 
@@ -108,29 +132,27 @@ export default function createContext (canvas: HTMLCanvasElement): WebGLRenderin
 }
 
 // Set up the VR display and callbacks
-function vrSetup(canvas, gl, programInfo, buffers, noVRRender) {
-    if (!navigator.getVRDisplays) {
-        alert("Your browser does not support WebVR");
+function vrSetup(canvas, gl, programInfo, buffers, noVRRender, vrCallback) {
+    if (typeof navigator.getVRDisplays !== 'function') {
+        window.alert("Your browser does not support WebVR");
         return;
     }
-    navigator.getVRDisplays().then(displays => {
-        if (displays.length === 0) {
-            return;
-        }
-        vrDisplay = displays[displays.length - 1];
 
-        // optional, but recommended
-        vrDisplay.depthNear = 0.1;
-        vrDisplay.depthFar = 100.0;
+    navigator.getVRDisplays().then(displays => {
+        if (displays !== null && displays.length > 0) {
+            // Assign last returned display to vrDisplay
+            vrDisplay = displays[displays.length - 1];
+
+            // optional, but recommended
+            vrDisplay.depthNear = 0.1;
+            vrDisplay.depthFar = 100.0;
+        }
     });
 
     window.addEventListener('vrdisplaypresentchange', () => {
-        // no VR display, exit
-        if (vrDisplay == null)
-            return;
 
-        // are we entering or exiting VR?
-        if (vrDisplay.isPresenting) {
+        // Are we entering or exiting VR?
+        if (vrDisplay != null && vrDisplay.isPresenting) {
             // We should make our canvas the size expected
             // by WebVR
             const eye = vrDisplay.getEyeParameters("left");
@@ -139,31 +161,16 @@ function vrSetup(canvas, gl, programInfo, buffers, noVRRender) {
             canvas.width = eye.renderWidth * 2;
             canvas.height = eye.renderHeight;
 
-            var then = 0;
-
-            const vrCallback = (now) => {
-                if (vrDisplay == null || !inVR) {
-                    return;
-                }
-
-                // reregister callback if we're still in VR
-                vrDisplay.requestAnimationFrame(vrCallback);
-
-                // calculate time delta for rotation
-                now *= 0.001;  // convert to seconds
-                const deltaTime = now - then;
-                then = now;
-
-                // render scene
-                // renderVR(gl, programInfo, buffers, deltaTime);
-            };
-            // register callback
             vrDisplay.requestAnimationFrame(vrCallback);
-        } else {
+
+        } else if (vrDisplay !== null) {
+            console.log('Exit VR');
+
             inVR = false;
             canvas.width = 640;
             canvas.height = 480;
-            requestAnimationFrame(noVRRender);
+
+            window.requestAnimationFrame(noVRRender);
         }
     });
 }
@@ -218,10 +225,82 @@ function initBuffers(gl) {
     };
 }
 
+// entry point for WebVR, called by vrCallback()
+function renderVR(canvas, gl, programInfo, buffers, deltaTime) {
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    gl.clearColor(0.5, 0.5, 0.5, 1.0);  // Clear to grey, fully opaque
+    gl.clearDepth(1.0);                 // Clear everything
+    gl.enable(gl.DEPTH_TEST);           // Enable depth testing
+    gl.depthFunc(gl.LEQUAL);            // Near things obscure far things
+
+    // Clear the canvas before we start drawing on it.
+
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    cubeRotation += deltaTime;
+    renderEye(canvas, gl, programInfo, buffers, true);
+    renderEye(canvas, gl, programInfo, buffers, false);
+    vrDisplay.submitFrame();
+}
+
+// entry point for non-WebVR rendering
+// called by whatever mechanism (likely keyboard/mouse events)
+// you used before to trigger redraws
+function render (canvas, gl, programInfo, buffers, deltaTime) {
+    gl.clearColor(0.5, 0.5, 0.5, 1.0);  // Clear to grey, fully opaque
+    gl.clearDepth(1.0);                 // Clear everything
+    gl.enable(gl.DEPTH_TEST);           // Enable depth testing
+    gl.depthFunc(gl.LEQUAL);            // Near things obscure far things
+
+    // Clear the canvas before we start drawing on it.
+
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+
+    const fieldOfView = 45 * Math.PI / 180;   // in radians
+    const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
+    const zNear = 0.1;
+    const zFar = 100.0;
+    const projectionMatrix = mat4.create();
+
+    // note: glmatrix.js always has the first argument
+    // as the destination to receive the result.
+    mat4.perspective(projectionMatrix,
+        fieldOfView,
+        aspect,
+        zNear,
+        zFar);
+
+    cubeRotation += deltaTime;
+
+    drawScene(gl, programInfo, buffers, projectionMatrix);
+}
+
+function renderEye(canvas, gl, programInfo, buffers, isLeft) {
+    let width = canvas.width;
+    let height = canvas.height;
+    let projection, view;
+    let frameData = new VRFrameData();
+    vrDisplay.getFrameData(frameData);
+    // choose which half of the canvas to draw on
+    if (isLeft) {
+        gl.viewport(0, 0, width / 2, height);
+        projection = frameData.leftProjectionMatrix;
+        view = frameData.leftViewMatrix;
+    } else {
+        gl.viewport(width / 2, 0, width / 2, height);
+        projection = frameData.rightProjectionMatrix;
+        view = frameData.rightViewMatrix;
+    }
+    // we don't want auto-rotation in VR mode, so we directly
+    // use the view matrix
+    drawScene(gl, programInfo, buffers, projection, view);
+}
+
 //
 // Draw the scene.
 //
-function drawScene(gl, programInfo, buffers, deltaTime) {
+function drawScene(gl, programInfo, buffers, deltaTime, view = null) {
     gl.clearColor(0.0, 0.0, 0.0, 1.0);  // Clear to black, fully opaque
     gl.clearDepth(1.0);                 // Clear everything
     gl.enable(gl.DEPTH_TEST);           // Enable depth testing
@@ -271,6 +350,11 @@ function drawScene(gl, programInfo, buffers, deltaTime) {
         modelViewMatrix,  // matrix to rotate
         cubeRotation * .7     ,// amount to rotate in radians
         [0, 1, 0]);       // axis to rotate around (X)
+
+    if (view !== null) {
+        // Premultiply the view matrix
+        mat4.multiply(modelViewMatrix, view, modelViewMatrix);
+    }
 
     // Tell WebGL how to pull out the positions from the position
     // buffer into the vertexPosition attribute
@@ -356,7 +440,7 @@ function initShaderProgram(gl, vsSource, fsSource) {
     // If creating the shader program failed, alert
 
     if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
-        alert('Unable to initialize the shader program: ' + gl.getProgramInfoLog(shaderProgram));
+        window.alert('Unable to initialize the shader program: ' + gl.getProgramInfoLog(shaderProgram));
         return null;
     }
 
@@ -381,7 +465,7 @@ function loadShader(gl, type, source) {
     // See if it compiled successfully
 
     if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-        alert('An error occurred compiling the shaders: ' + gl.getShaderInfoLog(shader));
+        window.alert('An error occurred compiling the shaders: ' + gl.getShaderInfoLog(shader));
         gl.deleteShader(shader);
         return null;
     }
