@@ -1,4 +1,5 @@
 import createContext from './modules/basic/webvr-context';
+import backgroundUpdater from "./modules/basic/background-update";
 
 const canvas: HTMLCanvasElement = window.document.createElement('canvas');
 
@@ -26,4 +27,26 @@ function main () {
     window.document.body.style.overflow = 'hidden';
 
     const gl: WebGLRenderingContext = createContext(canvas);
+
+    (<any>window).onkeydown = function checkKey (event) {
+        switch (event['keyCode']) {
+            case 49: { // #1 => black
+                backgroundUpdater(gl, 0.0, 0.0, 0.0, 1.0);
+                break;
+            }
+            case 50: { // #2 => green
+                backgroundUpdater(gl, 0.2, 0.8, 0.2, 1.0);
+                break;
+            }
+            case 51: { // #3 => blue
+                backgroundUpdater(gl, 0.2, 0.2, 0.8, 1.0);
+                break;
+            }
+            case 52: { // #4 => random color
+                backgroundUpdater(gl, Math.random(), Math.random(), Math.random(), 1.0);
+                break;
+            }
+        }
+
+    }
 }

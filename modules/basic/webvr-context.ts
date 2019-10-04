@@ -69,6 +69,8 @@ export default function createContext (canvas: HTMLCanvasElement): WebGLRenderin
 
     let then = 0;
 
+    gl.clearColor(0.0, 0.0, 0.0, 1.0);  // Clear to black, fully opaque
+
     const nonVRCallback = (now) => {
         if (inVR) {
             return;
@@ -229,7 +231,6 @@ function initBuffers(gl) {
 // called by whatever mechanism (likely keyboard/mouse events)
 // you used before to trigger redraws
 function render (canvas, gl, programInfo, buffers, deltaTime) {
-    gl.clearColor(0.0, 0.0, 0.0, 1.0);  // Clear to black, fully opaque
     gl.clearDepth(1.0);                 // Clear everything
     gl.enable(gl.DEPTH_TEST);           // Enable depth testing
     gl.depthFunc(gl.LEQUAL);            // Near things obscure far things
@@ -266,7 +267,6 @@ function render (canvas, gl, programInfo, buffers, deltaTime) {
 // entry point for WebVR, called by vrCallback()
 function renderVR(canvas, gl, programInfo, buffers, deltaTime) {
     gl.viewport(0, 0, canvas.width, canvas.height);
-    gl.clearColor(0.0, 0.0, 0.0, 1.0);  // Clear to black, fully opaque
     gl.clearDepth(1.0);                 // Clear everything
     gl.enable(gl.DEPTH_TEST);           // Enable depth testing
     gl.depthFunc(gl.LEQUAL);            // Near things obscure far things
