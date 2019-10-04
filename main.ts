@@ -11,7 +11,7 @@ main();
 function main () {
     // Attach canvas to window
     canvas.id = 'canvas';
-    canvas.width = window.innerWidth / 2;
+    canvas.width = window.innerWidth / 2;5
     canvas.height = window.innerHeight / 2;
     canvas.style.marginLeft = 'auto';
     canvas.style.marginRight = 'auto';
@@ -23,6 +23,7 @@ function main () {
         canvas.style.width = window.outerHeight * canvas.width / canvas.height + 'px';
     }
     window.document.body.append(canvas);
+    window.document.body.style.backgroundColor = "#000000";
     window.document.body.style.margin = '0px';
     window.document.body.style.overflow = 'hidden';
 
