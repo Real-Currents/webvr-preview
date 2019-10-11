@@ -1,5 +1,9 @@
-import createContext from './modules/basic/webvr-context';
-import backgroundUpdater from "./modules/basic/background-update";
+// import createContext from './modules/basic/webvr-context';
+// import backgroundUpdater from "./modules/basic/background-update";
+import createContext from './modules/content/context';
+import initBuffers from "./modules/content/basic-buffers";
+import initShaderProgram from "./modules/content/basic-shaders";
+
 
 const canvas: HTMLCanvasElement = window.document.createElement('canvas');
 
@@ -23,12 +27,14 @@ function main () {
     }
 
     window.document.body.append(canvas);
-    
+
     window.document.body.style.backgroundColor = "#000000";
     window.document.body.style.margin = '0px';
     window.document.body.style.overflow = 'hidden';
 
-    const gl: WebGLRenderingContext = createContext(canvas);
+    const gl: WebGLRenderingContext = createContext(canvas, initBuffers, initShaderProgram);
 
-    backgroundUpdater(gl);
+    // backgroundUpdater(gl);
+
+    initBuffers(gl);
 }
