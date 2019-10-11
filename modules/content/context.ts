@@ -266,11 +266,18 @@ function drawScene(gl, programInfo, buffers, projection, view = null) {
         false,
         modelViewMatrix);
 
+    // {
+    //     const vertexCount = 3;
+    //     const type = gl.UNSIGNED_SHORT;
+    //     const offset = 0;
+    //     gl.drawArrays(gl.TRIANGLES, offset, vertexCount);
+    // }
+
     {
-        const vertexCount = 3;
-        const type = gl.UNSIGNED_SHORT;
-        const offset = 0;
-        gl.drawArrays(gl.TRIANGLES, offset, vertexCount);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffers['index']);
+        gl.drawElements(gl.TRIANGLES, buffers['indexSize'], gl.UNSIGNED_SHORT, 0);
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
     }
 
 }

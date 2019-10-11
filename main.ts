@@ -1,5 +1,5 @@
 // import createContext from './modules/basic/webvr-context';
-// import backgroundUpdater from "./modules/basic/background-update";
+import backgroundUpdater from "./modules/basic/background-update";
 import createContext from './modules/content/context';
 import initBuffers from "./modules/content/basic-buffers";
 import initShaderProgram from "./modules/content/basic-shaders";
@@ -34,7 +34,7 @@ function main () {
 
     const gl: WebGLRenderingContext = createContext(canvas, initBuffers, initShaderProgram);
 
-    // backgroundUpdater(gl);
+    backgroundUpdater(gl);
 
     initBuffers(gl);
 }
