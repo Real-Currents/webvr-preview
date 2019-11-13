@@ -1,15 +1,11 @@
 // import createContext from './modules/basic/webvr-context';
 import backgroundUpdater from "./modules/basic/background-update";
 import createContext from './modules/content/context';
-import initBuffers from "./modules/content/basic-buffers";
-import initShaderProgram from "./modules/content/basic-shaders";
+import initBuffers from "./modules/content/cube-buffers";
+import initShaderProgram from "./modules/content/cubemap-shaders";
 import generateFace from "./modules/content/face-generator";
 
-
 const canvas: HTMLCanvasElement = window.document.createElement('canvas');
-
-main();
-
 //
 // Start here
 //
@@ -71,3 +67,5 @@ function main () {
     });
 
 }
+
+main();
