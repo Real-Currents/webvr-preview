@@ -3,15 +3,19 @@ export default function initShaderProgram(gl) {
     // Vertex shader program
 
     const vertexShader = loadShader(gl, gl.VERTEX_SHADER,`
-attribute vec4 aVertexPosition;
 attribute vec4 aVertexColor;
+attribute vec3 aVertexNormal;
+attribute vec4 aVertexPosition;
 
 uniform mat4 uModelViewMatrix;
 uniform mat4 uProjectionMatrix;
-
-varying lowp vec4 vColor;
+uniform mat4 uWorldMatrix;
 
 varying vec3 v_normal;
+varying vec3 v_worldNormal;
+varying vec3 v_worldPosition;
+
+varying lowp vec4 vColor;
 
 void main() {
   //gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
@@ -22,6 +26,12 @@ void main() {
   // centered around the origin we can just 
   // pass the position
   v_normal = normalize(aVertexPosition.xyz);
+   
+  // send the view position to the fragment shader
+  v_worldPosition = (uWorldMatrix * aVertexPosition).xyz;
+ 
+  // orient the normals and pass to the fragment shader
+  v_worldNormal = mat3(uWorldMatrix) * aVertexNormal;
   
   vColor = aVertexColor;
 }
@@ -30,19 +40,30 @@ void main() {
     // Fragment shader program
 
     const fragmentShader = loadShader(gl, gl.FRAGMENT_SHADER, `
-varying lowp vec4 vColor;
+precision highp float;
 
-precision mediump float;
+// The texture.
+uniform samplerCube uTexture;
+
+// The position of the camera
+uniform vec3 uWorldCameraPosition;
 
 // Passed in from the vertex shader.
 varying vec3 v_normal;
+varying vec3 v_worldNormal;
+varying vec3 v_worldPosition;
 
-// The texture.
-uniform samplerCube u_texture;
+varying lowp vec4 vColor;
 
 void main() {
   //gl_FragColor = vColor;
-  gl_FragColor = textureCube(u_texture, normalize(v_normal));
+  //gl_FragColor = textureCube(uTexture, normalize(v_normal));
+  
+  vec3 worldNormal = normalize(v_worldNormal);
+  vec3 eyeToSurfaceDir = normalize(v_worldPosition - uWorldCameraPosition);
+  vec3 direction = reflect(eyeToSurfaceDir, worldNormal);
+ 
+  gl_FragColor = textureCube(uTexture, direction);
 }
 `);
 

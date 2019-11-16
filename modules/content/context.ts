@@ -1,8 +1,15 @@
-import { gl, mat4 }  from 'gl-matrix';
+import { gl, mat4, vec4 }  from 'gl-matrix';
 
 let cubeRotation: number = 0.0;
 let inVR = false;
 let vrDisplay;
+let positionLocation: number;
+let normalLocation: number;
+let projectionLocation: WebGLUniformLocation;
+let viewLocation: WebGLUniformLocation;
+let worldLocation: WebGLUniformLocation;
+let textureLocation: WebGLUniformLocation;
+let worldCameraPositionLocation: WebGLUniformLocation;
 
 export default function createContext (canvas: HTMLCanvasElement, initBuffers: Function, initShaders: Function): WebGLRenderingContext {
     const gl: WebGLRenderingContext = (
@@ -19,6 +26,17 @@ export default function createContext (canvas: HTMLCanvasElement, initBuffers: F
     // Initialize a shader program; this is where all the lighting
     // for the vertices and so forth is established.
     const shaderProgram = initShaders(gl);
+
+// look up where the vertex data needs to go.
+    positionLocation = gl.getAttribLocation(shaderProgram, "aVertexPosition");
+    normalLocation = gl.getAttribLocation(shaderProgram, "aVertexNormal");
+
+// lookup uniforms
+    projectionLocation = gl.getUniformLocation(shaderProgram, "uProjectionMatrix");
+    viewLocation = gl.getUniformLocation(shaderProgram, "uModelViewMatrix");
+    worldLocation = gl.getUniformLocation(shaderProgram, "uWorldMatrix");
+    textureLocation = gl.getUniformLocation(shaderProgram, "uTexture");
+    worldCameraPositionLocation = gl.getUniformLocation(shaderProgram, "uWorldCameraPosition");
 
     // Collect all the info needed to use the shader program.
     // Look up which attributes our shader program is using
@@ -110,9 +128,11 @@ export default function createContext (canvas: HTMLCanvasElement, initBuffers: F
 // called by whatever mechanism (likely keyboard/mouse events)
 // you used before to trigger redraws
 function render (canvas, gl, programInfo, buffers, deltaTime) {
-    gl.clearDepth(1.0);                 // Clear everything
-    gl.enable(gl.DEPTH_TEST);           // Enable depth testing
-    gl.depthFunc(gl.LEQUAL);            // Near things obscure far things
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    gl.enable(gl.CULL_FACE);
+    gl.enable(gl.DEPTH_TEST);                               // Enable depth testing
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);    // Clear everything
+    gl.depthFunc(gl.LEQUAL);                                // Near things obscure far things
 
     // Clear the canvas before we start drawing on it.
 
@@ -128,39 +148,32 @@ function render (canvas, gl, programInfo, buffers, deltaTime) {
     const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
     const zNear = 0.1;
     const zFar = 100.0;
-    const projectionMatrix = mat4.create();
 
     // note: glmatrix.js always has the first argument
     // as the destination to receive the result.
-    mat4.perspective(projectionMatrix,
+    const projectionMatrix = mat4.perspective(mat4.create(),
         fieldOfView,
         aspect,
         zNear,
         zFar);
 
-    cubeRotation += deltaTime;
-
-    drawScene(gl, programInfo, buffers, projectionMatrix);
+    drawScene(gl, programInfo, buffers, projectionMatrix, null, deltaTime);
 }
 
 // entry point for WebVR, called by vrCallback()
 function renderVR(canvas, gl, programInfo, buffers, deltaTime) {
     gl.viewport(0, 0, canvas.width, canvas.height);
-    gl.clearDepth(1.0);                 // Clear everything
-    gl.enable(gl.DEPTH_TEST);           // Enable depth testing
-    gl.depthFunc(gl.LEQUAL);            // Near things obscure far things
+    gl.enable(gl.CULL_FACE);
+    gl.enable(gl.DEPTH_TEST);                               // Enable depth testing
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);    // Clear everything
+    gl.depthFunc(gl.LEQUAL);                                // Near things obscure far things
 
-    // Clear the canvas before we start drawing on it.
-
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-    cubeRotation += deltaTime;
-    renderEye(canvas, gl, programInfo, buffers, true);
-    renderEye(canvas, gl, programInfo, buffers, false);
+    renderEye(canvas, gl, programInfo, buffers, true, deltaTime);
+    renderEye(canvas, gl, programInfo, buffers, false, deltaTime);
     vrDisplay.submitFrame();
 }
 
-function renderEye(canvas, gl, programInfo, buffers, isLeft) {
+function renderEye(canvas, gl, programInfo, buffers, isLeft, deltaTime) {
     let width = canvas.width;
     let height = canvas.height;
     let projection, view;
@@ -178,34 +191,40 @@ function renderEye(canvas, gl, programInfo, buffers, isLeft) {
     }
     // we don't want auto-rotation in VR mode, so we directly
     // use the view matrix
-    drawScene(gl, programInfo, buffers, projection, view);
+    drawScene(gl, programInfo, buffers, projection, view, deltaTime);
 }
 
 //
 // Draw the scene.
 //
-function drawScene(gl, programInfo, buffers, projection, view = null) {
+function drawScene(gl, programInfo, buffers, projection, view = null, deltaTime) {
 
     // Set the drawing position to the "identity" point, which is
     // the center of the scene.
     const modelViewMatrix = mat4.create();
 
+    cubeRotation += deltaTime;
+
+    // Animate the rotation
+    const modelXRotationRadians = cubeRotation * .7;
+    const modelYRotationRadians = cubeRotation * 1;
+
     // Now move the drawing position a bit to where we want to
     // start drawing the square.
 
-    mat4.translate(modelViewMatrix,     // destination matrix
-        modelViewMatrix,     // matrix to translate
-        [-0.0, 0.0, -6.0]);  // amount to translate
+    // mat4.translate(modelViewMatrix,     // destination matrix
+    //     modelViewMatrix,     // matrix to translate
+    //     [-0.0, 0.0, -6.0]);  // amount to translate
 
-    mat4.rotate(modelViewMatrix,  // destination matrix
-        modelViewMatrix,  // matrix to rotate
-        cubeRotation * .7     ,// amount to rotate in radians
-        [1, 0, 0]);       // axis to rotate around (X)
-    mat4.rotate(modelViewMatrix,  // destination matrix
-        modelViewMatrix,  // matrix to rotate
-        cubeRotation * 1     ,// amount to rotate in radians
-        [0, 1, 0]);       // axis to rotate around (Y)
     // mat4.rotate(modelViewMatrix,  // destination matrix
+    //     modelViewMatrix,  // matrix to rotate
+    //     modelXRotationRadians     ,// amount to rotate in radians
+    //     [1, 0, 0]);       // axis to rotate around (X)
+    // mat4.rotate(modelViewMatrix,  // destination matrix
+    //     modelViewMatrix,  // matrix to rotate
+    //     modelYRotationRadians, // amount to rotate in radians
+    //     [0, 1, 0]);       // axis to rotate around (Y)
+    //mat4.rotate(modelViewMatrix,  // destination matrix
     //     modelViewMatrix,  // matrix to rotate
     //     cubeRotation,     // amount to rotate in radians
     //     [0, 0, 1]);       // axis to rotate around (Z)
@@ -215,6 +234,36 @@ function drawScene(gl, programInfo, buffers, projection, view = null) {
         mat4.multiply(modelViewMatrix, view, modelViewMatrix);
     }
 
+    var cameraPosition = [-0.0, 0.0, -6.0];
+    var target = [0, 0, 0];
+    var up = [0, 1, 0];
+    // Compute the camera's matrix using look at.
+    var cameraMatrix = mat4.lookAt(mat4.create(), cameraPosition, target, up);
+
+    // Make a view matrix from the camera matrix.
+    var viewMatrix = mat4.invert(mat4.create(), cameraMatrix);
+
+    var worldMatrix = mat4.create();
+    var worldMatrix = mat4.fromXRotation(worldMatrix, modelXRotationRadians); //mat4.create();
+    worldMatrix = mat4.fromYRotation(worldMatrix, modelYRotationRadians);
+
+    mat4.rotate(viewMatrix,  // destination matrix
+        viewMatrix,  // matrix to rotate
+        modelXRotationRadians     ,// amount to rotate in radians
+        [1, 0, 0]);       // axis to rotate around (X)
+    mat4.rotate(worldMatrix,  // destination matrix
+        viewMatrix,  // matrix to rotate
+        0, //modelXRotationRadians     ,// amount to rotate in radians
+        [1, 0, 0]);       // axis to rotate around (X)
+    mat4.rotate(viewMatrix,  // destination matrix
+        viewMatrix,  // matrix to rotate
+        -modelYRotationRadians, // amount to rotate in radians
+        [0, 1, 0]);       // axis to rotate around (Y)
+    mat4.rotate(worldMatrix,  // destination matrix
+        viewMatrix,  // matrix to rotate
+        0, //modelYRotationRadians, // amount to rotate in radians
+        [0, 1, 0]);       // axis to rotate around (Y)
+
     // Tell WebGL how to pull out the positions from the position
     // buffer into the vertexPosition attribute
     {
@@ -223,6 +272,8 @@ function drawScene(gl, programInfo, buffers, projection, view = null) {
         const normalize = false;
         const stride = 0;
         const offset = 0;
+        gl.enableVertexAttribArray(
+            programInfo.attribLocations.vertexPosition);
         gl.bindBuffer(gl.ARRAY_BUFFER, buffers['position']);
         gl.vertexAttribPointer(
             programInfo.attribLocations.vertexPosition,
@@ -231,8 +282,6 @@ function drawScene(gl, programInfo, buffers, projection, view = null) {
             normalize,
             stride,
             offset);
-        gl.enableVertexAttribArray(
-            programInfo.attribLocations.vertexPosition);
     }
 
     // Tell WebGL how to pull out the colors from the color buffer
@@ -243,6 +292,8 @@ function drawScene(gl, programInfo, buffers, projection, view = null) {
         const normalize = false;
         const stride = 0;
         const offset = 0;
+        gl.enableVertexAttribArray(
+            programInfo.attribLocations.vertexColor);
         gl.bindBuffer(gl.ARRAY_BUFFER, buffers['color']);
         gl.vertexAttribPointer(
             programInfo.attribLocations.vertexColor,
@@ -251,24 +302,43 @@ function drawScene(gl, programInfo, buffers, projection, view = null) {
             normalize,
             stride,
             offset);
-        gl.enableVertexAttribArray(
-            programInfo.attribLocations.vertexColor);
     }
+
+    // Tell WebGL how to pull normals out of normalBuffer (ARRAY_BUFFER)
+    var size = 3;          // 3 components per iteration
+    var type = gl.FLOAT;   // the data is 32bit floating point values
+    var normalize = false; // normalize the data (convert from 0-255 to 0-1)
+    var stride = 0;        // 0 = move forward size * sizeof(type) each iteration to get the next position
+    var offset = 0;        // start at the beginning of the buffer
+    // Bind the normal buffer.
+    gl.enableVertexAttribArray(
+        programInfo.attribLocations.vertexNormal);
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffers['normal']);
+    gl.vertexAttribPointer(
+        normalLocation, size, type, normalize, stride, offset);
 
     // Tell WebGL to use our program when drawing
 
     gl.useProgram(programInfo.program);
 
-    // Set the shader uniforms
+    // Set the uniforms
+    gl.uniformMatrix4fv(projectionLocation, false, projection);
+    gl.uniformMatrix4fv(viewLocation, false, viewMatrix);
+    gl.uniformMatrix4fv(worldLocation, false, worldMatrix);
+    gl.uniform3fv(worldCameraPositionLocation, cameraPosition);
 
-    gl.uniformMatrix4fv(
-        programInfo.uniformLocations.projectionMatrix,
-        false,
-        projection);
-    gl.uniformMatrix4fv(
-        programInfo.uniformLocations.modelViewMatrix,
-        false,
-        modelViewMatrix);
+    // Tell the shader to use texture unit 0 for u_texture
+    gl.uniform1i(textureLocation, 0);
+
+    // gl.uniformMatrix4fv(
+    //     programInfo.uniformLocations.projectionMatrix,
+    //     false,
+    //     projection);
+
+    // gl.uniformMatrix4fv(
+    //     programInfo.uniformLocations.modelViewMatrix,
+    //     false,
+    //     modelViewMatrix);
 
     // {
     //     const vertexCount = 3;

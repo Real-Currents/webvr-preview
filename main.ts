@@ -33,8 +33,6 @@ function main () {
 
     backgroundUpdater(gl);
 
-    initBuffers(gl);
-
     // Get A 2D context
     /** @type {Canvas2DRenderingContext} */
     const ctx = document.createElement("canvas").getContext("2d");
@@ -55,14 +53,41 @@ function main () {
     ];
 
     faceInfos.forEach((faceInfo, i, a) => {
-        const {target, faceColor, textColor, text} = faceInfo;
+        const { target, faceColor, textColor, text } = faceInfo;
+        const img = new Image();
+
+        img.id = 'image-' + (i + 1);
 
         // Use 2d face generator to generate 6 images
         generateFace(ctx, faceColor, textColor, text);
 
+        // Upload the canvas to the cubemap face.
+        const level = 0;
+        const internalFormat = gl.RGBA;
+        const format = gl.RGBA;
+        const type = gl.UNSIGNED_BYTE;
+        const width = 512;
+        const height = 512;
+        // gl.texImage2D(target, level, internalFormat, format, type, ctx.canvas);
+
+        // Setup each face so it's immediately renderable
+        gl.texImage2D(target, level, internalFormat, width, height, 0, format, type, null);
+
+        // Asynchronously load an image
+        // const img = new Image();
+        // img.src = url;
+        img.addEventListener('load', function() {
+            console.log(`Image ${img.id} loaded!`);
+
+            // Now that the image has loaded make copy it to the texture.
+            gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
+            gl.texImage2D(target, level, internalFormat, format, type, img);
+            gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
+        });
+
         // show the result
         ctx.canvas.toBlob((blob) => {
-            const img = new Image();
+            console.log(`Loading ${img.id} ...`);
             img.src = URL.createObjectURL(blob);
             img.style.margin = 'auto';
             img.style.position = 'fixed';
@@ -70,15 +95,7 @@ function main () {
             img.style.left = i * ctx.canvas.width + 'px';
             document.body.appendChild(img);
         });
-
-        // Upload the canvas to the cubemap face.
-        const level = 0;
-        const internalFormat = gl.RGBA;
-        const format = gl.RGBA;
-        const type = gl.UNSIGNED_BYTE;
-        gl.texImage2D(target, level, internalFormat, format, type, ctx.canvas);
     });
-
     gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
     gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
 
