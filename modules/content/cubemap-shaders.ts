@@ -11,8 +11,18 @@ uniform mat4 uProjectionMatrix;
 
 varying lowp vec4 vColor;
 
-void main(void) {
+varying vec3 v_normal;
+
+void main() {
+  //gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
+  // Multiply the position by the matrix.
   gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
+
+  // Pass a normal. Since the positions
+  // centered around the origin we can just 
+  // pass the position
+  v_normal = normalize(aVertexPosition.xyz);
+  
   vColor = aVertexColor;
 }
 `);
@@ -22,8 +32,17 @@ void main(void) {
     const fragmentShader = loadShader(gl, gl.FRAGMENT_SHADER, `
 varying lowp vec4 vColor;
 
-void main(void) {
-  gl_FragColor = vColor;
+precision mediump float;
+
+// Passed in from the vertex shader.
+varying vec3 v_normal;
+
+// The texture.
+uniform samplerCube u_texture;
+
+void main() {
+  //gl_FragColor = vColor;
+  gl_FragColor = textureCube(u_texture, normalize(v_normal));
 }
 `);
 
