@@ -199,12 +199,16 @@ function drawScene(gl, programInfo, buffers, projection, view = null) {
 
     mat4.rotate(modelViewMatrix,  // destination matrix
         modelViewMatrix,  // matrix to rotate
-        cubeRotation,     // amount to rotate in radians
-        [0, 0, 1]);       // axis to rotate around (Z)
+        cubeRotation * .7     ,// amount to rotate in radians
+        [1, 0, 0]);       // axis to rotate around (X)
     mat4.rotate(modelViewMatrix,  // destination matrix
         modelViewMatrix,  // matrix to rotate
-        cubeRotation * .7     ,// amount to rotate in radians
-        [0, 1, 0]);       // axis to rotate around (X)
+        cubeRotation * 1     ,// amount to rotate in radians
+        [0, 1, 0]);       // axis to rotate around (Y)
+    // mat4.rotate(modelViewMatrix,  // destination matrix
+    //     modelViewMatrix,  // matrix to rotate
+    //     cubeRotation,     // amount to rotate in radians
+    //     [0, 0, 1]);       // axis to rotate around (Z)
 
     if (view !== null) {
         // Premultiply the view matrix
