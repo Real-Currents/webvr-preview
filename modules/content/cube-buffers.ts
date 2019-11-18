@@ -14,59 +14,31 @@ export default function initBuffers (gl: WebGLRenderingContext):
         0.5, 0.5, 0
     ];
     const cubePositions = [
-        -0.5, 0.5, 0.5,
+        -0.5, -0.5,  -0.5,
+        -0.5,  0.5,  -0.5,
+        0.5,  0.5,  -0.5,
+        0.5, -0.5,  -0.5,
+
         -0.5, -0.5, 0.5,
         0.5, -0.5, 0.5,
         0.5, 0.5, 0.5,
-
-        -0.5,  0.5,  -0.5,
-        -0.5, -0.5, -0.5,
-        0.5, -0.5,  -0.5,
-        0.5,  0.5,  -0.5
-
-        // -0.5, -0.5,  -0.5,
-        // -0.5,  0.5,  -0.5,
-        // 0.5, -0.5,  -0.5,
-        // -0.5,  0.5,  -0.5,
-        // 0.5,  0.5,  -0.5,
-        // 0.5, -0.5,  -0.5,
-
-        // -0.5, -0.5,   0.5,
-        // 0.5, -0.5,   0.5,
-        // -0.5,  0.5,   0.5,
-        // -0.5,  0.5,   0.5,
-        // 0.5, -0.5,   0.5,
-        // 0.5,  0.5,   0.5,
-
-        // -0.5,   0.5, -0.5,
-        // -0.5,   0.5,  0.5,
-        // 0.5,   0.5, -0.5,
-        // -0.5,   0.5,  0.5,
-        // 0.5,   0.5,  0.5,
-        // 0.5,   0.5, -0.5,
-
-        // -0.5,  -0.5, -0.5,
-        // 0.5,  -0.5, -0.5,
-        // -0.5,  -0.5,  0.5,
-        // -0.5,  -0.5,  0.5,
-        // 0.5,  -0.5, -0.5,
-        // 0.5,  -0.5,  0.5,
-
-        // -0.5,  -0.5, -0.5,
-        // -0.5,  -0.5,  0.5,
-        // -0.5,   0.5, -0.5,
-        // -0.5,  -0.5,  0.5,
-        // -0.5,   0.5,  0.5,
-        // -0.5,   0.5, -0.5,
-
-        // 0.5,  -0.5, -0.5,
-        // 0.5,   0.5, -0.5,
-        // 0.5,  -0.5,  0.5,
-        // 0.5,  -0.5,  0.5,
-        // 0.5,   0.5, -0.5,
-        // 0.5,   0.5,  0.5,
-
+        -0.5, 0.5, 0.5
     ];
+
+    // Create a buffer to put normals in
+    var normalBuffer = gl.createBuffer();
+    var normals =
+        [
+            -1, -1, -1,
+            -1, 1, -1,
+            1, 1, -1,
+            1, -1, -1,
+
+            -1, -1, 1,
+            1, -1, 1,
+            1, 1, 1,
+            -1, 1, 1
+        ];
 
     // Define color buffer and color values (per vertex)
     const colorBuffer: WebGLBuffer = gl.createBuffer();
@@ -92,20 +64,21 @@ export default function initBuffers (gl: WebGLRenderingContext):
         0, 1, 2,
         0, 2, 3,
 
-        3, 2, 6,
-        3, 6, 7,
+        4, 5, 7,
+        7, 5, 6,
 
-        7, 6, 5,
-        7, 5, 4,
+        1, 4, 7,
+        1, 0, 4,
 
-        4, 5, 1,
-        4, 1, 0,
+        6, 3, 2,
+        6, 5, 3,
 
-        0, 3, 7,
-        0, 7, 4,
+        1, 7, 2,
+        7, 6, 2,
 
-        1, 5, 6,
-        1, 6, 2
+        0, 5, 4,
+        5, 0, 3
+
     ];
 
     // Load vertex value into bound buffer
@@ -120,66 +93,19 @@ export default function initBuffers (gl: WebGLRenderingContext):
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(cubeIndices), gl.STATIC_DRAW);
 
+    // Bind it to ARRAY_BUFFER (think of it as ARRAY_BUFFER = normalBuffer)
+    gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
+    // Put normals data into buffer
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);
+
     // Un-bind buffers
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 
-    // Create a buffer to put normals in
-    var normalBuffer = gl.createBuffer();
-    // Bind it to ARRAY_BUFFER (think of it as ARRAY_BUFFER = normalBuffer)
-    gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
-    // Put normals data into buffer
-
-    var normals =
-        [
-            0, 0, -1,
-            0, 0, -1,
-            0, 0, -1,
-            0, 0, -1,
-            0, 0, -1,
-            0, 0, -1,
-
-            0, 0, 1,
-            0, 0, 1,
-            0, 0, 1,
-            0, 0, 1,
-            0, 0, 1,
-            0, 0, 1,
-
-            0, 1, 0,
-            0, 1, 0,
-            0, 1, 0,
-            0, 1, 0,
-            0, 1, 0,
-            0, 1, 0,
-
-            0, -1, 0,
-            0, -1, 0,
-            0, -1, 0,
-            0, -1, 0,
-            0, -1, 0,
-            0, -1, 0,
-
-            -1, 0, 0,
-            -1, 0, 0,
-            -1, 0, 0,
-            -1, 0, 0,
-            -1, 0, 0,
-            -1, 0, 0,
-
-            1, 0, 0,
-            1, 0, 0,
-            1, 0, 0,
-            1, 0, 0,
-            1, 0, 0,
-            1, 0, 0,
-        ];
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);
-
     return {
         index: indexBuffer, indexSize: cubeIndices.length,
         normal: normalBuffer, normalSize: normals.length,
-        position: vertexBuffer, positionSize: vertices.length,
+        position: vertexBuffer, positionSize: cubePositions.length,
         color: colorBuffer, colorSize: colors.length
     }
 }
