@@ -45,12 +45,20 @@ export default function createContext (canvas: HTMLCanvasElement, initBuffers: F
     const programInfo = {
         program: shaderProgram,
         attribLocations: {
+            vertexNormal: gl.getAttribLocation(shaderProgram, 'aVertexNormal'),
             vertexPosition: gl.getAttribLocation(shaderProgram, 'aVertexPosition'),
             vertexColor: gl.getAttribLocation(shaderProgram, 'aVertexColor'),
         },
         uniformLocations: {
             projectionMatrix: gl.getUniformLocation(shaderProgram, 'uProjectionMatrix'),
             modelViewMatrix: gl.getUniformLocation(shaderProgram, 'uModelViewMatrix'),
+            normalMatrix: gl.getUniformLocation(shaderProgram, "uNormalMatrix"),
+            worldMatrix: gl.getUniformLocation(shaderProgram, "uWorldMatrix"),
+            textureLocation: gl.getUniformLocation(shaderProgram, "uTexture"),
+            worldCameraPositionLocation: gl.getUniformLocation(shaderProgram, "uWorldCameraPosition"),
+            lightDirection: gl.getUniformLocation(shaderProgram, 'uLightDirection'),
+            lightDiffuse: gl.getUniformLocation(shaderProgram, "uLightDiffuse"),
+            materialDiffuse: gl.getUniformLocation(shaderProgram, "uMaterialDiffuse")
         },
     };
 
@@ -234,6 +242,15 @@ function drawScene(gl, programInfo, buffers, projection, view = null, deltaTime)
         mat4.multiply(modelViewMatrix, view, modelViewMatrix);
     }
 
+    const lightDiffuseColor = [1, 1, 1];
+    const lightDirection = [0, -0.5, -1];
+    const materialColor = [0.5, 0.8, 0.1];
+    const normalMatrix = mat4.create();
+
+    mat4.copy(normalMatrix, modelViewMatrix);
+    mat4.invert(normalMatrix, normalMatrix);
+    mat4.transpose(normalMatrix, normalMatrix);
+
     // var cameraPosition = [0.0, 0.0, -5.0];
     // var target = [0, 0, 0];
     // var up = [0, -1, 0];
@@ -305,24 +322,24 @@ function drawScene(gl, programInfo, buffers, projection, view = null, deltaTime)
     }
 
     // Tell WebGL how to pull normals out of normalBuffer (ARRAY_BUFFER)
-    // {
-    //     const numComponents = 3;          // 3 components per iteration
-    //     var type = gl.FLOAT;   // the data is 32bit floating point values
-    //     var normalize = false; // normalize the data (convert from 0-255 to 0-1)
-    //     var stride = 0;        // 0 = move forward size * sizeof(type) each iteration to get the next position
-    //     var offset = 0;        // start at the beginning of the buffer
-    //     // Bind the normal buffer.
-    //     gl.enableVertexAttribArray(
-    //         programInfo.attribLocations.vertexNormal);
-    //     gl.bindBuffer(gl.ARRAY_BUFFER, buffers['normal']);
-    //     gl.vertexAttribPointer(
-    //         programInfo.attribLocations.vertexNormal,
-    //         numComponents,
-    //         type,
-    //         normalize,
-    //         stride,
-    //         offset);
-    // }
+    {
+        const numComponents = 3; // 3 components per iteration
+        const type = gl.FLOAT;   // the data is 32bit floating point values
+        const normalize = false; // normalize the data (convert from 0-255 to 0-1)
+        const stride = 0;        // 0 = move forward size * sizeof(type) each iteration to get the next position
+        const offset = 0;        // start at the beginning of the buffer
+        gl.enableVertexAttribArray(
+            programInfo.attribLocations.vertexNormal);
+        // Bind the normal buffer.
+        gl.bindBuffer(gl.ARRAY_BUFFER, buffers['normal']);
+        gl.vertexAttribPointer(
+            programInfo.attribLocations.vertexNormal,
+            numComponents,
+            type,
+            normalize,
+            stride,
+            offset);
+    }
 
     // Tell WebGL to use our program when drawing
     gl.useProgram(programInfo.program);
@@ -336,6 +353,12 @@ function drawScene(gl, programInfo, buffers, projection, view = null, deltaTime)
         programInfo.uniformLocations.modelViewMatrix,
         false,
         modelViewMatrix);
+
+    gl.uniformMatrix4fv(programInfo.uniformLocations.normalMatrix, false, normalMatrix);
+
+    gl.uniform3fv(programInfo.uniformLocations.lightDirection, lightDirection);
+    gl.uniform3fv(programInfo.uniformLocations.lightDiffuse, lightDiffuseColor);
+    gl.uniform3fv(programInfo.uniformLocations.materialDiffuse, materialColor);
 
     // Set the uniforms
     // gl.uniformMatrix4fv(projectionLocation, false, projection);

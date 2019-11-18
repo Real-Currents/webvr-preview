@@ -7,10 +7,13 @@ precision mediump float;
 
 in vec4 aVertexColor;
 in vec3 aVertexNormal;
-in vec4 aVertexPosition;
+in vec3 aVertexPosition;
 
 uniform mat4 uModelViewMatrix;
 uniform mat4 uNormalMatrix;
+uniform vec3 uLightDirection;
+uniform vec3 uLightDiffuse;
+uniform vec3 uMaterialDiffuse;
 uniform mat4 uProjectionMatrix;
 uniform mat4 uWorldMatrix;
 
@@ -24,7 +27,27 @@ void main() {
   
   vVertexColor = aVertexColor;
   
-  gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
+  // gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition; // vec4 aVertexPosition
+  
+  // Calculate the normal vector
+  vec3 N = normalize(vec3(uNormalMatrix * vec4(aVertexNormal, 1.0)));
+
+  // Normalized light direction
+  vec3 L = normalize(uLightDirection);
+
+  // Dot product of the normal product and negative light direction vector
+  float lambertTerm = dot(N, -L);
+
+  // Calculating the diffuse color based on the Lambertian reflection model
+  // vec3 Id = uMaterialDiffuse * uLightDiffuse * lambertTerm;
+  vec3 Id = aVertexColor.rgb * uLightDiffuse * lambertTerm;
+
+  // Set the varying to be used inside of the fragment shader
+  vVertexColor = vec4(Id, 1.0);
+  // vVertexColor = vec4(uMaterialDiffuse, 1.0);
+
+  // Setting the vertex position
+  gl_Position = uProjectionMatrix * uModelViewMatrix * vec4(aVertexPosition, 1.0);
 
   // Pass a normal. Since the positions
   // centered around the origin we can just 
