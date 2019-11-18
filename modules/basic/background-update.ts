@@ -1,5 +1,5 @@
 
-export default function backgroundUpdater (gl: WebGLRenderingContext) {
+export default function backgroundUpdater (gl: WebGL2RenderingContext) {
 
     (<any>window).onkeydown = function checkKey (event) {
         switch (event['keyCode']) {
@@ -24,7 +24,7 @@ export default function backgroundUpdater (gl: WebGLRenderingContext) {
     }
 }
 
-function update ( gl: WebGLRenderingContext, r, g, b, a) {
+function update ( gl: WebGL2RenderingContext, r, g, b, a) {
     gl.clearColor(r, g, b, a);
     gl.clear(gl.COLOR_BUFFER_BIT);
 }
