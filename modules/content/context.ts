@@ -214,8 +214,8 @@ function drawScene(gl, programInfo, buffers, projection, view = null, deltaTime)
     cubeRotation += deltaTime;
 
     // Animate the rotation
-    const modelXRotationRadians = cubeRotation * -0.4;
-    const modelYRotationRadians = cubeRotation * 1;
+    const modelXRotationRadians = cubeRotation * 0.4;
+    const modelYRotationRadians = cubeRotation * 0.7;
 
     // Now move the drawing position a bit to where we want to
     // start drawing the square.
@@ -224,15 +224,15 @@ function drawScene(gl, programInfo, buffers, projection, view = null, deltaTime)
         modelViewMatrix,     // matrix to translate
         [-0.0, 0.0, -6.0]);  // amount to translate
 
-    // mat4.rotate(modelViewMatrix,  // destination matrix
-    //     modelViewMatrix,  // matrix to rotate
-    //     modelXRotationRadians     ,// amount to rotate in radians
-    //     [1, 0, 0]);       // axis to rotate around (X)
+    mat4.rotate(modelViewMatrix,  // destination matrix
+        modelViewMatrix,  // matrix to rotate
+        modelXRotationRadians     ,// amount to rotate in radians
+        [1, 0, 0]);       // axis to rotate around (X)
     mat4.rotate(modelViewMatrix,  // destination matrix
         modelViewMatrix,  // matrix to rotate
         modelYRotationRadians, // amount to rotate in radians
         [0, 1, 0]);       // axis to rotate around (Y)
-    //mat4.rotate(modelViewMatrix,  // destination matrix
+    // mat4.rotate(modelViewMatrix,  // destination matrix
     //     modelViewMatrix,  // matrix to rotate
     //     cubeRotation,     // amount to rotate in radians
     //     [0, 0, 1]);       // axis to rotate around (Z)
@@ -244,7 +244,7 @@ function drawScene(gl, programInfo, buffers, projection, view = null, deltaTime)
 
     const lightDiffuseColor = [1, 1, 1];
     const lightDirection = [0, -0.5, -1];
-    const materialColor = [0.5, 0.8, 0.1];
+    const materialColor = [0.5, 0.75, 0.25];
     const normalMatrix = mat4.create();
 
     mat4.copy(normalMatrix, modelViewMatrix);

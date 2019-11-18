@@ -23,75 +23,21 @@ export default function initBuffers (gl: WebGLRenderingContext):
         0.5, -0.5, 0.5,
         0.5, 0.5, 0.5,
         -0.5, 0.5, 0.5
-
-        // -0.5, -0.5,  -0.5,
-        // -0.5,  0.5,  -0.5,
-        // 0.5, -0.5,  -0.5,
-        // -0.5,  0.5,  -0.5,
-        // 0.5,  0.5,  -0.5,
-        // 0.5, -0.5,  -0.5,
-
-        // -0.5, -0.5,   0.5,
-        // 0.5, -0.5,   0.5,
-        // -0.5,  0.5,   0.5,
-        // -0.5,  0.5,   0.5,
-        // 0.5, -0.5,   0.5,
-        // 0.5,  0.5,   0.5,
-
-        // -0.5,   0.5, -0.5,
-        // -0.5,   0.5,  0.5,
-        // 0.5,   0.5, -0.5,
-        // -0.5,   0.5,  0.5,
-        // 0.5,   0.5,  0.5,
-        // 0.5,   0.5, -0.5,
-
-        // -0.5,  -0.5, -0.5,
-        // 0.5,  -0.5, -0.5,
-        // -0.5,  -0.5,  0.5,
-        // -0.5,  -0.5,  0.5,
-        // 0.5,  -0.5, -0.5,
-        // 0.5,  -0.5,  0.5,
-
-        // -0.5,  -0.5, -0.5,
-        // -0.5,  -0.5,  0.5,
-        // -0.5,   0.5, -0.5,
-        // -0.5,  -0.5,  0.5,
-        // -0.5,   0.5,  0.5,
-        // -0.5,   0.5, -0.5,
-
-        // 0.5,  -0.5, -0.5,
-        // 0.5,   0.5, -0.5,
-        // 0.5,  -0.5,  0.5,
-        // 0.5,  -0.5,  0.5,
-        // 0.5,   0.5, -0.5,
-        // 0.5,   0.5,  0.5,
     ];
 
     // Create a buffer to put normals in
     var normalBuffer = gl.createBuffer();
     var normals =
         [
-            0, 0, -1,
-            0, 0, -1,
-            0, 0, -1,
-            0, 0, -1,
+            -1, -1, -1,
+            -1, 1, -1,
+            1, 1, -1,
+            1, -1, -1,
 
-            0, 0, 1,
-            0, 0, 1,
-            0, 0, 1,
-            0, 0, 1,
-
-            // 0, 1, 0,
-            // 0, 1, 0,
-            //
-            // 0, -1, 0,
-            // 0, -1, 0,
-            //
-            // -1, 0, 0,
-            // -1, 0, 0,
-            //
-            // 1, 0, 0,
-            // 1, 0, 0
+            -1, -1, 1,
+            1, -1, 1,
+            1, 1, 1,
+            -1, 1, 1
         ];
 
     // Define color buffer and color values (per vertex)
@@ -119,7 +65,20 @@ export default function initBuffers (gl: WebGLRenderingContext):
         0, 2, 3,
 
         4, 5, 7,
-        7, 5, 6
+        7, 5, 6,
+
+        1, 4, 7,
+        1, 0, 4,
+
+        6, 3, 2,
+        6, 5, 3,
+
+        1, 7, 2,
+        7, 6, 2,
+
+        0, 5, 4,
+        5, 0, 3
+
     ];
 
     // Load vertex value into bound buffer
@@ -146,7 +105,7 @@ export default function initBuffers (gl: WebGLRenderingContext):
     return {
         index: indexBuffer, indexSize: cubeIndices.length,
         normal: normalBuffer, normalSize: normals.length,
-        position: vertexBuffer, positionSize: vertices.length,
+        position: vertexBuffer, positionSize: cubePositions.length,
         color: colorBuffer, colorSize: colors.length
     }
 }
