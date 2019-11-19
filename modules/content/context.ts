@@ -218,15 +218,13 @@ function drawScene(gl, programInfo, buffers, projectionMatrix, view = null, delt
     // Tell WebGL to use our program when drawing
     gl.useProgram(programInfo.program);
 
-    // Compute the projection matrix
-    const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
-
-    const fieldOfViewRadians = 0.5236;
-    // var projectionMatrix =
+    // const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
+    // const fieldOfViewRadians = 0.5236;
+    // const projectionMatrix =
     //     mat4.perspective(mat4.create(), fieldOfViewRadians, aspect, 1, 2000);
     gl.uniformMatrix4fv(projectionLocation, false, projectionMatrix);
 
-    const cameraPosition = [0, 0, -5];
+    const cameraPosition = [0, 0, -2.5];
     const target = [0, 0, 0];
     const up = [0, 1, 0];
     // Compute the camera's matrix using look at.
@@ -283,26 +281,6 @@ function drawScene(gl, programInfo, buffers, projectionMatrix, view = null, delt
             offset);
     }
 
-    // Tell WebGL how to pull out the colors from the color buffer
-    // into the vertexColor attribute.
-    // {
-    //     const numComponents = 4;
-    //     const type = gl.FLOAT;
-    //     const normalize = false;
-    //     const stride = 0;
-    //     const offset = 0;
-    //     gl.enableVertexAttribArray(
-    //         programInfo.attribLocations.vertexColor);
-    //     gl.bindBuffer(gl.ARRAY_BUFFER, buffers['color']);
-    //     gl.vertexAttribPointer(
-    //         programInfo.attribLocations.vertexColor,
-    //         numComponents,
-    //         type,
-    //         normalize,
-    //         stride,
-    //         offset);
-    // }
-
     // Set the uniforms
     gl.uniformMatrix4fv(projectionLocation, false, projectionMatrix);
     gl.uniformMatrix4fv(viewLocation, false, viewMatrix);
@@ -312,20 +290,12 @@ function drawScene(gl, programInfo, buffers, projectionMatrix, view = null, delt
     // Tell the shader to use texture unit 0 for u_texture
     gl.uniform1i(textureLocation, 0);
 
+    gl.drawArrays(gl.TRIANGLES, 0, buffers['positionSize'] / 3);
 
-    // {
-    //     const vertexCount = 3;
-    //     const type = gl.UNSIGNED_SHORT;
-    //     const offset = 0;
-    //     gl.drawArrays(gl.TRIANGLES, offset, vertexCount);
-    // }
-
-    {
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffers['index']);
-        gl.drawElements(gl.TRIANGLES, buffers['indexSize'], gl.UNSIGNED_SHORT, 0);
-        gl.bindBuffer(gl.ARRAY_BUFFER, null);
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
-    }
+    // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffers['index']);
+    // gl.drawElements(gl.TRIANGLES, buffers['indexSize'], gl.UNSIGNED_SHORT, 0);
+    // gl.bindBuffer(gl.ARRAY_BUFFER, null);
+    // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 
 }
 
