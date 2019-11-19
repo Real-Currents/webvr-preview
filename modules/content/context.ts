@@ -221,12 +221,9 @@ function drawScene(gl, programInfo, buffers, projectionMatrix, view = null, delt
     // Compute the projection matrix
     const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
 
-    const fieldOfViewRadians = 0.5236;
-    // var projectionMatrix =
-    //     mat4.perspective(mat4.create(), fieldOfViewRadians, aspect, 1, 2000);
     gl.uniformMatrix4fv(projectionLocation, false, projectionMatrix);
 
-    const cameraPosition = [0, 0, -5];
+    const cameraPosition = [0, 0, -2.5];
     const target = [0, 0, 0];
     const up = [0, 1, 0];
     // Compute the camera's matrix using look at.
