@@ -222,7 +222,7 @@ function drawScene(gl, programInfo, buffers, projection, view = null, deltaTime)
 
     mat4.translate(modelViewMatrix,     // destination matrix
         modelViewMatrix,     // matrix to translate
-        [-0.0, 0.0, -6.0]);  // amount to translate
+        [-0.0, 0.0, -2.5]);  // amount to translate
 
     mat4.rotate(modelViewMatrix,  // destination matrix
         modelViewMatrix,  // matrix to rotate
@@ -250,36 +250,6 @@ function drawScene(gl, programInfo, buffers, projection, view = null, deltaTime)
     mat4.copy(normalMatrix, modelViewMatrix);
     mat4.invert(normalMatrix, normalMatrix);
     mat4.transpose(normalMatrix, normalMatrix);
-
-    // var cameraPosition = [0.0, 0.0, -5.0];
-    // var target = [0, 0, 0];
-    // var up = [0, -1, 0];
-    // Compute the camera's matrix using look at.
-    // var cameraMatrix = mat4.lookAt(mat4.create(), cameraPosition, target, up);
-
-    // Make a view matrix from the camera matrix.
-    // var viewMatrix = mat4.invert(mat4.create(), cameraMatrix);
-
-    // var worldMatrix = mat4.create();
-    // worldMatrix = mat4.fromXRotation(worldMatrix, modelXRotationRadians); //mat4.create();
-    // worldMatrix = mat4.fromYRotation(worldMatrix, modelYRotationRadians);
-
-    // mat4.rotate(viewMatrix,  // destination matrix
-    //     viewMatrix,  // matrix to rotate
-    //     modelXRotationRadians     ,// amount to rotate in radians
-    //     [1, 0, 0]);       // axis to rotate around (X)
-    // mat4.rotate(worldMatrix,  // destination matrix
-    //     worldMatrix,  // matrix to rotate
-    //     modelXRotationRadians     ,// amount to rotate in radians
-    //     [1, 0, 0]);       // axis to rotate around (X)
-    // mat4.rotate(viewMatrix,  // destination matrix
-    //     viewMatrix,  // matrix to rotate
-    //     -modelYRotationRadians, // amount to rotate in radians
-    //     [0, 1, 0]);       // axis to rotate around (Y)
-    // mat4.rotate(worldMatrix,  // destination matrix
-    //     worldMatrix,  // matrix to rotate
-    //     modelYRotationRadians, // amount to rotate in radians
-    //     [0, 1, 0]);       // axis to rotate around (Y)
 
     // Tell WebGL how to pull out the positions from the position
     // buffer into the vertexPosition attribute
@@ -359,22 +329,6 @@ function drawScene(gl, programInfo, buffers, projection, view = null, deltaTime)
     gl.uniform3fv(programInfo.uniformLocations.lightDirection, lightDirection);
     gl.uniform3fv(programInfo.uniformLocations.lightDiffuse, lightDiffuseColor);
     gl.uniform3fv(programInfo.uniformLocations.materialDiffuse, materialColor);
-
-    // Set the uniforms
-    // gl.uniformMatrix4fv(projectionLocation, false, projection);
-    // gl.uniformMatrix4fv(viewLocation, false, viewMatrix);
-    // gl.uniformMatrix4fv(worldLocation, false, worldMatrix);
-    // gl.uniform3fv(worldCameraPositionLocation, cameraPosition);
-
-    // Tell the shader to use texture unit 0 for u_texture
-    // gl.uniform1i(textureLocation, 0);
-
-    // {
-    //     const vertexCount = 3;
-    //     const type = gl.UNSIGNED_SHORT;
-    //     const offset = 0;
-    //     gl.drawArrays(gl.TRIANGLES, offset, vertexCount);
-    // }
 
     {
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffers['index']);

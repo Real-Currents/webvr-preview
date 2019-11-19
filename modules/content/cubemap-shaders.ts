@@ -52,7 +52,7 @@ void main() {
   // Pass a normal. Since the positions
   // centered around the origin we can just 
   // pass the position
-  // v_normal = normalize(aVertexPosition.xyz);
+  v_normal = normalize(aVertexPosition.xyz);
   
   // Multiply the position by the matrix.
   // gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition * uWorldMatrix;
@@ -86,14 +86,14 @@ in lowp vec4 vVertexColor;
 out vec4 fragColor;
 
 void main() {
-  fragColor = vVertexColor;
-  //fragColor = textureCube(uTexture, normalize(v_normal));
+  // fragColor = vVertexColor;
+  fragColor = texture(uTexture, normalize(v_normal)) * vVertexColor;
   
   // vec3 worldNormal = normalize(v_worldNormal);
   // vec3 eyeToSurfaceDir = normalize(v_worldPosition - uWorldCameraPosition);
   // vec3 direction = reflect(eyeToSurfaceDir, worldNormal);
  
-  // fragColor = textureCube(uTexture, direction);
+  // fragColor = texture(uTexture, direction);
 }
 `);
 

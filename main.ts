@@ -68,20 +68,19 @@ function main () {
         const type = gl.UNSIGNED_BYTE;
         const width = 512;
         const height = 512;
-        // gl.texImage2D(target, level, internalFormat, format, type, ctx.canvas);
 
         // Setup each face so it's immediately renderable
-        // gl.texImage2D(target, level, internalFormat, width, height, 0, format, type, null);
-        //
-        // img.addEventListener('load', function() {
-        //     // Asynchronously load an image
-        //     console.log(`Image ${img.id} loaded!`);
-        //
-        //     // Now that the image has loaded make copy it to the texture.
-        //     gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
-        //     gl.texImage2D(target, level, internalFormat, format, type, img);
-        //     gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
-        // });
+        gl.texImage2D(target, level, internalFormat, width, height, 0, format, type, null);
+
+        img.addEventListener('load', function() {
+            // Asynchronously load an image
+            console.log(`Image ${img.id} loaded!`);
+
+            // Now that the image has loaded make copy it to the texture.
+            gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
+            gl.texImage2D(target, level, internalFormat, format, type, img);
+            gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
+        });
 
         // show the result
         ctx.canvas.toBlob((blob) => {
@@ -91,11 +90,12 @@ function main () {
             img.style.position = 'fixed';
             img.style.top = '0px';
             img.style.left = i * ctx.canvas.width + 'px';
-            document.body.appendChild(img);
+            // document.body.appendChild(img);
         });
     });
-    // gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
-    // gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+
+    gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
+    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
 
 }
 
