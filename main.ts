@@ -93,7 +93,7 @@ function main () {
             img.style.position = 'fixed';
             img.style.top = '0px';
             img.style.left = i * ctx.canvas.width + 'px';
-            document.body.appendChild(img);
+            // document.body.appendChild(img);
         });
     });
     gl.generateMipmap(gl.TEXTURE_CUBE_MAP);

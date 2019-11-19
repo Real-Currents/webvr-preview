@@ -1,4 +1,5 @@
-import { gl, mat4, vec4 }  from 'gl-matrix';
+import { gl, inverse$1, mat4, vec4 }  from 'gl-matrix';
+import { lookAt } from 'gl-matrix/mat4';
 
 let cubeRotation: number = 0.0;
 let inVR = false;
@@ -202,7 +203,7 @@ function renderEye(canvas, gl, programInfo, buffers, isLeft, deltaTime) {
 //
 // Draw the scene.
 //
-function drawScene(gl, programInfo, buffers, projection, view = null, deltaTime) {
+function drawScene(gl, programInfo, buffers, projectionMatrix, view = null, deltaTime) {
 
     // Set the drawing position to the "identity" point, which is
     // the center of the scene.
@@ -214,34 +215,18 @@ function drawScene(gl, programInfo, buffers, projection, view = null, deltaTime)
     const modelXRotationRadians = cubeRotation * 0.4;
     const modelYRotationRadians = cubeRotation * 0.7;
 
-    // Now move the drawing position a bit to where we want to
-    // start drawing the square.
+    // Tell WebGL to use our program when drawing
+    gl.useProgram(programInfo.program);
 
-    // mat4.translate(modelViewMatrix,     // destination matrix
-    //     modelViewMatrix,     // matrix to translate
-    //     [-0.0, 0.0, -6.0]);  // amount to translate
+    // Compute the projection matrix
+    const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
 
-    // mat4.rotate(modelViewMatrix,  // destination matrix
-    //     modelViewMatrix,  // matrix to rotate
-    //     modelXRotationRadians     ,// amount to rotate in radians
-    //     [1, 0, 0]);       // axis to rotate around (X)
-    // mat4.rotate(modelViewMatrix,  // destination matrix
-    //     modelViewMatrix,  // matrix to rotate
-    //     modelYRotationRadians, // amount to rotate in radians
-    //     [0, 1, 0]);       // axis to rotate around (Y)
-    //mat4.rotate(modelViewMatrix,  // destination matrix
-    //     modelViewMatrix,  // matrix to rotate
-    //     cubeRotation,     // amount to rotate in radians
-    //     [0, 0, 1]);       // axis to rotate around (Z)
+    const fieldOfViewRadians = 0.5236;
+    // var projectionMatrix =
+    //     mat4.perspective(mat4.create(), fieldOfViewRadians, aspect, 1, 2000);
+    gl.uniformMatrix4fv(projectionLocation, false, projectionMatrix);
 
-    if (view !== null) {
-        // Premultiply the view matrix
-        mat4.multiply(modelViewMatrix, view, modelViewMatrix);
-    }
-
-    const normalMatrix = mat4.create();
-
-    const cameraPosition = [-0.0, 0.0, -6.0];
+    const cameraPosition = [0, 0, -5];
     const target = [0, 0, 0];
     const up = [0, 1, 0];
     // Compute the camera's matrix using look at.
@@ -250,19 +235,13 @@ function drawScene(gl, programInfo, buffers, projection, view = null, deltaTime)
     // Make a view matrix from the camera matrix.
     const viewMatrix = mat4.invert(mat4.create(), cameraMatrix);
 
-    let worldMatrix = mat4.create();
-    // mat4.rotate(worldMatrix,  // destination matrix
-    //     worldMatrix,  // matrix to rotate
-    //     modelXRotationRadians     ,// amount to rotate in radians
-    //     [1, 0, 0]);       // axis to rotate around (X)
-    mat4.rotate(worldMatrix,  // destination matrix
-        worldMatrix,  // matrix to rotate
-        1.6, // amount to rotate in radians
-        [0, 1, 0]);       // axis to rotate around (Y)
-    //mat4.rotate(worldMatrix,  // destination matrix
-    //     worldMatrix,  // matrix to rotate
-    //     cubeRotation,     // amount to rotate in radians
-    //     [0, 0, 1]);       // axis to rotate around (Z)
+    const worldMatrix = mat4.rotateX(mat4.create(), mat4.create(), modelXRotationRadians);
+    mat4.rotateY(worldMatrix, worldMatrix, modelYRotationRadians);
+
+    if (view !== null) {
+        // Premultiply the view matrix
+        mat4.multiply(viewMatrix, view, viewMatrix);
+    }
 
     // Tell WebGL how to pull out the positions from the position
     // buffer into the vertexPosition attribute
@@ -277,26 +256,6 @@ function drawScene(gl, programInfo, buffers, projection, view = null, deltaTime)
         gl.bindBuffer(gl.ARRAY_BUFFER, buffers['position']);
         gl.vertexAttribPointer(
             programInfo.attribLocations.vertexPosition,
-            numComponents,
-            type,
-            normalize,
-            stride,
-            offset);
-    }
-
-    // Tell WebGL how to pull out the colors from the color buffer
-    // into the vertexColor attribute.
-    {
-        const numComponents = 4;
-        const type = gl.FLOAT;
-        const normalize = false;
-        const stride = 0;
-        const offset = 0;
-        gl.enableVertexAttribArray(
-            programInfo.attribLocations.vertexColor);
-        gl.bindBuffer(gl.ARRAY_BUFFER, buffers['color']);
-        gl.vertexAttribPointer(
-            programInfo.attribLocations.vertexColor,
             numComponents,
             type,
             normalize,
@@ -324,39 +283,35 @@ function drawScene(gl, programInfo, buffers, projection, view = null, deltaTime)
             offset);
     }
 
-    // Tell WebGL to use our program when drawing
-    gl.useProgram(programInfo.program);
-
-    // gl.uniformMatrix4fv(
-    //     programInfo.uniformLocations.projectionMatrix,
-    //     false,
-    //     projection);
-
-    // gl.uniformMatrix4fv(
-    //     programInfo.uniformLocations.modelViewMatrix,
-    //     false,
-    //     modelViewMatrix);
-
-    // gl.uniformMatrix4fv(programInfo.uniformLocations.normalMatrix, false, normalMatrix);
+    // Tell WebGL how to pull out the colors from the color buffer
+    // into the vertexColor attribute.
+    // {
+    //     const numComponents = 4;
+    //     const type = gl.FLOAT;
+    //     const normalize = false;
+    //     const stride = 0;
+    //     const offset = 0;
+    //     gl.enableVertexAttribArray(
+    //         programInfo.attribLocations.vertexColor);
+    //     gl.bindBuffer(gl.ARRAY_BUFFER, buffers['color']);
+    //     gl.vertexAttribPointer(
+    //         programInfo.attribLocations.vertexColor,
+    //         numComponents,
+    //         type,
+    //         normalize,
+    //         stride,
+    //         offset);
+    // }
 
     // Set the uniforms
-    gl.uniformMatrix4fv(programInfo.uniformLocations.projectionMatrix, false, projection);
-    gl.uniformMatrix4fv(programInfo.uniformLocations.modelViewMatrix, false, viewMatrix);
-    gl.uniformMatrix4fv(programInfo.uniformLocations.worldMatrix, false, worldMatrix);
-    gl.uniform3fv(programInfo.uniformLocations.worldCameraPositionLocation, cameraPosition);
+    gl.uniformMatrix4fv(projectionLocation, false, projectionMatrix);
+    gl.uniformMatrix4fv(viewLocation, false, viewMatrix);
+    gl.uniformMatrix4fv(worldLocation, false, worldMatrix);
+    gl.uniform3fv(worldCameraPositionLocation, cameraPosition);
 
     // Tell the shader to use texture unit 0 for u_texture
-    gl.uniform1i(programInfo.uniformLocations.textureLocation, 0);
+    gl.uniform1i(textureLocation, 0);
 
-    // gl.uniformMatrix4fv(
-    //     programInfo.uniformLocations.projectionMatrix,
-    //     false,
-    //     projection);
-
-    // gl.uniformMatrix4fv(
-    //     programInfo.uniformLocations.modelViewMatrix,
-    //     false,
-    //     modelViewMatrix);
 
     // {
     //     const vertexCount = 3;

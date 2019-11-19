@@ -2,10 +2,12 @@ export default function initShaderProgram(gl) {
 
     // Vertex shader program
 
-    const vertexShader = loadShader(gl, gl.VERTEX_SHADER,`
-attribute vec4 aVertexColor;
-attribute vec3 aVertexNormal;
-attribute vec3 aVertexPosition;
+    const vertexShader = loadShader(gl, gl.VERTEX_SHADER,`#version 300 es
+precision mediump float;
+
+in vec4 aVertexColor;
+in vec3 aVertexNormal;
+in vec3 aVertexPosition;
 
 uniform mat4 uModelViewMatrix;
 uniform mat4 uNormalMatrix;
@@ -15,29 +17,29 @@ uniform vec3 uMaterialDiffuse;
 uniform mat4 uProjectionMatrix;
 uniform mat4 uWorldMatrix;
 
-varying vec3 v_normal;
-varying vec3 v_worldNormal;
-varying vec3 v_worldPosition;
+out vec3 v_normal;
+out vec3 v_worldNormal;
+out vec3 v_worldPosition;
 
-varying lowp vec4 vVertexColor;
+out lowp vec4 vVertexColor;
 
 void main() {
   
-  vVertexColor = aVertexColor;
+  // vVertexColor = aVertexColor;
   
   // gl_Position = uProjectionMatrix * uModelViewMatrix * vec4(aVertexPosition, 1.0); // vec4 aVertexPosition
   
   // Calculate the normal vector
-  vec3 N = normalize(vec3(uNormalMatrix * vec4(aVertexNormal, 1.0)));
+  // vec3 N = normalize(vec3(uNormalMatrix * vec4(aVertexNormal, 1.0)));
 
   // Normalized light direction
-  vec3 L = normalize(uLightDirection);
+  // vec3 L = normalize(uLightDirection);
 
   // Dot product of the normal product and negative light direction vector
-  float lambertTerm = dot(N, -L);
+  // float lambertTerm = dot(N, -L);
 
   // Calculating the diffuse color based on the Lambertian reflection model
-  vec3 Id = uMaterialDiffuse * uLightDiffuse * lambertTerm;
+  // vec3 Id = uMaterialDiffuse * uLightDiffuse * lambertTerm;
   // vec3 Id = aVertexColor.rgb * uLightDiffuse * lambertTerm;
 
   // Set the varying to be used inside of the fragment shader
@@ -49,10 +51,10 @@ void main() {
   // Pass a normal. Since the positions
   // centered around the origin we can just 
   // pass the position
-  v_normal = normalize(aVertexPosition);
+  // v_normal = normalize(aVertexPosition);
   
   // Multiply the position by the matrix.
-  gl_Position = uProjectionMatrix * uModelViewMatrix * vec4(aVertexPosition, 1.0) * uWorldMatrix;
+  gl_Position = uProjectionMatrix * uModelViewMatrix * uWorldMatrix * vec4(aVertexPosition, 1.0);
    
   // send the view position to the fragment shader
   v_worldPosition = (uWorldMatrix * vec4(aVertexPosition, 1.0)).xyz;
@@ -64,8 +66,8 @@ void main() {
 
     // Fragment shader program
 
-    const fragmentShader = loadShader(gl, gl.FRAGMENT_SHADER, `
-precision highp float;
+    const fragmentShader = loadShader(gl, gl.FRAGMENT_SHADER, `#version 300 es
+precision mediump float;
 
 // The texture.
 uniform samplerCube uTexture;
@@ -74,21 +76,23 @@ uniform samplerCube uTexture;
 uniform vec3 uWorldCameraPosition;
 
 // Passed in from the vertex shader.
-varying vec3 v_normal;
-varying vec3 v_worldNormal;
-varying vec3 v_worldPosition;
+in vec3 v_normal;
+in vec3 v_worldNormal;
+in vec3 v_worldPosition;
 
-varying lowp vec4 vVertexColor;
+in mediump vec4 vVertexColor;
+
+out mediump vec4 fragColor;
 
 void main() {
-  gl_FragColor = vVertexColor;
-  // gl_FragColor = textureCube(uTexture, normalize(v_normal));
+  // fragColor = vVertexColor;
+  //fragColor = textureCube(uTexture, normalize(v_normal));
   
   vec3 worldNormal = normalize(v_worldNormal);
   vec3 eyeToSurfaceDir = normalize(v_worldPosition - uWorldCameraPosition);
   vec3 direction = reflect(eyeToSurfaceDir, worldNormal);
  
-  // gl_FragColor = textureCube(uTexture, direction);
+  fragColor = texture(uTexture, direction);
 }
 `);
 
