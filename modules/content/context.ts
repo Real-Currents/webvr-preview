@@ -150,7 +150,7 @@ function render (canvas, gl, programInfo, buffers, deltaTime) {
     // ratio that matches the display size of the canvas
     // and we only want to see objects between 0.1 units
     // and 100 units away from the camera.
-    const fieldOfView = 45 * Math.PI / 180;   // in radians
+    const fieldOfView = 35 * Math.PI / 180;   // in radians
     const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
     const zNear = 1; // 0.1;
     const zFar = 2000; // 100.0;
@@ -290,12 +290,12 @@ function drawScene(gl, programInfo, buffers, projectionMatrix, view = null, delt
     // Tell the shader to use texture unit 0 for u_texture
     gl.uniform1i(textureLocation, 0);
 
-    gl.drawArrays(gl.TRIANGLES, 0, buffers['positionSize'] / 3);
+    // gl.drawArrays(gl.TRIANGLES, 0, buffers['positionSize'] / 3);
 
-    // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffers['index']);
-    // gl.drawElements(gl.TRIANGLES, buffers['indexSize'], gl.UNSIGNED_SHORT, 0);
-    // gl.bindBuffer(gl.ARRAY_BUFFER, null);
-    // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffers['index']);
+    gl.drawElements(gl.TRIANGLES, buffers['indexSize'], gl.UNSIGNED_SHORT, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, null);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 
 }
 

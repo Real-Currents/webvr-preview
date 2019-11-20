@@ -26,19 +26,19 @@ export default function initBuffers (gl: WebGLRenderingContext):
         0.5,  0.5,  -0.5,
         0.5, -0.5,  -0.5,
 
-        -0.5, -0.5,   0.5,
-        0.5, -0.5,   0.5,
-        -0.5,  0.5,   0.5,
-        -0.5,  0.5,   0.5,
-        0.5, -0.5,   0.5,
-        0.5,  0.5,   0.5,
-
         -0.5,   0.5, -0.5,
         -0.5,   0.5,  0.5,
         0.5,   0.5, -0.5,
         -0.5,   0.5,  0.5,
         0.5,   0.5,  0.5,
         0.5,   0.5, -0.5,
+
+        -0.5, -0.5,   0.5,
+        0.5, -0.5,   0.5,
+        -0.5,  0.5,   0.5,
+        -0.5,  0.5,   0.5,
+        0.5, -0.5,   0.5,
+        0.5,  0.5,   0.5,
 
         -0.5,  -0.5, -0.5,
         0.5,  -0.5, -0.5,
@@ -86,19 +86,19 @@ export default function initBuffers (gl: WebGLRenderingContext):
             0, 0, -1,
             0, 0, -1,
 
-            0, 0, 1,
-            0, 0, 1,
-            0, 0, 1,
-            0, 0, 1,
-            0, 0, 1,
-            0, 0, 1,
+            0, 1, 0,
+            0, 1, 0,
+            0, 1, 0,
+            0, 1, 0,
+            0, 1, 0,
+            0, 1, 0,
 
-            0, 1, 0,
-            0, 1, 0,
-            0, 1, 0,
-            0, 1, 0,
-            0, 1, 0,
-            0, 1, 0,
+            0, 0, 1,
+            0, 0, 1,
+            0, 0, 1,
+            0, 0, 1,
+            0, 0, 1,
+            0, 0, 1,
 
             0, -1, 0,
             0, -1, 0,
@@ -161,12 +161,12 @@ export default function initBuffers (gl: WebGLRenderingContext):
 
     // Load vertex value into bound buffer
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(cubeVertices), gl.STATIC_DRAW);
 
     // Bind it to ARRAY_BUFFER (think of it as ARRAY_BUFFER = normalBuffer)
     gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
     // Put normals data into buffer
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(cubeNormals), gl.STATIC_DRAW);
 
     // Load color value into bound buffer
     gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
@@ -181,8 +181,8 @@ export default function initBuffers (gl: WebGLRenderingContext):
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 
     return {
-        position: vertexBuffer, positionSize: vertices.length,
-        normal: normalBuffer, normalSize: normals.length,
+        position: vertexBuffer, positionSize: cubeVertices.length,
+        normal: normalBuffer, normalSize: cubeNormals.length,
         index: indexBuffer, indexSize: cubeIndices.length,
         color: colorBuffer, colorSize: cubeColors.length
     }

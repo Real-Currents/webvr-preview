@@ -25,10 +25,6 @@ function main () {
 
     window.document.body.append(canvas);
 
-    window.document.body.style.backgroundColor = "#000000";
-    window.document.body.style.margin = '0px';
-    window.document.body.style.overflow = 'hidden';
-
     const gl = createContext(canvas, initBuffers, initShaderProgram);
 
     backgroundUpdater(gl);
@@ -40,8 +36,36 @@ function main () {
     ctx.canvas.height = 128;
 
     // Create a texture.
-    var texture = gl.createTexture();
+    const texture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
+
+    window.document.body.style.backgroundColor = "#000000";
+    window.document.body.style.margin = '0px';
+    window.document.body.style.overflow = 'hidden';
+
+    /*
+    <video id="aud1" preload="auto" muted ="true" controls="true">
+      <source src="https://s3-us-west-1.amazonaws.com/real-currents/js-demos/video/fathers.mp4" />
+      <source src="https://s3-us-west-1.amazonaws.com/real-currents/js-demos/video/fathers.ogv" />
+    </video>
+     */
+    const video = document.createElement('video');
+    const source1 = document.createElement('source');
+    const source2 = document.createElement('source');
+    source1.src = "data/fathers.mp4";
+    source2.src = "data/fathers.ogv";
+    let videoLoad = false;
+    let videoReady = false;
+    let videoName = source1.src.match(/[\/|\\]*([\w|\-|]+)\.\w\w\w$/)[1];
+    video.append(source1);
+    video.append(source2);
+
+    console.log(videoName);
+
+    let timeout = {};
+    let lastKeyPress = {};
+    let startVideo = false;
+    let stopVideo = false;
 
     const faceInfos = [
         { target: gl.TEXTURE_CUBE_MAP_POSITIVE_X, faceColor: '#F00', textColor: '#0FF', text: '+X' },
@@ -56,7 +80,7 @@ function main () {
         const { target, faceColor, textColor, text } = faceInfo;
         const img = new Image();
 
-        img.id = 'image-' + (i + 1);
+        img.id = '' + (i + 1);
 
         // Use 2d face generator to generate 6 images
         generateFace(ctx, faceColor, textColor, text);
@@ -66,8 +90,8 @@ function main () {
         const internalFormat = gl.RGBA;
         const format = gl.RGBA;
         const type = gl.UNSIGNED_BYTE;
-        const width = 512;
-        const height = 512;
+        const width = 256;
+        const height = 256;
         // gl.texImage2D(target, level, internalFormat, format, type, ctx.canvas);
 
         // Setup each face so it's immediately renderable
@@ -77,8 +101,6 @@ function main () {
         // const img = new Image();
         // img.src = url;
         img.addEventListener('load', function() {
-            console.log(`Image ${img.id} loaded!`);
-
             // Now that the image has loaded make copy it to the texture.
             gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
             gl.texImage2D(target, level, internalFormat, format, type, img);
@@ -94,6 +116,64 @@ function main () {
             img.style.top = '0px';
             img.style.left = i * ctx.canvas.width + 'px';
             // document.body.appendChild(img);
+        });
+
+        lastKeyPress[img.id] = (new Date()).getTime();
+
+        window.addEventListener('keydown', function checkKey (event) {
+            const kbEvent: KeyboardEvent = (event || window['event']) as KeyboardEvent; // cross-browser shenanigans
+            // console.log(lastKeyPress[img.id], ((new Date()).getTime() - lastKeyPress[img.id]));
+            // console.log(startVideo);
+
+            if (kbEvent['keyCode'] === 32 &&((new Date()).getTime() - lastKeyPress[img.id]) > 500) { // this is the spacebar
+                if (!stopVideo && (startVideo || video.paused)) {
+                    startVideo = true;
+
+                    lastKeyPress[img.id] = (new Date()).getTime();
+
+                    console.log("Play video");
+
+                    video.play();
+
+                    const vh = ctx.canvas.height;
+                    const vw = video.videoHeight * (ctx.canvas.width / ctx.canvas.height);
+                    const vx = (parseInt(img.id) % 2) ? 0 : - (vw - ctx.canvas.width) / 1.75;
+
+                    timeout[img.id] = setInterval(d => {//requestAnimationFrame(d => {
+                        if ((video != null) && (video.readyState > 2) && (!video.paused)) {
+                            ctx.drawImage(video, vx, 0, vw, vh);
+                        }
+
+                        // show the result
+                        ctx.canvas.toBlob((blob) => {
+                            img.src = URL.createObjectURL(blob);
+                        });
+                    }, 33);
+
+                    setTimeout(s => startVideo = false, 1000);
+
+                } else if (!startVideo) {
+                    console.log("Pause video!");
+                    video.pause();
+
+                    stopVideo = true;
+
+                    for (const i in timeout) {
+                        if (timeout[i] != null) {
+                            // cancelAnimationFrame(timeout[i]);
+                            clearTimeout(timeout[i]);
+                            timeout[i] = null;
+                        }
+                    }
+
+                    setTimeout(s => stopVideo = false, 1000);
+                }
+
+                kbEvent.preventDefault();
+
+                return true; // treat all other keys normally;
+
+            } else return false;
         });
     });
     gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
