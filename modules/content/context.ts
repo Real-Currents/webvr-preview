@@ -150,10 +150,10 @@ function render (canvas, gl, programInfo, buffers, deltaTime) {
     // ratio that matches the display size of the canvas
     // and we only want to see objects between 0.1 units
     // and 100 units away from the camera.
-    const fieldOfView = 35 * Math.PI / 180;   // in radians
+    const fieldOfView = 45 * Math.PI / 180;   // in radians
     const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
-    const zNear = 1; // 0.1;
-    const zFar = 2000; // 100.0;
+    const zNear = 0.1;
+    const zFar = 100.0;
 
     // note: glmatrix.js always has the first argument
     // as the destination to receive the result.
@@ -224,7 +224,9 @@ function drawScene(gl, programInfo, buffers, projectionMatrix, view = null, delt
     //     mat4.perspective(mat4.create(), fieldOfViewRadians, aspect, 1, 2000);
     gl.uniformMatrix4fv(projectionLocation, false, projectionMatrix);
 
-    const cameraPosition = [0, 0, -2.5];
+
+    const worldCameraPosition = [0, 0, -.25];
+    const cameraPosition = [0, 0, worldCameraPosition[2] * 1.5];
     const target = [0, 0, 0];
     const up = [0, 1, 0];
     // Compute the camera's matrix using look at.
@@ -235,6 +237,7 @@ function drawScene(gl, programInfo, buffers, projectionMatrix, view = null, delt
 
     const worldMatrix = mat4.rotateX(mat4.create(), mat4.create(), modelXRotationRadians);
     mat4.rotateY(worldMatrix, worldMatrix, modelYRotationRadians);
+    mat4.rotateZ(worldMatrix, worldMatrix, Math.PI / 2);
 
     if (view !== null) {
         // Premultiply the view matrix
@@ -285,17 +288,17 @@ function drawScene(gl, programInfo, buffers, projectionMatrix, view = null, delt
     gl.uniformMatrix4fv(projectionLocation, false, projectionMatrix);
     gl.uniformMatrix4fv(viewLocation, false, viewMatrix);
     gl.uniformMatrix4fv(worldLocation, false, worldMatrix);
-    gl.uniform3fv(worldCameraPositionLocation, cameraPosition);
+    gl.uniform3fv(worldCameraPositionLocation, worldCameraPosition);
 
     // Tell the shader to use texture unit 0 for u_texture
     gl.uniform1i(textureLocation, 0);
 
-    // gl.drawArrays(gl.TRIANGLES, 0, buffers['positionSize'] / 3);
+    gl.drawArrays(gl.TRIANGLES, 0, buffers['positionSize'] / 3);
 
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffers['index']);
-    gl.drawElements(gl.TRIANGLES, buffers['indexSize'], gl.UNSIGNED_SHORT, 0);
-    gl.bindBuffer(gl.ARRAY_BUFFER, null);
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+    // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffers['index']);
+    // gl.drawElements(gl.TRIANGLES, buffers['indexSize'], gl.UNSIGNED_SHORT, 0);
+    // gl.bindBuffer(gl.ARRAY_BUFFER, null);
+    // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 
 }
 
