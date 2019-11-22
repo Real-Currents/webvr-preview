@@ -62,10 +62,14 @@ function main () {
 
     console.log(videoName);
 
-    let timeout = {};
-    let lastKeyPress = {};
+    let frame = 0;
+    let timeout = null;
+    let lastKeyPress = 0;
     let startVideo = false;
     let stopVideo = false;
+
+    const aCanvas = document.createElement('canvas');
+    const bCanvas = document.createElement('canvas');
 
     const faceInfos = [
         { target: gl.TEXTURE_CUBE_MAP_POSITIVE_X, faceColor: '#F00', textColor: '#0FF', text: '+X' },
@@ -90,8 +94,8 @@ function main () {
         const internalFormat = gl.RGBA;
         const format = gl.RGBA;
         const type = gl.UNSIGNED_BYTE;
-        const width = 256;
-        const height = 256;
+        const width = 512;
+        const height = 512;
         // gl.texImage2D(target, level, internalFormat, format, type, ctx.canvas);
 
         // Setup each face so it's immediately renderable
@@ -118,66 +122,86 @@ function main () {
             // document.body.appendChild(img);
         });
 
-        lastKeyPress[img.id] = (new Date()).getTime();
+        setInterval(d => {
+            if (frame > 0) {
+                if ((+img.id) % 2) ctx.drawImage(aCanvas, 0, 0, aCanvas.width, aCanvas.height);
+                else ctx.drawImage(bCanvas, 0, 0, bCanvas.width, bCanvas.height);
 
-        window.addEventListener('keydown', function checkKey (event) {
-            const kbEvent: KeyboardEvent = (event || window['event']) as KeyboardEvent; // cross-browser shenanigans
-            // console.log(lastKeyPress[img.id], ((new Date()).getTime() - lastKeyPress[img.id]));
-            // console.log(startVideo);
-
-            if (kbEvent['keyCode'] === 32 &&((new Date()).getTime() - lastKeyPress[img.id]) > 500) { // this is the spacebar
-                if (!stopVideo && (startVideo || video.paused)) {
-                    startVideo = true;
-
-                    lastKeyPress[img.id] = (new Date()).getTime();
-
-                    console.log("Play video");
-
-                    video.play();
-
-                    const vh = ctx.canvas.height;
-                    const vw = video.videoHeight * (ctx.canvas.width / ctx.canvas.height);
-                    const vx = (parseInt(img.id) % 2) ? 0 : - (vw - ctx.canvas.width) / 1.75;
-
-                    timeout[img.id] = setInterval(d => {//requestAnimationFrame(d => {
-                        if ((video != null) && (video.readyState > 2) && (!video.paused)) {
-                            ctx.drawImage(video, vx, 0, vw, vh);
-                        }
-
-                        // show the result
-                        ctx.canvas.toBlob((blob) => {
-                            img.src = URL.createObjectURL(blob);
-                        });
-                    }, 33);
-
-                    setTimeout(s => startVideo = false, 1000);
-
-                } else if (!startVideo) {
-                    console.log("Pause video!");
-                    video.pause();
-
-                    stopVideo = true;
-
-                    for (const i in timeout) {
-                        if (timeout[i] != null) {
-                            // cancelAnimationFrame(timeout[i]);
-                            clearTimeout(timeout[i]);
-                            timeout[i] = null;
-                        }
-                    }
-
-                    setTimeout(s => stopVideo = false, 1000);
-                }
-
-                kbEvent.preventDefault();
-
-                return true; // treat all other keys normally;
-
-            } else return false;
-        });
+                // show the result
+                ctx.canvas.toBlob((blob) => {
+                    img.src = URL.createObjectURL(blob);
+                });
+            }
+        }, 33);
     });
     gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
     gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+
+    lastKeyPress = (new Date()).getTime();
+
+    window.addEventListener('keydown', function checkKey (event) {
+        const kbEvent: KeyboardEvent = (event || window['event']) as KeyboardEvent; // cross-browser shenanigans
+        // console.log(lastKeyPress, ((new Date()).getTime() - lastKeyPress));
+        // console.log(startVideo);
+
+        if (kbEvent['keyCode'] === 32 && ((new Date()).getTime() - lastKeyPress) > 500) { // this is the spacebar
+            if (!stopVideo && (startVideo || video.paused)) {
+                startVideo = true;
+
+                lastKeyPress = (new Date()).getTime();
+
+                console.log("Play video");
+
+                video.play();
+
+
+                const actx = aCanvas.getContext('2d');
+                actx.globalAlpha = 1.0;
+                aCanvas.width = ctx.canvas.width;
+                aCanvas.height = ctx.canvas.height;
+                const bctx = bCanvas.getContext('2d');
+                bctx.globalAlpha = 1.0;
+                bCanvas.width = ctx.canvas.width;
+                bCanvas.height = ctx.canvas.height;
+
+                const vh = ctx.canvas.height;
+                const vw = video.videoHeight * (ctx.canvas.width / ctx.canvas.height) / 2;
+                const vax = 0;
+                const vbx = -(vw - ctx.canvas.width) / 1.75;
+
+                timeout = setInterval(d => { // requestAnimationFrame(d => {
+                    if ((video != null) && (video.readyState > 2) && (!video.paused)) {
+                        if (++frame % 2) {
+                            actx.drawImage(video, vax, 0, vw, vh);
+                        } else {
+                            bctx.drawImage(video, vbx, 0, vw, vh);
+                        }
+                    }
+                }, 33);
+
+                setTimeout(s => startVideo = false, 1000);
+
+            } else if (!startVideo) {
+                console.log("Pause video!");
+                video.pause();
+
+                stopVideo = true;
+
+                if (timeout != null) {
+                    // cancelAnimationFrame(timeout);
+                    clearTimeout(timeout);
+                    timeout = null;
+                }
+
+                setTimeout(s => stopVideo = false, 1000);
+            }
+
+            kbEvent.preventDefault();
+
+            return true; // treat all other keys normally;
+
+        } else return false;
+    });
 
 }
 

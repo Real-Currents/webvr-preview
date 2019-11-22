@@ -150,7 +150,7 @@ function render (canvas, gl, programInfo, buffers, deltaTime) {
     // ratio that matches the display size of the canvas
     // and we only want to see objects between 0.1 units
     // and 100 units away from the camera.
-    const fieldOfView = 45 * Math.PI / 180;   // in radians
+    const fieldOfView = 60 * Math.PI / 180;   // in radians
     const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
     const zNear = 0.1;
     const zFar = 100.0;
@@ -225,8 +225,8 @@ function drawScene(gl, programInfo, buffers, projectionMatrix, view = null, delt
     gl.uniformMatrix4fv(projectionLocation, false, projectionMatrix);
 
 
-    const worldCameraPosition = [0, 0, -.25];
-    const cameraPosition = [0, 0, worldCameraPosition[2] * 1.5];
+    const worldCameraPosition = [0, 0, -2.5];
+    const cameraPosition = [0, 0, worldCameraPosition[2] / 5];
     const target = [0, 0, 0];
     const up = [0, 1, 0];
     // Compute the camera's matrix using look at.
@@ -234,6 +234,7 @@ function drawScene(gl, programInfo, buffers, projectionMatrix, view = null, delt
 
     // Make a view matrix from the camera matrix.
     const viewMatrix = mat4.invert(mat4.create(), cameraMatrix);
+    mat4.rotateZ(viewMatrix, viewMatrix, Math.PI);
 
     const worldMatrix = mat4.rotateX(mat4.create(), mat4.create(), modelXRotationRadians);
     mat4.rotateY(worldMatrix, worldMatrix, modelYRotationRadians);
