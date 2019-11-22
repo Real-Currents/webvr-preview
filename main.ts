@@ -60,6 +60,8 @@ function main () {
     video.append(source1);
     video.append(source2);
 
+    video.muted = true;
+
     console.log(videoName);
 
     let frame = 0;
@@ -141,8 +143,8 @@ function main () {
 
     lastKeyPress = (new Date()).getTime();
 
-    window.addEventListener('keydown', function checkKey (event) {
-        const kbEvent: KeyboardEvent = (event || window['event']) as KeyboardEvent; // cross-browser shenanigans
+    const videoPlayer = function (event: (any | KeyboardEvent)) {
+        const kbEvent = (event || window['event']); // cross-browser shenanigans
         // console.log(lastKeyPress, ((new Date()).getTime() - lastKeyPress));
         // console.log(startVideo);
 
@@ -155,6 +157,10 @@ function main () {
                 console.log("Play video");
 
                 video.play();
+
+                setTimeout( d => {
+                  if (kbEvent == KeyboardEvent) video.muted = false;
+                }, 533);
 
                 /*! Avoid any references to ctx (final buffer) within this routine !*/
 
@@ -200,7 +206,16 @@ function main () {
             return true; // treat all other keys normally;
 
         } else return false;
-    });
+    };
+
+    window.addEventListener('keydown', videoPlayer);
+
+    const delayStart = {
+      'keyCode': 32,
+      'preventDefault': d => {}
+    };
+
+    setTimeout(videoPlayer, 5000, delayStart);
 
 }
 

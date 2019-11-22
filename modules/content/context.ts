@@ -225,7 +225,7 @@ function drawScene(gl, programInfo, buffers, projectionMatrix, view = null, delt
     gl.uniformMatrix4fv(projectionLocation, false, projectionMatrix);
 
 
-    const worldCameraPosition = [0, 0, -2.5];
+    const worldCameraPosition = [0, 0, -1];
     const cameraPosition = [0, 0, worldCameraPosition[2] / 5];
     const target = [0, 0, 0];
     const up = [0, 1, 0];
