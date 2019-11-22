@@ -60,8 +60,6 @@ function main () {
     video.append(source1);
     video.append(source2);
 
-    video.muted = true;
-
     console.log(videoName);
 
     let frame = 0;
@@ -215,7 +213,12 @@ function main () {
       'preventDefault': d => {}
     };
 
-    setTimeout(videoPlayer, 5000, delayStart);
+    setTimeout(() => {
+        if (!!video.paused) {
+            video.muted = true;
+            videoPlayer(delayStart);
+        }
+    }, 5000, delayStart);
 
 }
 
