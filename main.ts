@@ -70,6 +70,8 @@ function main () {
 
     const aCanvas = document.createElement('canvas');
     const bCanvas = document.createElement('canvas');
+    aCanvas.width = bCanvas.width = ctx.canvas.width;
+    aCanvas.height = bCanvas.height = ctx.canvas.height;
 
     const faceInfos = [
         { target: gl.TEXTURE_CUBE_MAP_POSITIVE_X, faceColor: '#F00', textColor: '#0FF', text: '+X' },
@@ -132,7 +134,7 @@ function main () {
                     img.src = URL.createObjectURL(blob);
                 });
             }
-        }, 33);
+        }, 66);
     });
     gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
     gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
@@ -154,20 +156,17 @@ function main () {
 
                 video.play();
 
+                /*! Avoid any references to ctx (final buffer) within this routine !*/
 
                 const actx = aCanvas.getContext('2d');
                 actx.globalAlpha = 1.0;
-                aCanvas.width = ctx.canvas.width;
-                aCanvas.height = ctx.canvas.height;
                 const bctx = bCanvas.getContext('2d');
                 bctx.globalAlpha = 1.0;
-                bCanvas.width = ctx.canvas.width;
-                bCanvas.height = ctx.canvas.height;
 
-                const vh = ctx.canvas.height;
-                const vw = video.videoHeight * (ctx.canvas.width / ctx.canvas.height) / 2;
+                const vh = aCanvas.height;
+                const vw = video.videoHeight * (aCanvas.width / aCanvas.height) / 2;
                 const vax = 0;
-                const vbx = -(vw - ctx.canvas.width) / 1.75;
+                const vbx = -(vw - aCanvas.width) / 1.75;
 
                 timeout = setInterval(d => { // requestAnimationFrame(d => {
                     if ((video != null) && (video.readyState > 2) && (!video.paused)) {
