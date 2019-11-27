@@ -50,24 +50,32 @@ function main () {
     const texture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
 
-    /*
-    <video id="aud1" preload="auto" muted ="true" controls="true">
-      <source src="https://s3-us-west-1.amazonaws.com/real-currents/js-demos/video/fathers.mp4" />
-      <source src="https://s3-us-west-1.amazonaws.com/real-currents/js-demos/video/fathers.ogv" />
-    </video>
-     */
-    const video = document.createElement('video');
-    const source1 = document.createElement('source');
-    const source2 = document.createElement('source');
-    source1.src = "data/fathers.mp4";
-    source2.src = "data/fathers.ogv";
+    const video = (window.document.querySelector('#aud1') !== null) ?
+        window.document.querySelector('#aud1') as HTMLVideoElement :
+        document.createElement('video');
+
+    if (video.id !== 'aud1') {
+        const source1 = document.createElement('source');
+        const source2 = document.createElement('source');
+        source1.src = "data/fathers.mp4";
+        source2.src = "data/fathers.ogv";
+        video.append(source1);
+        video.append(source2);
+
+    } else {
+        /*
+<video id="aud1" preload="auto" muted ="true" controls="true">
+  <source src="https://s3-us-west-1.amazonaws.com/real-currents/js-demos/video/fathers.mp4" />
+  <source src="https://s3-us-west-1.amazonaws.com/real-currents/js-demos/video/fathers.ogv" />
+</video>
+         */
+        window['aud1'] = video;
+    }
+
     let videoLoad = false;
     let videoReady = false;
-    let videoName = source1.src.match(/[\/|\\]*([\w|\-|]+)\.\w\w\w$/)[1];
-    video.append(source1);
-    video.append(source2);
-
-    window['aud1'] = video;
+    let videoName = (<HTMLSourceElement>video.children[0]).src.match(/[\/|\\]*([\w|\-|]+)\.\w\w\w$/)[1];
+    video.pause();
 
     console.log(videoName);
 
@@ -90,11 +98,13 @@ function main () {
         { target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Y, faceColor: '#0FF', textColor: '#F00', text: '-Y' },
         { target: gl.TEXTURE_CUBE_MAP_POSITIVE_Z, faceColor: '#00F', textColor: '#FF0', text: '+Z' },
         { target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Z, faceColor: '#F0F', textColor: '#0F0', text: '-Z' },
+        // { target: "gl.TEXTURE_CUBE_MAP_NEGATIVE_Z", faceColor: '#F0F', textColor: '#0F0', text: '-Z' }
     ];
 
     faceInfos.forEach((faceInfo, i, a) => {
         const { target, faceColor, textColor, text } = faceInfo;
         const img = new Image();
+        img.crossOrigin = '';
 
         img.id = '' + (i + 1);
 
@@ -108,20 +118,24 @@ function main () {
         const type = gl.UNSIGNED_BYTE;
         const width = 512;
         const height = 512;
-        // gl.texImage2D(target, level, internalFormat, format, type, ctx.canvas);
 
         // Setup each face so it's immediately renderable
         gl.texImage2D(target, level, internalFormat, width, height, 0, format, type, null);
 
         // Asynchronously load an image
         // const img = new Image();
-        // img.src = url;
+        img.src = video.poster;
+        img.style.margin = 'auto';
+        img.style.position = 'fixed';
+        img.style.top = '0px';
+        img.style.left = i * ctx.canvas.width + 'px';
         img.addEventListener('load', function() {
             // Now that the image has loaded make copy it to the texture.
             gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
             gl.texImage2D(target, level, internalFormat, format, type, img);
             gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
         });
+        // document.body.appendChild(img);
 
         // show the result
         ctx.canvas.toBlob((blob) => {
@@ -131,7 +145,6 @@ function main () {
             img.style.position = 'fixed';
             img.style.top = '0px';
             img.style.left = i * ctx.canvas.width + 'px';
-            // document.body.appendChild(img);
         });
 
         setInterval(d => {
@@ -140,9 +153,12 @@ function main () {
                 else ctx.drawImage(bCanvas, 0, 0, bCanvas.width, bCanvas.height);
 
                 // show the result
-                ctx.canvas.toBlob((blob) => {
+                if (video.currentTime > 0) ctx.canvas.toBlob((blob) => {
                     img.src = URL.createObjectURL(blob);
                 });
+
+            } else {
+                img.src = video.poster;
             }
         }, 66);
     });
@@ -237,14 +253,14 @@ function main () {
         } else return false;
     });
 
-    window['playVideo'] = videoPlayer();
+    window['playVideo'] = videoPlayer;
 
-    setTimeout(() => {
-        if (!!video.paused) {
-            video.muted = true;
-            videoPlayer();
-        }
-    }, 500);
+    // setTimeout(() => {
+    //     if (!!video.paused) {
+    //         video.muted = true;
+    //         videoPlayer();
+    //     }
+    // }, 500);
 
 }
 
