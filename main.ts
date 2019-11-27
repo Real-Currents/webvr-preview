@@ -66,11 +66,13 @@ function main () {
     video.append(source1);
     video.append(source2);
 
+    window['aud1'] = video;
+
     console.log(videoName);
 
     let frame = 0;
     let timeout = null;
-    let lastKeyPress = 0;
+    let lastKeyPress = (new Date()).getTime();
     let startVideo = false;
     let stopVideo = false;
 
@@ -145,86 +147,83 @@ function main () {
     gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
     gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
 
-    lastKeyPress = (new Date()).getTime();
+    const videoPlayer = function () {
+        if (!stopVideo && (startVideo || video.paused)) {
+            startVideo = true;
 
-    const videoPlayer = function (event: (any | KeyboardEvent)) {
+            lastKeyPress = (new Date()).getTime();
+
+            console.log("Play video");
+
+            video.play();
+
+            /*! Avoid any references to ctx (final buffer) within this routine !*/
+
+            const actx = aCanvas.getContext('2d');
+            actx.globalAlpha = 1.0;
+            const bctx = bCanvas.getContext('2d');
+            bctx.globalAlpha = 1.0;
+
+            const vh = aCanvas.height;
+            const vw = video.videoHeight * (aCanvas.width / aCanvas.height) / 2;
+            const vax = 0;
+            const vbx = -(vw - aCanvas.width) / 1.75;
+
+            timeout = setInterval(d => { // requestAnimationFrame(d => {
+                if ((video != null) && (video.readyState > 2) && (!video.paused)) {
+                    if (++frame % 2) {
+                        actx.drawImage(video, vax, 0, vw, vh);
+                    } else {
+                        bctx.drawImage(video, vbx, 0, vw, vh);
+                    }
+                }
+            }, 33);
+
+            setTimeout(s => startVideo = false, 1000);
+
+        } else if (!startVideo) {
+            console.log("Pause video!");
+            video.pause();
+
+            stopVideo = true;
+
+            if (timeout != null) {
+                // cancelAnimationFrame(timeout);
+                clearTimeout(timeout);
+                timeout = null;
+            }
+
+            setTimeout(s => stopVideo = false, 1000);
+        }
+    };
+
+    window.addEventListener('keydown', function (event: (any | KeyboardEvent)) {
         const kbEvent = (event || window['event']); // cross-browser shenanigans
         // console.log(lastKeyPress, ((new Date()).getTime() - lastKeyPress));
         // console.log(startVideo);
 
         if (kbEvent['keyCode'] === 32 && ((new Date()).getTime() - lastKeyPress) > 500) { // this is the spacebar
-            if (!stopVideo && (startVideo || video.paused)) {
-                startVideo = true;
+            videoPlayer();
 
-                lastKeyPress = (new Date()).getTime();
-
-                console.log("Play video");
-
-                video.play();
-
-                setTimeout( d => {
-                  if (kbEvent == KeyboardEvent) video.muted = false;
-                }, 533);
-
-                /*! Avoid any references to ctx (final buffer) within this routine !*/
-
-                const actx = aCanvas.getContext('2d');
-                actx.globalAlpha = 1.0;
-                const bctx = bCanvas.getContext('2d');
-                bctx.globalAlpha = 1.0;
-
-                const vh = aCanvas.height;
-                const vw = video.videoHeight * (aCanvas.width / aCanvas.height) / 2;
-                const vax = 0;
-                const vbx = -(vw - aCanvas.width) / 1.75;
-
-                timeout = setInterval(d => { // requestAnimationFrame(d => {
-                    if ((video != null) && (video.readyState > 2) && (!video.paused)) {
-                        if (++frame % 2) {
-                            actx.drawImage(video, vax, 0, vw, vh);
-                        } else {
-                            bctx.drawImage(video, vbx, 0, vw, vh);
-                        }
-                    }
-                }, 33);
-
-                setTimeout(s => startVideo = false, 1000);
-
-            } else if (!startVideo) {
-                console.log("Pause video!");
-                video.pause();
-
-                stopVideo = true;
-
-                if (timeout != null) {
-                    // cancelAnimationFrame(timeout);
-                    clearTimeout(timeout);
-                    timeout = null;
-                }
-
-                setTimeout(s => stopVideo = false, 1000);
-            }
+            setTimeout( d => {
+                if (kbEvent == KeyboardEvent) video.muted = false;
+            }, 33);
 
             kbEvent.preventDefault();
 
             return true; // treat all other keys normally;
 
         } else return false;
-    };
+    });
 
-    window.addEventListener('keydown', videoPlayer);
-
-    const delayStart = {
-      'keyCode': 32,
-      'preventDefault': d => {}
-    };
+    window['playVideo'] = videoPlayer();
 
     setTimeout(() => {
         if (!!video.paused) {
             video.muted = true;
-            videoPlayer(delayStart);
+            videoPlayer();
         }
-    }, 5000, delayStart);
+    }, 500);
 
 }
 

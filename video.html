@@ -19,7 +19,11 @@
           Please play in a new web browser, like Firefox or Chrome.
         </div>
       </canvas>
-    </div><a id="aud1_play" href="#" onclick="(function() { aud1.muted=false; this.innerHTML='Now Playing'; } ());">Play</a>
+    </div>
+    <div style="text-align: center;">
+      <br /><a id="aud1_play" href="#" onclick="(function() { aud1.currentTime=0; aud1.muted=false; this.innerHTML='Now Playing'; } ());">Play</a>
+      <br /><a href="http://www.w3.org/2010/05/video/mediaevents.html" target="_blank">Media Help</a>
+    </div>
 
     <div id="stream" style="display:none; text-align:center">
       <video id="aud1" preload="auto" muted ="true" controls="true">
