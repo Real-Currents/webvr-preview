@@ -12,8 +12,8 @@
   </head>
 
   <body>
-    <div id="header-canvas">
-      <canvas id='cv' width='1280' height='720'  style="image-rendering:optimizespeed ! important;">
+    <div id="header-canvas" style="text-align: center;">
+      <canvas id='cv' width='1280' height='720'  style="display: inline-block; image-rendering:optimizespeed ! important;">
         <div id='main-header'>
           <h1>Happy Birthday, Dad!</h1>
           Please play in a new web browser, like Firefox or Chrome.
@@ -21,7 +21,7 @@
       </canvas>
     </div>
     <div style="text-align: center;">
-      <br /><a id="aud1_play" href="#" onclick="(function() { aud1.currentTime=0; aud1.muted=false; this.innerHTML='Now Playing'; } ());">Play</a>
+      <br /><a id="aud1_play" href="#" onclick="(function() { aud1.currentTime=0; aud1.muted=false; userTriggered=true; this.innerHTML='Now Playing'; } ());">Play</a>
       <br /><a href="http://www.w3.org/2010/05/video/mediaevents.html" target="_blank">Media Help</a>
     </div>
 

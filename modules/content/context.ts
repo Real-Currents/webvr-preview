@@ -11,8 +11,19 @@ let viewLocation: WebGLUniformLocation;
 let worldLocation: WebGLUniformLocation;
 let textureLocation: WebGLUniformLocation;
 let worldCameraPositionLocation: WebGLUniformLocation;
+const worldCameraPosition = [ 0, 0, -15 ];
+let buffers: {
+    position: WebGLBuffer, positionSize: number,
+    normal: WebGLBuffer, normalSize: number,
+    index: WebGLBuffer, indexSize: number,
+    color: WebGLBuffer , colorSize: number
+} = null;
 
-export default function createContext (canvas: HTMLCanvasElement, initBuffers: Function, initShaders: Function): WebGL2RenderingContext {
+export default function createContext (
+    canvas: HTMLCanvasElement,
+    initBuffers: Function,
+    initShaders: Function
+): { gl: WebGL2RenderingContext, updateContext: Function } {
     const gl: WebGL2RenderingContext = (
         (canvas.getContext('webgl2') || canvas.getContext('experimental-webgl')
         ) as any as WebGLRenderingContextStrict) as any as WebGL2RenderingContext;
@@ -62,7 +73,7 @@ export default function createContext (canvas: HTMLCanvasElement, initBuffers: F
 
     // Here's where we call the routine that builds all the
     // objects we'll be drawing.
-    const buffers = initBuffers(gl);
+    buffers = initBuffers(gl);
 
     let then = 0;
 
@@ -127,7 +138,37 @@ export default function createContext (canvas: HTMLCanvasElement, initBuffers: F
 
     (<any>window).document.body.append((<any>window).vrButton);
 
-    return gl;
+    return { gl, updateContext };
+}
+
+function updateContext (gl: WebGL2RenderingContext, contextProperties: any) {
+    for (const prop in contextProperties) {
+        if (prop === 'buffers' && typeof contextProperties['buffers'] === 'function') {
+            buffers = contextProperties['buffers'](gl);
+        }
+        if (prop === 'worldCameraPosition' && !!Array.isArray(contextProperties['worldCameraPosition'])) {
+            const wcp: [number] = contextProperties['worldCameraPosition'] as [number];
+            console.log("Move camera");
+
+            if ('worldCameraDelta' in contextProperties && !!Array.isArray(contextProperties['worldCameraDelta'])) {
+                const wcd: [number] = contextProperties['worldCameraDelta'] as [number];
+                wcd.forEach((v, i, a) => {
+                    if (!!wcp[i]) {
+                        if (worldCameraPosition[i] < wcp[i]) { // Don't go closer than specified worldCameraPosition
+                            worldCameraPosition[i] = (worldCameraPosition[i] + v);
+                        } else {
+                            worldCameraPosition[i] = wcp[i];
+                        }
+                    } else {
+                        worldCameraPosition[i] = (worldCameraPosition[i] + v);
+                    }
+                });
+
+            } else {
+                wcp.forEach((v, i, a) => worldCameraPosition[i] = v);
+            }
+        }
+    }
 }
 
 // entry point for non-WebVR rendering
@@ -224,8 +265,6 @@ function drawScene(gl, programInfo, buffers, projectionMatrix, view = null, delt
     //     mat4.perspective(mat4.create(), fieldOfViewRadians, aspect, 1, 2000);
     gl.uniformMatrix4fv(projectionLocation, false, projectionMatrix);
 
-
-    const worldCameraPosition = [0, 0, -1];
     const cameraPosition = [0, 0, worldCameraPosition[2] / 5];
     const target = [0, 0, 0];
     const up = [0, 1, 0];

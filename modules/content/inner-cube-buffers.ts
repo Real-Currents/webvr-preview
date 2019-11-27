@@ -19,46 +19,46 @@ export default function initBuffers (gl: WebGLRenderingContext):
         -0.5, 0.5, 0.5
     ];
     const vertices = [
+        -0.5, 0.5, -0.5,
         -0.5, -0.5, -0.5,
-        -0.5, 0.5, -0.5,
         0.5, -0.5, -0.5,
-        -0.5, 0.5, -0.5,
         0.5, 0.5, -0.5,
+        -0.5, 0.5, -0.5,
         0.5, -0.5, -0.5,
 
+        -0.5, 0.5, 0.5,
+        -0.5, 0.5, -0.5,
+        0.5, 0.5, -0.5,
+        0.5, 0.5, 0.5,
+        -0.5, 0.5, 0.5,
+        0.5, 0.5, -0.5,
+
+        0.5, -0.5, 0.5,
         -0.5, -0.5, 0.5,
-        0.5, -0.5, 0.5,
-        -0.5, 0.5, 0.5,
         -0.5, 0.5, 0.5,
         0.5, -0.5, 0.5,
+        -0.5, 0.5, 0.5,
         0.5, 0.5, 0.5,
 
-        -0.5, 0.5, -0.5,
-        -0.5, 0.5, 0.5,
-        0.5, 0.5, -0.5,
-        -0.5, 0.5, 0.5,
-        0.5, 0.5, 0.5,
-        0.5, 0.5, -0.5,
-
-        -0.5, -0.5, -0.5,
         0.5, -0.5, -0.5,
-        -0.5, -0.5, 0.5,
-        -0.5, -0.5, 0.5,
-        0.5, -0.5, -0.5,
-        0.5, -0.5, 0.5,
-
         -0.5, -0.5, -0.5,
         -0.5, -0.5, 0.5,
-        -0.5, 0.5, -0.5,
+        0.5, -0.5, -0.5,
         -0.5, -0.5, 0.5,
+        0.5, -0.5, 0.5,
+
+        -0.5, -0.5, 0.5,
+        -0.5, -0.5, -0.5,
+        -0.5, 0.5, -0.5,
         -0.5, 0.5, 0.5,
+        -0.5, -0.5, 0.5,
         -0.5, 0.5, -0.5,
 
+        0.5, 0.5, -0.5,
         0.5, -0.5, -0.5,
-        0.5, 0.5, -0.5,
-        0.5, -0.5, 0.5,
         0.5, -0.5, 0.5,
         0.5, 0.5, -0.5,
+        0.5, -0.5, 0.5,
         0.5, 0.5, 0.5,
 
     ];
@@ -209,7 +209,7 @@ export default function initBuffers (gl: WebGLRenderingContext):
     // Bind it to ARRAY_BUFFER (think of it as ARRAY_BUFFER = normalBuffer)
     gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
     // Put normals data into buffer
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(innerNormals), gl.STATIC_DRAW);
 
     // Load color value into bound buffer
     gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);

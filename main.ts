@@ -2,6 +2,7 @@
 import backgroundUpdater from "./modules/basic/background-update";
 import createContext from './modules/content/context';
 import initBuffers from "./modules/content/cube-buffers";
+import innerBuffers from "./modules/content/inner-cube-buffers";
 import initShaderProgram from "./modules/content/cubemap-shaders";
 import generateFace from "./modules/content/face-generator";
 
@@ -35,7 +36,7 @@ function main () {
     window.document.body.style.margin = '0px';
     window.document.body.style.overflow = 'hidden';
 
-    const gl = createContext(canvas, initBuffers, initShaderProgram);
+    const { gl, updateContext } = createContext(canvas, initBuffers, initShaderProgram);
 
     backgroundUpdater(gl);
 
@@ -75,6 +76,7 @@ function main () {
     let lastKeyPress = (new Date()).getTime();
     let startVideo = false;
     let stopVideo = false;
+    window['userTriggered'] = false;
 
     const aCanvas = document.createElement('canvas');
     const bCanvas = document.createElement('canvas');
@@ -148,7 +150,7 @@ function main () {
     gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
 
     const videoPlayer = function () {
-        if (!stopVideo && (startVideo || video.paused)) {
+        if (!stopVideo && (startVideo || video.paused || !window['userTriggered'])) {
             startVideo = true;
 
             lastKeyPress = (new Date()).getTime();
@@ -177,6 +179,19 @@ function main () {
                         bctx.drawImage(video, vbx, 0, vw, vh);
                     }
                 }
+
+                if (video.currentTime > 5 && !video.muted) {
+                    updateContext(gl, {
+                        'buffers': innerBuffers,
+                        'worldCameraDelta': [ 0, 0, +0.05 ],
+                        'worldCameraPosition': [ 0, 0, -1 ]
+                    });
+                } else if (video.currentTime > 1 && !video.muted) {
+                    updateContext(gl, {
+                        'worldCameraDelta': [ 0, 0, +0.025 ],
+                        'worldCameraPosition': [ 0, 0, -1 ]
+                    });
+                }
             }, 33);
 
             setTimeout(s => startVideo = false, 1000);
@@ -204,6 +219,12 @@ function main () {
 
         if (kbEvent['keyCode'] === 32 && ((new Date()).getTime() - lastKeyPress) > 500) { // this is the spacebar
             videoPlayer();
+
+            if (!window['userTriggered']) {
+                video.currentTime = 0;
+                video.muted = false;
+                window['userTriggered'] = true;
+            }
 
             setTimeout( d => {
                 if (kbEvent == KeyboardEvent) video.muted = false;
