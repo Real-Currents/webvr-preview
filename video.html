@@ -1,0 +1,34 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <title>WebVR Preview</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0, shrink-to-fit=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+  </head>
+
+  <body>
+    <div id="header-canvas">
+      <canvas id='cv' width='1280' height='720'  style="image-rendering:optimizespeed ! important;">
+        <div id='main-header'>
+          <h1>Happy Birthday, Dad!</h1>
+          Please play in a new web browser, like Firefox or Chrome.
+        </div>
+      </canvas>
+    </div><a id="aud1_play" href="#" onclick="(function() { aud1.muted=false; this.innerHTML='Now Playing'; } ());">Play</a>
+
+    <div id="stream" style="display:none; text-align:center">
+      <video id="aud1" preload="auto" muted ="true" controls="true">
+        <source src="https://s3-us-west-1.amazonaws.com/real-currents/js-demos/video/fathers.mp4" />
+        <source src="https://s3-us-west-1.amazonaws.com/real-currents/js-demos/video/fathers.ogv" />
+      </video>
+    </div>
+
+    <script type="text/javascript" src="app.js"></script>
+
+  </body>
+</html>

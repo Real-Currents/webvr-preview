@@ -5,25 +5,35 @@ import initBuffers from "./modules/content/cube-buffers";
 import initShaderProgram from "./modules/content/cubemap-shaders";
 import generateFace from "./modules/content/face-generator";
 
-const canvas: HTMLCanvasElement = window.document.createElement('canvas');
+const canvas: HTMLCanvasElement = (window.document.querySelector('canvas#cv') !== null) ?
+    window.document.querySelector('canvas#cv') :
+    window.document.createElement('canvas');
+
 //
 // Start here
 //
 function main () {
+
     // Attach canvas to window
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    canvas.style.display = 'block';
-    canvas.style.margin = 'auto';
-    canvas.style.width = window.outerWidth + 'px';
-    if (window.outerWidth * 0.99 * canvas.height / canvas.width < window.innerHeight) {
-        canvas.style.height = window.outerWidth * canvas.height / canvas.width + 'px';
-    } else {
-        canvas.style.height = window.outerHeight * 0.99 + 'px';
-        canvas.style.width = window.outerHeight * canvas.width / canvas.height + 'px';
+    if (canvas.id !== 'cv') {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        canvas.style.display = 'block';
+        canvas.style.margin = 'auto';
+        canvas.style.width = window.outerWidth + 'px';
+        if (window.outerWidth * 0.99 * canvas.height / canvas.width < window.innerHeight) {
+            canvas.style.height = window.outerWidth * canvas.height / canvas.width + 'px';
+        } else {
+            canvas.style.height = window.outerHeight * 0.99 + 'px';
+            canvas.style.width = window.outerHeight * canvas.width / canvas.height + 'px';
+        }
+
+        window.document.body.append(canvas);
     }
 
-    window.document.body.append(canvas);
+    window.document.body.style.backgroundColor = "#000000";
+    window.document.body.style.margin = '0px';
+    window.document.body.style.overflow = 'hidden';
 
     const gl = createContext(canvas, initBuffers, initShaderProgram);
 
@@ -38,10 +48,6 @@ function main () {
     // Create a texture.
     const texture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
-
-    window.document.body.style.backgroundColor = "#000000";
-    window.document.body.style.margin = '0px';
-    window.document.body.style.overflow = 'hidden';
 
     /*
     <video id="aud1" preload="auto" muted ="true" controls="true">
