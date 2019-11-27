@@ -23,11 +23,11 @@ function main () {
         }
 
         window.document.body.append(canvas);
-
-        window.document.body.style.backgroundColor = "#000000";
-        window.document.body.style.margin = '0px';
-        window.document.body.style.overflow = 'hidden';
     }
+
+    window.document.body.style.backgroundColor = "#000000";
+    window.document.body.style.margin = '0px';
+    window.document.body.style.overflow = 'hidden';
 
     const gl: WebGLRenderingContext = createContext(canvas);
 }
