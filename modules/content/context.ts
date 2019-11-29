@@ -12,7 +12,7 @@ let worldLocation: WebGLUniformLocation;
 let textureLocation: WebGLUniformLocation;
 let worldCameraPositionLocation: WebGLUniformLocation;
 let viewPosition = [ 0, 0, -5 ];
-let worldCameraPosition = [ 0, 0, -15 ];
+let worldCameraPosition = [ 0, 0, -5 ];
 let buffers: {
     position: WebGLBuffer, positionSize: number,
     normal: WebGLBuffer, normalSize: number,
@@ -147,12 +147,41 @@ function updateContext (gl: WebGL2RenderingContext, contextProperties: any) {
         if (prop === 'buffers' && typeof contextProperties['buffers'] === 'function') {
             buffers = contextProperties['buffers'](gl);
         }
+
+        if (prop === 'viewPosition' && !!Array.isArray(contextProperties['viewPosition'])) {
+            const vp: [number] = contextProperties['viewPosition'] as [number];
+
+            if ('cameraDelta' in contextProperties && !!Array.isArray(contextProperties['cameraDelta'])) {
+                const wcd: [number] = contextProperties['cameraDelta'] as [number];
+
+                wcd.forEach((v, i, a) => {
+                    if (!!vp[i]) {
+                        if (viewPosition[i] < vp[i]) { // Don't go closer than specified worldCameraPosition
+                            viewPosition[i] = (viewPosition[i] + v);
+                        } else {
+                            viewPosition[i] = vp[i];
+                        }
+                    } else {
+                        viewPosition[i] = (viewPosition[i] + v);
+                    }
+                });
+
+                // console.log("Move view", viewPosition);
+
+            } else {
+                vp.forEach((v, i, a) => viewPosition[i] = v);
+            }
+
+        } else if (prop === 'viewPosition' ) {
+            viewPosition = contextProperties['viewPosition'];
+            // console.log("Hold position");
+        }
+
         if (prop === 'worldCameraPosition' && !!Array.isArray(contextProperties['worldCameraPosition'])) {
             const wcp: [number] = contextProperties['worldCameraPosition'] as [number];
-            console.log("Move camera");
 
-            if ('worldCameraDelta' in contextProperties && !!Array.isArray(contextProperties['worldCameraDelta'])) {
-                const wcd: [number] = contextProperties['worldCameraDelta'] as [number];
+            if ('cameraDelta' in contextProperties && !!Array.isArray(contextProperties['cameraDelta'])) {
+                const wcd: [number] = contextProperties['cameraDelta'] as [number];
                 wcd.forEach((v, i, a) => {
                     if (!!wcp[i]) {
                         if (worldCameraPosition[i] < wcp[i]) { // Don't go closer than specified worldCameraPosition
@@ -164,6 +193,8 @@ function updateContext (gl: WebGL2RenderingContext, contextProperties: any) {
                         worldCameraPosition[i] = (worldCameraPosition[i] + v);
                     }
                 });
+
+                // console.log("Move camera", worldCameraPosition);
 
             } else {
                 wcp.forEach((v, i, a) => worldCameraPosition[i] = v);
@@ -264,9 +295,9 @@ function drawScene(gl, programInfo, buffers, projectionMatrix, view = null, delt
 
     const cameraPosition = (viewPosition !== null) ?
         viewPosition :
-        [0, 0, worldCameraPosition[2] / 5];
-    const target = [0, 0, 0];
-    const up = [0, 1, 0];
+        [ 0, 0, worldCameraPosition[2] / 5 ];
+    const target = [ 0, 0, 0] ;
+    const up = [ 0, 1, 0 ];
     // Compute the camera's matrix using look at.
     const cameraMatrix = mat4.lookAt(mat4.create(), cameraPosition, target, up);
 
@@ -329,7 +360,7 @@ function drawScene(gl, programInfo, buffers, projectionMatrix, view = null, delt
     gl.uniformMatrix4fv(projectionLocation, false, projectionMatrix);
     gl.uniformMatrix4fv(viewLocation, false, viewMatrix);
     gl.uniformMatrix4fv(worldLocation, false, worldMatrix);
-    gl.uniform3fv(worldCameraPositionLocation, worldCameraPosition);
+    gl.uniform3fv(worldCameraPositionLocation, (viewPosition !== null) ? cameraPosition : worldCameraPosition);
 
     // Tell the shader to use texture unit 0 for u_texture
     gl.uniform1i(textureLocation, 0);

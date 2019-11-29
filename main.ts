@@ -199,12 +199,14 @@ function main () {
                 if (video.currentTime > 5 && !video.muted) {
                     updateContext(gl, {
                         'buffers': innerBuffers,
-                        'worldCameraDelta': [ 0, 0, +0.05 ],
+                        'cameraDelta': [ 0, 0, +0.05 ],
+                        'viewPosition': null,
                         'worldCameraPosition': [ 0, 0, -1 ]
                     });
                 } else if (video.currentTime > 1 && !video.muted) {
                     updateContext(gl, {
-                        'worldCameraDelta': [ 0, 0, +0.025 ],
+                        'cameraDelta': [ 0, 0, +0.025 ],
+                        'viewPosition': [ 0, 0, -1 ],
                         'worldCameraPosition': [ 0, 0, -1 ]
                     });
                 }
