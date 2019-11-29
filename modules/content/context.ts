@@ -11,7 +11,8 @@ let viewLocation: WebGLUniformLocation;
 let worldLocation: WebGLUniformLocation;
 let textureLocation: WebGLUniformLocation;
 let worldCameraPositionLocation: WebGLUniformLocation;
-const worldCameraPosition = [ 0, 0, -15 ];
+let viewPosition = [ 0, 0, -5 ];
+let worldCameraPosition = [ 0, 0, -15 ];
 let buffers: {
     position: WebGLBuffer, positionSize: number,
     normal: WebGLBuffer, normalSize: number,
@@ -246,10 +247,6 @@ function renderEye(canvas, gl, programInfo, buffers, isLeft, deltaTime) {
 //
 function drawScene(gl, programInfo, buffers, projectionMatrix, view = null, deltaTime) {
 
-    // Set the drawing position to the "identity" point, which is
-    // the center of the scene.
-    const modelViewMatrix = mat4.create();
-
     cubeRotation += deltaTime;
 
     // Animate the rotation
@@ -265,7 +262,9 @@ function drawScene(gl, programInfo, buffers, projectionMatrix, view = null, delt
     //     mat4.perspective(mat4.create(), fieldOfViewRadians, aspect, 1, 2000);
     gl.uniformMatrix4fv(projectionLocation, false, projectionMatrix);
 
-    const cameraPosition = [0, 0, worldCameraPosition[2] / 5];
+    const cameraPosition = (viewPosition !== null) ?
+        viewPosition :
+        [0, 0, worldCameraPosition[2] / 5];
     const target = [0, 0, 0];
     const up = [0, 1, 0];
     // Compute the camera's matrix using look at.
@@ -325,6 +324,8 @@ function drawScene(gl, programInfo, buffers, projectionMatrix, view = null, delt
     }
 
     // Set the uniforms
+    // Set the drawing position to the "identity" point, which is
+    // the center of the scene.
     gl.uniformMatrix4fv(projectionLocation, false, projectionMatrix);
     gl.uniformMatrix4fv(viewLocation, false, viewMatrix);
     gl.uniformMatrix4fv(worldLocation, false, worldMatrix);
