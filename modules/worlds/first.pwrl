@@ -1,6 +1,6 @@
-'PWRL V1.0 utf8';
+{ 'PWRL V1.0 utf8':
 /**
- *  A demonstration of the PWRL TypeSript API
+ *  A demonstration of the PWRLScript API
  *  (Procedural World Realization Language)
  *  A brown hut described with PWRL syntax
  *
@@ -10,34 +10,35 @@
  *  (John Wiley & Sons, Inc., 1997)
  */
 
-Group({
-  children([
-    // Draw the hut walls
-    Shape({
-      appearance(DEF({
-        'Brown': Appearance({
-            material(Material({
-              diffuseColor([ 0.6, 0.4, 0.0 ])
-            }))
-        })
-      })),
-      geometry(Cylinder({
-        height: 2.0,
-        radius: 2.0
-      }))
-    }),
-     *  Draw the hut roof
-    Transform({
-      translation([ 0.0, 2.0, 0.0 ]),
+    Group({
       children([
-	    Shape({
-          appearance(USE('Brown')),
-          geometry(Cone({
+        // Draw the hut walls
+        Shape({
+          appearance(DEF({
+            'Brown': Appearance({
+                material(Material({
+                  diffuseColor([ 0.6, 0.4, 0.0 ])
+                }))
+            })
+          })),
+          geometry(Cylinder({
             height: 2.0,
-            bottomRadius: 2.5
+            radius: 2.0
           }))
-        })
+        }),
+        //  Draw the hut roof
+        Transform({
+          translation([ 0.0, 2.0, 0.0 ]),
+          children([
+            Shape({
+              appearance(USE('Brown')),
+              geometry(Cone({
+                height: 2.0,
+                bottomRadius: 2.5
+              }))
+            })
+          ])
+        }),
       ])
-    }),
-  ])
-});
+    });
+}
