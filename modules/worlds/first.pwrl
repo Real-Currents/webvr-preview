@@ -1,4 +1,4 @@
-{ 'PWRLScript V1.0 utf8':
+[
 /**
  *  A demonstration of the PWRLScript API
  *  (Procedural World Realization Language)
@@ -41,4 +41,4 @@
       }),
     ]
   })
-}
+]
