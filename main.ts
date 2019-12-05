@@ -29,7 +29,7 @@ function main () {
     window.document.body.style.margin = '0px';
     window.document.body.style.overflow = 'hidden';
 
-    const gl = createContext(canvas, initBuffers, initShaderProgram);
+    const { gl, updateContext } = createContext(canvas, initBuffers, initShaderProgram);
 
     backgroundUpdater(gl);
 
