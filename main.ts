@@ -68,13 +68,8 @@ function main () {
         const type = gl.UNSIGNED_BYTE;
         const width = 512;
         const height = 512;
-        // gl.texImage2D(target, level, internalFormat, format, type, ctx.canvas);
-
-        // Setup each face so it's immediately renderable
-        gl.texImage2D(target, level, internalFormat, width, height, 0, format, type, null);
 
         // Asynchronously load an image
-        // const img = new Image();
         // img.src = url;
         img.addEventListener('load', function() {
             console.log(`Image ${img.id} loaded!`);
@@ -95,6 +90,9 @@ function main () {
             img.style.left = i * ctx.canvas.width + 'px';
             // document.body.appendChild(img);
         });
+
+        // Setup each face so it's immediately renderable
+        gl.texImage2D(target, level, internalFormat, width, height, 0, format, type, null);
     });
     gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
     gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
