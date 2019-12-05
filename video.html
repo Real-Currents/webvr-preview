@@ -12,23 +12,29 @@
   </head>
 
   <body>
-    <div id="header-canvas">
-      <canvas id='cv' width='1280' height='720'  style="image-rendering:optimizespeed ! important;">
+    <div id="header-canvas" style="text-align: center;">
+      <canvas id='cv' width='1280' height='720'  style="display: inline-block; image-rendering:optimizespeed ! important;">
         <div id='main-header'>
           <h1>Happy Birthday, Dad!</h1>
           Please play in a new web browser, like Firefox or Chrome.
         </div>
       </canvas>
-    </div><a id="aud1_play" href="#" onclick="(function() { aud1.muted=false; this.innerHTML='Now Playing'; } ());">Play</a>
+    </div>
+    <div style="text-align: center;">
+      <br /><a id="aud1_play" href="#" onclick="(function(evt) { playVideo(); aud1.currentTime=0; aud1.muted=false; userTriggered=true; evt.target.innerHTML='Now Playing'; } (event));">Play</a>
+      <br /><a href="http://www.w3.org/2010/05/video/mediaevents.html" target="_blank">Media Help</a>
+    </div>
 
     <div id="stream" style="display:none; text-align:center">
-      <video id="aud1" preload="auto" muted ="true" controls="true">
-        <source src="https://s3-us-west-1.amazonaws.com/real-currents/js-demos/video/fathers.mp4" />
-        <source src="https://s3-us-west-1.amazonaws.com/real-currents/js-demos/video/fathers.ogv" />
+      <video id="aud1" poster="/data/fathers.jpg" preload="auto" muted="true" controls="true">
+        <!--source src="https://s3-us-west-1.amazonaws.com/real-currents/js-demos/video/fathers.mp4" /-->
+        <!--source src="https://s3-us-west-1.amazonaws.com/real-currents/js-demos/video/fathers.ogv" /-->
+        <source src="/data/fathers.mp4" />
+        <source src="/data/fathers.ogv" />
       </video>
     </div>
 
-    <script type="text/javascript" src="app.js"></script>
+    <script type="text/javascript" src="video.js"></script>
 
   </body>
 </html>
