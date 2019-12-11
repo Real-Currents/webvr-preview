@@ -36,8 +36,8 @@ function main () {
     // Get A 2D context
     /** @type {Canvas2DRenderingContext} */
     const ctx = document.createElement("canvas").getContext("2d");
-    ctx.canvas.width = 128;
-    ctx.canvas.height = 128;
+    ctx.canvas.width = 512;
+    ctx.canvas.height = 512;
 
     // Create a texture.
     var texture = gl.createTexture();

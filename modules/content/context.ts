@@ -11,7 +11,7 @@ let viewLocation: WebGLUniformLocation;
 let worldLocation: WebGLUniformLocation;
 let textureLocation: WebGLUniformLocation;
 let worldCameraPositionLocation: WebGLUniformLocation;
-let viewPosition = [ 0, 0, -2.5 ];
+let viewPosition = [ 0, 0, -5 ];
 let worldCameraPosition = [ 0, 0, -5 ];
 let buffers: {
     position: WebGLBuffer, positionSize: number,
@@ -206,7 +206,7 @@ function updateContext (gl: WebGL2RenderingContext, contextProperties: any) {
 // entry point for non-WebVR rendering
 // called by whatever mechanism (likely keyboard/mouse events)
 // you used before to trigger redraws
-function render (canvas, gl, programInfo, buffers, deltaTime) {
+function render (canvas: HTMLCanvasElement, gl: WebGL2RenderingContext, programInfo, buffers, deltaTime) {
     gl.viewport(0, 0, canvas.width, canvas.height);
     gl.enable(gl.CULL_FACE);
     gl.enable(gl.DEPTH_TEST);                               // Enable depth testing
@@ -224,7 +224,7 @@ function render (canvas, gl, programInfo, buffers, deltaTime) {
     // and we only want to see objects between 0.1 units
     // and 100 units away from the camera.
     const fieldOfView = 45 * Math.PI / 180;   // in radians
-    const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
+    const aspect = canvas.width / canvas.height;
     const zNear = 1; // 0.1;
     const zFar = 2000; // 100.0;
 
@@ -240,7 +240,7 @@ function render (canvas, gl, programInfo, buffers, deltaTime) {
 }
 
 // entry point for WebVR, called by vrCallback()
-function renderVR(canvas, gl, programInfo, buffers, deltaTime) {
+function renderVR(canvas: HTMLCanvasElement, gl: WebGL2RenderingContext, programInfo, buffers, deltaTime) {
     gl.viewport(0, 0, canvas.width, canvas.height);
     gl.enable(gl.CULL_FACE);
     gl.enable(gl.DEPTH_TEST);                               // Enable depth testing
@@ -252,19 +252,20 @@ function renderVR(canvas, gl, programInfo, buffers, deltaTime) {
     vrDisplay.submitFrame();
 }
 
-function renderEye(canvas, gl, programInfo, buffers, isLeft, deltaTime) {
+function renderEye(canvas: HTMLCanvasElement, gl: WebGL2RenderingContext, programInfo, buffers, isLeft, deltaTime) {
     let width = canvas.width;
+    let wD2 = canvas.width / 2;
     let height = canvas.height;
     let projection, view;
     let frameData = new VRFrameData();
     vrDisplay.getFrameData(frameData);
     // choose which half of the canvas to draw on
     if (isLeft) {
-        gl.viewport(0, 0, width / 2, height);
+        gl.viewport(0, 0, wD2, height);
         projection = frameData.leftProjectionMatrix;
         view = frameData.leftViewMatrix;
     } else {
-        gl.viewport(width / 2, 0, width / 2, height);
+        gl.viewport(wD2, 0, wD2, height);
         projection = frameData.rightProjectionMatrix;
         view = frameData.rightViewMatrix;
     }
@@ -276,7 +277,7 @@ function renderEye(canvas, gl, programInfo, buffers, isLeft, deltaTime) {
 //
 // Draw the scene.
 //
-function drawScene(gl, programInfo, buffers, projectionMatrix, view = null, deltaTime) {
+function drawScene(gl: WebGL2RenderingContext, programInfo, buffers, projectionMatrix, view = null, deltaTime) {
 
     cubeRotation += deltaTime;
 
@@ -287,7 +288,7 @@ function drawScene(gl, programInfo, buffers, projectionMatrix, view = null, delt
     // Tell WebGL to use our program when drawing
     gl.useProgram(programInfo.program);
 
-    // const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
+    // const aspect = canvas.height / canvas.height;
     // const fieldOfViewRadians = 0.5236;
     // const projectionMatrix =
     //     mat4.perspective(mat4.create(), fieldOfViewRadians, aspect, 1, 2000);
