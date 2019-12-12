@@ -4,11 +4,11 @@ export default function generateFace(ctx, gridColor, gridSpacing) {
     const w = ctx.canvas.width,
         h = ctx.canvas.height;
     ctx.beginPath();
-    for (let x=0; x<=w; x+=gridSpacing){
+    for (let x=gridSpacing/2; x<=w; x+=gridSpacing){
         ctx.moveTo(x-0.5,0);      // 0.5 offset so that 1px lines are crisp
         ctx.lineTo(x-0.5,h);
     }
-    for (let y=0;y<=h;y+=gridSpacing){
+    for (let y=gridSpacing/2;y<=h;y+=gridSpacing){
         ctx.moveTo(0,y-0.5);
         ctx.lineTo(w,y-0.5);
     }

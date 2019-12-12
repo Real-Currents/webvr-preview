@@ -4,8 +4,7 @@ import createContext from './modules/content/context';
 import initBuffers from "./modules/content/cube-buffers";
 import innerBuffers from "./modules/content/inner-cube-buffers";
 import initShaderProgram from "./modules/content/cubemap-shaders";
-import generateFace from "./modules/content/face-generator";
-// import generateFace from "./modules/content/grid-generator";
+import generateFace from "./modules/content/grid-generator";
 
 const canvas: HTMLCanvasElement = (window.document.querySelector('canvas#cv') !== null) ?
     window.document.querySelector('canvas#cv') :
@@ -99,9 +98,8 @@ function main () {
                         (+img.id === 5) ? eCanvas.getContext('2d') :
                             fCanvas.getContext('2d');
         offscreen_ctx.globalAlpha = 1.0;
-        generateFace(offscreen_ctx, faceColor, textColor, text);
         // Use 2d face generator to generate 6 images
-        //generateFace(ctx, faceColor, 32);
+        generateFace(ctx, faceColor, 32);
 
         // Upload the canvas to the cubemap face.
         const level = 0;
@@ -123,34 +121,38 @@ function main () {
         });
         // document.body.appendChild(img);
 
-        setInterval(d => {
-            // Update texture from off-screen canvases
-            switch ((+img.id)) {
-                case 1:
-                    ctx.drawImage(aCanvas, 0, 0, aCanvas.width, aCanvas.height);
-                    break;
-                case 2:
-                    ctx.drawImage(bCanvas, 0, 0, bCanvas.width, bCanvas.height);
-                    break;
-                case 3:
-                    ctx.drawImage(cCanvas, 0, 0, cCanvas.width, cCanvas.height);
-                    break;
-                case 4:
-                    ctx.drawImage(dCanvas, 0, 0, dCanvas.width, dCanvas.height);
-                    break;
-                case 5:
-                    ctx.drawImage(eCanvas, 0, 0, eCanvas.width, eCanvas.height);
-                    break;
-                default:
-                    ctx.drawImage(fCanvas, 0, 0, fCanvas.width, fCanvas.height);
-            }
+        ctx.canvas.toBlob((blob) => {
+            img.src = URL.createObjectURL(blob);
+        });
 
-            // show the result
-            ctx.canvas.toBlob((blob) => {
-                img.src = URL.createObjectURL(blob);
-            });
-
-        }, 66);
+        // setInterval(d => {
+        //     // Update texture from off-screen canvases
+        //     switch ((+img.id)) {
+        //         case 1:
+        //             ctx.drawImage(aCanvas, 0, 0, aCanvas.width, aCanvas.height);
+        //             break;
+        //         case 2:
+        //             ctx.drawImage(bCanvas, 0, 0, bCanvas.width, bCanvas.height);
+        //             break;
+        //         case 3:
+        //             ctx.drawImage(cCanvas, 0, 0, cCanvas.width, cCanvas.height);
+        //             break;
+        //         case 4:
+        //             ctx.drawImage(dCanvas, 0, 0, dCanvas.width, dCanvas.height);
+        //             break;
+        //         case 5:
+        //             ctx.drawImage(eCanvas, 0, 0, eCanvas.width, eCanvas.height);
+        //             break;
+        //         default:
+        //             ctx.drawImage(fCanvas, 0, 0, fCanvas.width, fCanvas.height);
+        //     }
+        //
+        //     // show the result
+        //     ctx.canvas.toBlob((blob) => {
+        //         img.src = URL.createObjectURL(blob);
+        //     });
+        //
+        // }, 66);
 
         // Setup each face so it's immediately renderable
         gl.texImage2D(target, level, internalFormat, width, height, 0, format, type, null);
@@ -173,7 +175,7 @@ function main () {
                                 'buffers': innerBuffers,
                                 'cameraDelta': [0, 0, +0.05],
                                 'viewPosition': null,
-                                'worldCameraPosition': [0, 0, -1]
+                                'worldCameraPosition': [0, 0, -2.5]
                             });
                         } else {
                             updateContext(gl, {
