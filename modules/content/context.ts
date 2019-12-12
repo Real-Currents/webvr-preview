@@ -285,15 +285,6 @@ function drawScene(gl: WebGL2RenderingContext, programInfo, buffers, projectionM
     const modelXRotationRadians = cubeRotation * 0.4;
     const modelYRotationRadians = cubeRotation * 0.7;
 
-    // Tell WebGL to use our program when drawing
-    gl.useProgram(programInfo.program);
-
-    // const aspect = canvas.height / canvas.height;
-    // const fieldOfViewRadians = 0.5236;
-    // const projectionMatrix =
-    //     mat4.perspective(mat4.create(), fieldOfViewRadians, aspect, 1, 2000);
-    gl.uniformMatrix4fv(projectionLocation, false, projectionMatrix);
-
     const cameraPosition = (viewPosition !== null) ?
         viewPosition :
         [ 0, 0, worldCameraPosition[2] / 5 ];
@@ -313,6 +304,9 @@ function drawScene(gl: WebGL2RenderingContext, programInfo, buffers, projectionM
         // Premultiply the view matrix
         mat4.multiply(viewMatrix, view, viewMatrix);
     }
+
+    // Tell WebGL to use our program when drawing
+    gl.useProgram(programInfo.program);
 
     // Tell WebGL how to pull out the positions from the position
     // buffer into the vertexPosition attribute
