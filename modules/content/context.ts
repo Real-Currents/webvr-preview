@@ -349,12 +349,12 @@ function drawScene(gl: WebGL2RenderingContext, programInfo, buffers, projectionM
     }
 
     // Set the uniforms
-    // Set the drawing position to the "identity" point, which is
-    // the center of the scene.
     gl.uniformMatrix4fv(projectionLocation, false, projectionMatrix);
     gl.uniformMatrix4fv(viewLocation, false, viewMatrix);
     gl.uniformMatrix4fv(worldLocation, false, worldMatrix);
-    gl.uniform3fv(worldCameraPositionLocation, (viewPosition !== null) ? cameraPosition : worldCameraPosition);
+    // Set the drawing position to the "identity" point, which is
+    // the center of the scene.
+    gl.uniform3fv(worldCameraPositionLocation, worldCameraPosition);
 
     // Tell the shader to use texture unit 0 for u_texture
     gl.uniform1i(textureLocation, 0);
