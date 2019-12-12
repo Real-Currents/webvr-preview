@@ -116,23 +116,22 @@ export default function initBuffers (gl: WebGLRenderingContext):
     const indexBuffer: WebGLBuffer = gl.createBuffer();
     const indices = [
         0, 1, 2,
-        0, 2, 3,
+        3, 4, 5,
 
-        4, 5, 7,
-        7, 5, 6,
+        6, 7, 8,
+        9, 10, 11,
 
-        1, 4, 7,
-        1, 0, 4,
+        12, 13, 14,
+        15, 16, 17,
 
-        6, 3, 2,
-        6, 5, 3,
+        18, 19, 20,
+        21, 22, 23,
 
-        1, 7, 2,
-        7, 6, 2,
+        24, 25, 26,
+        27, 28, 29,
 
-        0, 5, 4,
-        5, 0, 3
-
+        30, 31, 32,
+        33, 34, 35,
     ];
 
     // Load vertex value into bound buffer

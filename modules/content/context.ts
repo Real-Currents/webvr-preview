@@ -359,12 +359,12 @@ function drawScene(gl: WebGL2RenderingContext, programInfo, buffers, projectionM
     // Tell the shader to use texture unit 0 for u_texture
     gl.uniform1i(textureLocation, 0);
 
-    gl.drawArrays(gl.TRIANGLES, 0, buffers['positionSize'] / 3);
+    // gl.drawArrays(gl.TRIANGLES, 0, buffers['positionSize'] / 3);
 
-    // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffers['index']);
-    // gl.drawElements(gl.TRIANGLES, buffers['indexSize'], gl.UNSIGNED_SHORT, 0);
-    // gl.bindBuffer(gl.ARRAY_BUFFER, null);
-    // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffers['index']);
+    gl.drawElements(gl.TRIANGLES, buffers['indexSize'], gl.UNSIGNED_SHORT, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, null);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 
 }
 
