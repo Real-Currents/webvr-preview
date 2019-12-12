@@ -12,7 +12,7 @@ let worldLocation: WebGLUniformLocation;
 let textureLocation: WebGLUniformLocation;
 let worldCameraPositionLocation: WebGLUniformLocation;
 let viewPosition = [ 0, 0, -5 ];
-let worldCameraPosition = [ 0, 0, -5 ];
+let worldCameraPosition = [ 0, 0, -2.5 ];
 let buffers: {
     position: WebGLBuffer, positionSize: number,
     normal: WebGLBuffer, normalSize: number,

@@ -3,7 +3,8 @@ import backgroundUpdater from "./modules/basic/background-update";
 import createContext from './modules/content/context';
 import initBuffers from "./modules/content/cube-buffers";
 import initShaderProgram from "./modules/content/cubemap-shaders";
-import generateFace from "./modules/content/face-generator";
+// import generateFace from "./modules/content/face-generator";
+import generateFace from "./modules/content/grid-generator";
 
 const canvas: HTMLCanvasElement = window.document.createElement('canvas');
 //
@@ -59,7 +60,7 @@ function main () {
         img.id = 'image-' + (i + 1);
 
         // Use 2d face generator to generate 6 images
-        generateFace(ctx, faceColor, textColor, text);
+        generateFace(ctx, faceColor, 32);
 
         // Upload the canvas to the cubemap face.
         const level = 0;
