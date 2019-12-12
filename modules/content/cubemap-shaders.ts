@@ -86,13 +86,14 @@ out mediump vec4 fragColor;
 
 void main() {
   // fragColor = vVertexColor;
-  //fragColor = textureCube(uTexture, normalize(v_normal));
+  // fragColor = textureCube(uTexture, normalize(v_normal));
   
   vec3 worldNormal = normalize(v_worldNormal);
   vec3 eyeToSurfaceDir = normalize(v_worldPosition - uWorldCameraPosition);
   vec3 direction = reflect(eyeToSurfaceDir, worldNormal);
  
-  fragColor = texture(uTexture, direction);
+  // fragColor = texture(uTexture, direction);
+  fragColor = texture(uTexture, v_worldPosition);
 }
 `);
 

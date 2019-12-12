@@ -12,7 +12,7 @@ let worldLocation: WebGLUniformLocation;
 let textureLocation: WebGLUniformLocation;
 let worldCameraPositionLocation: WebGLUniformLocation;
 let viewPosition = [ 0, 0, -5 ];
-let worldCameraPosition = [ 0, 0, -5 ];
+let worldCameraPosition = [ 0, 0, -2.5 ];
 let buffers: {
     position: WebGLBuffer, positionSize: number,
     normal: WebGLBuffer, normalSize: number,
@@ -206,7 +206,7 @@ function updateContext (gl: WebGL2RenderingContext, contextProperties: any) {
 // entry point for non-WebVR rendering
 // called by whatever mechanism (likely keyboard/mouse events)
 // you used before to trigger redraws
-function render (canvas, gl, programInfo, buffers, deltaTime) {
+function render (canvas: HTMLCanvasElement, gl: WebGL2RenderingContext, programInfo, buffers, deltaTime) {
     gl.viewport(0, 0, canvas.width, canvas.height);
     gl.enable(gl.CULL_FACE);
     gl.enable(gl.DEPTH_TEST);                               // Enable depth testing
@@ -223,10 +223,10 @@ function render (canvas, gl, programInfo, buffers, deltaTime) {
     // ratio that matches the display size of the canvas
     // and we only want to see objects between 0.1 units
     // and 100 units away from the camera.
-    const fieldOfView = 60 * Math.PI / 180;   // in radians
-    const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
-    const zNear = 0.1;
-    const zFar = 100.0;
+    const fieldOfView = 45 * Math.PI / 180;   // in radians
+    const aspect = canvas.width / canvas.height;
+    const zNear = 1; // 0.1;
+    const zFar = 2000; // 100.0;
 
     // note: glmatrix.js always has the first argument
     // as the destination to receive the result.
@@ -240,7 +240,7 @@ function render (canvas, gl, programInfo, buffers, deltaTime) {
 }
 
 // entry point for WebVR, called by vrCallback()
-function renderVR(canvas, gl, programInfo, buffers, deltaTime) {
+function renderVR(canvas: HTMLCanvasElement, gl: WebGL2RenderingContext, programInfo, buffers, deltaTime) {
     gl.viewport(0, 0, canvas.width, canvas.height);
     gl.enable(gl.CULL_FACE);
     gl.enable(gl.DEPTH_TEST);                               // Enable depth testing
@@ -252,19 +252,20 @@ function renderVR(canvas, gl, programInfo, buffers, deltaTime) {
     vrDisplay.submitFrame();
 }
 
-function renderEye(canvas, gl, programInfo, buffers, isLeft, deltaTime) {
+function renderEye(canvas: HTMLCanvasElement, gl: WebGL2RenderingContext, programInfo, buffers, isLeft, deltaTime) {
     let width = canvas.width;
+    let wD2 = canvas.width / 2;
     let height = canvas.height;
     let projection, view;
     let frameData = new VRFrameData();
     vrDisplay.getFrameData(frameData);
     // choose which half of the canvas to draw on
     if (isLeft) {
-        gl.viewport(0, 0, width / 2, height);
+        gl.viewport(0, 0, wD2, height);
         projection = frameData.leftProjectionMatrix;
         view = frameData.leftViewMatrix;
     } else {
-        gl.viewport(width / 2, 0, width / 2, height);
+        gl.viewport(wD2, 0, wD2, height);
         projection = frameData.rightProjectionMatrix;
         view = frameData.rightViewMatrix;
     }
@@ -276,22 +277,13 @@ function renderEye(canvas, gl, programInfo, buffers, isLeft, deltaTime) {
 //
 // Draw the scene.
 //
-function drawScene(gl, programInfo, buffers, projectionMatrix, view = null, deltaTime) {
+function drawScene(gl: WebGL2RenderingContext, programInfo, buffers, projectionMatrix, view = null, deltaTime) {
 
     cubeRotation += deltaTime;
 
     // Animate the rotation
     const modelXRotationRadians = cubeRotation * 0.4;
     const modelYRotationRadians = cubeRotation * 0.7;
-
-    // Tell WebGL to use our program when drawing
-    gl.useProgram(programInfo.program);
-
-    // const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
-    // const fieldOfViewRadians = 0.5236;
-    // const projectionMatrix =
-    //     mat4.perspective(mat4.create(), fieldOfViewRadians, aspect, 1, 2000);
-    gl.uniformMatrix4fv(projectionLocation, false, projectionMatrix);
 
     const cameraPosition = (viewPosition !== null) ?
         viewPosition :
@@ -303,7 +295,6 @@ function drawScene(gl, programInfo, buffers, projectionMatrix, view = null, delt
 
     // Make a view matrix from the camera matrix.
     const viewMatrix = mat4.invert(mat4.create(), cameraMatrix);
-    mat4.rotateZ(viewMatrix, viewMatrix, Math.PI);
 
     const worldMatrix = mat4.rotateX(mat4.create(), mat4.create(), modelXRotationRadians);
     mat4.rotateY(worldMatrix, worldMatrix, modelYRotationRadians);
@@ -313,6 +304,9 @@ function drawScene(gl, programInfo, buffers, projectionMatrix, view = null, delt
         // Premultiply the view matrix
         mat4.multiply(viewMatrix, view, viewMatrix);
     }
+
+    // Tell WebGL to use our program when drawing
+    gl.useProgram(programInfo.program);
 
     // Tell WebGL how to pull out the positions from the position
     // buffer into the vertexPosition attribute
@@ -355,22 +349,22 @@ function drawScene(gl, programInfo, buffers, projectionMatrix, view = null, delt
     }
 
     // Set the uniforms
-    // Set the drawing position to the "identity" point, which is
-    // the center of the scene.
     gl.uniformMatrix4fv(projectionLocation, false, projectionMatrix);
     gl.uniformMatrix4fv(viewLocation, false, viewMatrix);
     gl.uniformMatrix4fv(worldLocation, false, worldMatrix);
-    gl.uniform3fv(worldCameraPositionLocation, (viewPosition !== null) ? cameraPosition : worldCameraPosition);
+    // Set the drawing position to the "identity" point, which is
+    // the center of the scene.
+    gl.uniform3fv(worldCameraPositionLocation, worldCameraPosition);
 
     // Tell the shader to use texture unit 0 for u_texture
     gl.uniform1i(textureLocation, 0);
 
-    gl.drawArrays(gl.TRIANGLES, 0, buffers['positionSize'] / 3);
+    // gl.drawArrays(gl.TRIANGLES, 0, buffers['positionSize'] / 3);
 
-    // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffers['index']);
-    // gl.drawElements(gl.TRIANGLES, buffers['indexSize'], gl.UNSIGNED_SHORT, 0);
-    // gl.bindBuffer(gl.ARRAY_BUFFER, null);
-    // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffers['index']);
+    gl.drawElements(gl.TRIANGLES, buffers['indexSize'], gl.UNSIGNED_SHORT, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, null);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 
 }
 

@@ -5,6 +5,7 @@ import initBuffers from "./modules/content/cube-buffers";
 import innerBuffers from "./modules/content/inner-cube-buffers";
 import initShaderProgram from "./modules/content/cubemap-shaders";
 import generateFace from "./modules/content/face-generator";
+// import generateFace from "./modules/content/grid-generator";
 
 const canvas: HTMLCanvasElement = (window.document.querySelector('canvas#cv') !== null) ?
     window.document.querySelector('canvas#cv') :
@@ -14,7 +15,6 @@ const canvas: HTMLCanvasElement = (window.document.querySelector('canvas#cv') !=
 // Start here
 //
 function main () {
-
     // Attach canvas to window
     if (canvas.id !== 'cv') {
         canvas.width = window.innerWidth;
@@ -43,8 +43,8 @@ function main () {
     // Get A 2D context for dynamic textures
     /** @type {Canvas2DRenderingContext} */
     const ctx = document.createElement("canvas").getContext("2d");
-    ctx.canvas.width = 128;
-    ctx.canvas.height = 128;
+    ctx.canvas.width = 512;
+    ctx.canvas.height = 512;
 
     // Create a texture.
     const texture = gl.createTexture();
@@ -81,7 +81,6 @@ function main () {
         { target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Y, faceColor: '#0FF', textColor: '#F00', text: '-Y' },
         { target: gl.TEXTURE_CUBE_MAP_POSITIVE_Z, faceColor: '#00F', textColor: '#FF0', text: '+Z' },
         { target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Z, faceColor: '#F0F', textColor: '#0F0', text: '-Z' },
-        // { target: "gl.TEXTURE_CUBE_MAP_NEGATIVE_Z", faceColor: '#F0F', textColor: '#0F0', text: '-Z' }
     ];
 
     faceInfos.forEach((faceInfo, i, a) => {
@@ -101,6 +100,8 @@ function main () {
                             fCanvas.getContext('2d');
         offscreen_ctx.globalAlpha = 1.0;
         generateFace(offscreen_ctx, faceColor, textColor, text);
+        // Use 2d face generator to generate 6 images
+        //generateFace(ctx, faceColor, 32);
 
         // Upload the canvas to the cubemap face.
         const level = 0;

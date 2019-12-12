@@ -7,17 +7,6 @@ export default function initBuffers (gl: WebGLRenderingContext):
     } {
     // Define vertex (position) buffer and vertex values
     const vertexBuffer: WebGLBuffer = gl.createBuffer();
-    const cubeVertices = [
-        -0.5, -0.5, -0.5,
-        -0.5, 0.5, -0.5,
-        0.5, 0.5, -0.5,
-        0.5, -0.5, -0.5,
-
-        -0.5, -0.5, 0.5,
-        0.5, -0.5, 0.5,
-        0.5, 0.5, 0.5,
-        -0.5, 0.5, 0.5
-    ];
     const vertices = [
         -0.5, -0.5, -0.5,
         -0.5, 0.5, -0.5,
@@ -64,110 +53,54 @@ export default function initBuffers (gl: WebGLRenderingContext):
     ];
 
     // Create a buffer to put normals in
-    var normalBuffer = gl.createBuffer();
-    var cubeNormals =
-        [
-            -1, -1, -1,
-            -1, 1, -1,
-            1, 1, -1,
-            1, -1, -1,
+    const normalBuffer = gl.createBuffer();
+    const normals = [
+        0, 0, -1,
+        0, 0, -1,
+        0, 0, -1,
+        0, 0, -1,
+        0, 0, -1,
+        0, 0, -1,
 
-            -1, -1, 1,
-            1, -1, 1,
-            1, 1, 1,
-            -1, 1, 1
-        ];
-    var normals =
-        [
-            0, 0, -1,
-            0, 0, -1,
-            0, 0, -1,
-            0, 0, -1,
-            0, 0, -1,
-            0, 0, -1,
+        0, 1, 0,
+        0, 1, 0,
+        0, 1, 0,
+        0, 1, 0,
+        0, 1, 0,
+        0, 1, 0,
 
-            0, 1, 0,
-            0, 1, 0,
-            0, 1, 0,
-            0, 1, 0,
-            0, 1, 0,
-            0, 1, 0,
+        0, 0, 1,
+        0, 0, 1,
+        0, 0, 1,
+        0, 0, 1,
+        0, 0, 1,
+        0, 0, 1,
 
-            0, 0, 1,
-            0, 0, 1,
-            0, 0, 1,
-            0, 0, 1,
-            0, 0, 1,
-            0, 0, 1,
+        0, -1, 0,
+        0, -1, 0,
+        0, -1, 0,
+        0, -1, 0,
+        0, -1, 0,
+        0, -1, 0,
 
-            0, -1, 0,
-            0, -1, 0,
-            0, -1, 0,
-            0, -1, 0,
-            0, -1, 0,
-            0, -1, 0,
+        -1, 0, 0,
+        -1, 0, 0,
+        -1, 0, 0,
+        -1, 0, 0,
+        -1, 0, 0,
+        -1, 0, 0,
 
-            -1, 0, 0,
-            -1, 0, 0,
-            -1, 0, 0,
-            -1, 0, 0,
-            -1, 0, 0,
-            -1, 0, 0,
-
-            1, 0, 0,
-            1, 0, 0,
-            1, 0, 0,
-            1, 0, 0,
-            1, 0, 0,
-            1, 0, 0,
-        ];
-    var innerNormals = [
-        -1, 1, -1,
-        -1, -1, -1,
-        1, -1, -1,
-        1, 1, -1,
-        -1, 1, -1,
-        1, -1, -1,
-
-        -1, 1, 1,
-        -1, 1, -1,
-        1, 1, -1,
-        1, 1, 1,
-        -1, 1, 1,
-        1, 1, -1,
-
-        1, -1, 1,
-        -1, -1, 1,
-        -1, 1, 1,
-        1, -1, 1,
-        -1, 1, 1,
-        1, 1, 1,
-
-        1, -1, -1,
-        -1, -1, -1,
-        -1, -1, 1,
-        1, -1, -1,
-        -1, -1, 1,
-        1, -1, 1,
-
-        -1, -1, 1,
-        -1, -1, -1,
-        -1, 1, -1,
-        -1, 1, 1,
-        -1, -1, 1,
-        -1, 1, -1,
-
-        1, 1, -1,
-        1, -1, -1,
-        1, -1, 1,
-        1, 1, -1,
-        1, -1, 1,
-        1, 1, 1,
+        1, 0, 0,
+        1, 0, 0,
+        1, 0, 0,
+        1, 0, 0,
+        1, 0, 0,
+        1, 0, 0,
     ];
 
     // Define color buffer and color values (per vertex)
     const colorBuffer: WebGLBuffer = gl.createBuffer();
-    const cubeColors = [
+    const colors = [
         0, 0, 1, 1,
         0, 1, 0, 1,
         0, 0, 1, 1,
@@ -181,25 +114,24 @@ export default function initBuffers (gl: WebGLRenderingContext):
 
     // Define index buffer and index values
     const indexBuffer: WebGLBuffer = gl.createBuffer();
-    const cubeIndices = [
+    const indices = [
         0, 1, 2,
-        0, 2, 3,
+        3, 4, 5,
 
-        4, 5, 7,
-        7, 5, 6,
+        6, 7, 8,
+        9, 10, 11,
 
-        1, 4, 7,
-        1, 0, 4,
+        12, 13, 14,
+        15, 16, 17,
 
-        6, 3, 2,
-        6, 5, 3,
+        18, 19, 20,
+        21, 22, 23,
 
-        1, 7, 2,
-        7, 6, 2,
+        24, 25, 26,
+        27, 28, 29,
 
-        0, 5, 4,
-        5, 0, 3
-
+        30, 31, 32,
+        33, 34, 35,
     ];
 
     // Load vertex value into bound buffer
@@ -213,11 +145,11 @@ export default function initBuffers (gl: WebGLRenderingContext):
 
     // Load color value into bound buffer
     gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(cubeColors), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
 
     // Load index values into bound buffer
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(cubeIndices), gl.STATIC_DRAW);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
 
     // Un-bind buffers
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
@@ -226,7 +158,7 @@ export default function initBuffers (gl: WebGLRenderingContext):
     return {
         position: vertexBuffer, positionSize: vertices.length,
         normal: normalBuffer, normalSize: normals.length,
-        index: indexBuffer, indexSize: cubeIndices.length,
-        color: colorBuffer, colorSize: cubeColors.length
+        index: indexBuffer, indexSize: indices.length,
+        color: colorBuffer, colorSize: colors.length
     }
 }
