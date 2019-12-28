@@ -3,7 +3,10 @@ export default function initBuffers (gl: WebGLRenderingContext):
         position: WebGLBuffer, positionSize: number,
         normal: WebGLBuffer, normalSize: number,
         index: WebGLBuffer, indexSize: number,
-        color: WebGLBuffer , colorSize: number
+        color: WebGLBuffer , colorSize: number,
+        rotation: Array<number>,
+        scale: Array<number>,
+        translation: Array<number>
     } {
     // Define vertex (position) buffer and vertex values
     const vertexBuffer: WebGLBuffer = gl.createBuffer();
@@ -48,96 +51,12 @@ export default function initBuffers (gl: WebGLRenderingContext):
         0.05, -0.05, 0.05,
         0.05, -0.05, 0.05,
         0.05, 0.05, -0.05,
-        0.05, 0.05, 0.05,
-
-        -1.0, 1.0, -1.0,
-        -1.0, -1.0, -1.0,
-        1.0, -1.0, -1.0,
-        1.0, 1.0, -1.0,
-        -1.0, 1.0, -1.0,
-        1.0, -1.0, -1.0,
-
-        -1.0, 1.0, 1.0,
-        -1.0, 1.0, -1.0,
-        1.0, 1.0, -1.0,
-        1.0, 1.0, 1.0,
-        -1.0, 1.0, 1.0,
-        1.0, 1.0, -1.0,
-
-        1.0, -1.0, 1.0,
-        -1.0, -1.0, 1.0,
-        -1.0, 1.0, 1.0,
-        1.0, -1.0, 1.0,
-        -1.0, 1.0, 1.0,
-        1.0, 1.0, 1.0,
-
-        1.0, -1.0, -1.0,
-        -1.0, -1.0, -1.0,
-        -1.0, -1.0, 1.0,
-        1.0, -1.0, -1.0,
-        -1.0, -1.0, 1.0,
-        1.0, -1.0, 1.0,
-
-        -1.0, -1.0, 1.0,
-        -1.0, -1.0, -1.0,
-        -1.0, 1.0, -1.0,
-        -1.0, 1.0, 1.0,
-        -1.0, -1.0, 1.0,
-        -1.0, 1.0, -1.0,
-
-        1.0, 1.0, -1.0,
-        1.0, -1.0, -1.0,
-        1.0, -1.0, 1.0,
-        1.0, 1.0, -1.0,
-        1.0, -1.0, 1.0,
-        1.0, 1.0, 1.0
+        0.05, 0.05, 0.05
     ];
 
     // Create a buffer to put normals in
     var normalBuffer = gl.createBuffer();
     const normals = [
-        0, 0, -1,
-        0, 0, -1,
-        0, 0, -1,
-        0, 0, -1,
-        0, 0, -1,
-        0, 0, -1,
-
-        0, 1, 0,
-        0, 1, 0,
-        0, 1, 0,
-        0, 1, 0,
-        0, 1, 0,
-        0, 1, 0,
-
-        0, 0, 1,
-        0, 0, 1,
-        0, 0, 1,
-        0, 0, 1,
-        0, 0, 1,
-        0, 0, 1,
-
-        0, -1, 0,
-        0, -1, 0,
-        0, -1, 0,
-        0, -1, 0,
-        0, -1, 0,
-        0, -1, 0,
-
-        -1, 0, 0,
-        -1, 0, 0,
-        -1, 0, 0,
-        -1, 0, 0,
-        -1, 0, 0,
-        -1, 0, 0,
-
-        1, 0, 0,
-        1, 0, 0,
-        1, 0, 0,
-        1, 0, 0,
-        1, 0, 0,
-        1, 0, 0,
-
         0, 0, -1,
         0, 0, -1,
         0, 0, -1,
@@ -235,16 +154,6 @@ export default function initBuffers (gl: WebGLRenderingContext):
         0, 0, 1, 1,
         0, 1, 0, 1,
         0, 0, 1, 1,
-        1, 0, 0, 1,
-
-        0, 0, 1, 1,
-        0, 1, 0, 1,
-        0, 0, 1, 1,
-        1, 0, 0, 1,
-
-        0, 0, 1, 1,
-        0, 1, 0, 1,
-        0, 0, 1, 1,
         1, 0, 0, 1
     ];
 
@@ -267,25 +176,7 @@ export default function initBuffers (gl: WebGLRenderingContext):
         27, 28, 29,
 
         30, 31, 32,
-        33, 34, 35,
-
-        36, 37, 38,
-        39, 40, 41,
-
-        42, 43, 44,
-        45, 46, 47,
-
-        48, 49, 50,
-        51, 52, 53,
-
-        54, 55, 56,
-        57, 58, 59,
-
-        60, 61, 62,
-        63, 64, 65,
-
-        66, 67, 68,
-        69, 70, 71
+        33, 34, 35
     ];
 
     // Load vertex value into bound buffer
@@ -313,6 +204,9 @@ export default function initBuffers (gl: WebGLRenderingContext):
         position: vertexBuffer, positionSize: vertices.length,
         normal: normalBuffer, normalSize: normals.length,
         index: indexBuffer, indexSize: indices.length,
-        color: colorBuffer, colorSize: colors.length
+        color: colorBuffer, colorSize: colors.length,
+        rotation: [ 0.4, 0.7, 0.0 ],
+        scale: [ 1.0, 1.0, 1.0 ],
+        translation: [ 0.0, 0.0, 0.0 ]
     }
 }

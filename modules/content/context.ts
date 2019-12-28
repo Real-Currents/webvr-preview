@@ -13,12 +13,7 @@ let textureLocation: WebGLUniformLocation;
 let worldCameraPositionLocation: WebGLUniformLocation;
 let viewPosition = [ 0, 0, -5 ];
 let worldCameraPosition = [ 0, 0, -2.5 ];
-let buffers: {
-    position: WebGLBuffer, positionSize: number,
-    normal: WebGLBuffer, normalSize: number,
-    index: WebGLBuffer, indexSize: number,
-    color: WebGLBuffer , colorSize: number
-} = null;
+let buffers = [];
 
 export default function createContext (
     canvas: HTMLCanvasElement,
@@ -74,7 +69,7 @@ export default function createContext (
 
     // Here's where we call the routine that builds all the
     // objects we'll be drawing.
-    buffers = initBuffers(gl);
+    buffers.push(initBuffers(gl));
 
     let then = 0;
 
@@ -144,8 +139,11 @@ export default function createContext (
 
 function updateContext (gl: WebGL2RenderingContext, contextProperties: any) {
     for (const prop in contextProperties) {
-        if (prop === 'buffers' && typeof contextProperties['buffers'] === 'function') {
-            buffers = contextProperties['buffers'](gl);
+        if (prop === 'buffers' && contextProperties['buffers'].length > 0) {
+            buffers = [];
+            for (const buffer of contextProperties['buffers']) {
+                buffers.push(buffer(gl));
+            }
         }
 
         if (prop === 'viewPosition' && !!Array.isArray(contextProperties['viewPosition'])) {
@@ -281,10 +279,6 @@ function drawScene(gl: WebGL2RenderingContext, programInfo, buffers, projectionM
 
     cubeRotation += deltaTime;
 
-    // Animate the rotation
-    const modelXRotationRadians = cubeRotation * 0.4;
-    const modelYRotationRadians = cubeRotation * 0.7;
-
     const cameraPosition = (viewPosition !== null) ?
         viewPosition :
         [ 0, 0, worldCameraPosition[2] / 2 ];
@@ -296,75 +290,98 @@ function drawScene(gl: WebGL2RenderingContext, programInfo, buffers, projectionM
     // Make a view matrix from the camera matrix.
     const viewMatrix = mat4.invert(mat4.create(), cameraMatrix);
 
-    const worldMatrix = mat4.rotateX(mat4.create(), mat4.create(), modelXRotationRadians);
-    mat4.rotateY(worldMatrix, worldMatrix, modelYRotationRadians);
-    mat4.rotateZ(worldMatrix, worldMatrix, Math.PI / 2);
+    const worldMatrix = mat4.create()
 
     if (view !== null) {
         // Premultiply the view matrix
         mat4.multiply(viewMatrix, view, viewMatrix);
     }
 
-    // Tell WebGL to use our program when drawing
-    gl.useProgram(programInfo.program);
+    if (buffers.length > 0) {
+        let b = 0;
+        for (const buffer of buffers) {
+            // console.log('Frame ', deltaTime, ': buffer ', ++b);
+            // buffer: {
+            //     position: WebGLBuffer, positionSize: number,
+            //     normal: WebGLBuffer, normalSize: number,
+            //     index: WebGLBuffer, indexSize: number,
+            //     color: WebGLBuffer , colorSize: number
+            // }
 
-    // Tell WebGL how to pull out the positions from the position
-    // buffer into the vertexPosition attribute
-    {
-        const numComponents = 3;
-        const type = gl.FLOAT;
-        const normalize = false;
-        const stride = 0;
-        const offset = 0;
-        gl.enableVertexAttribArray(
-            programInfo.attribLocations.vertexPosition);
-        gl.bindBuffer(gl.ARRAY_BUFFER, buffers['position']);
-        gl.vertexAttribPointer(
-            programInfo.attribLocations.vertexPosition,
-            numComponents,
-            type,
-            normalize,
-            stride,
-            offset);
+            // Tell WebGL to use our program when drawing
+            gl.useProgram(programInfo.program);
+
+            // Tell WebGL how to pull out the positions from the position
+            // buffer into the vertexPosition attribute
+            {
+                const numComponents = 3;
+                const type = gl.FLOAT;
+                const normalize = false;
+                const stride = 0;
+                const offset = 0;
+                gl.enableVertexAttribArray(
+                    programInfo.attribLocations.vertexPosition);
+                gl.bindBuffer(gl.ARRAY_BUFFER, buffer['position']);
+                gl.vertexAttribPointer(
+                    programInfo.attribLocations.vertexPosition,
+                    numComponents,
+                    type,
+                    normalize,
+                    stride,
+                    offset);
+            }
+
+            // Tell WebGL how to pull normals out of normalBuffer (ARRAY_BUFFER)
+            {
+                const numComponents = 3; // 3 components per iteration
+                const type = gl.FLOAT;   // the data is 32bit floating point values
+                const normalize = false; // normalize the data (convert from 0-255 to 0-1)
+                const stride = 0;        // 0 = move forward size * sizeof(type) each iteration to get the next position
+                const offset = 0;        // start at the beginning of the buffer
+                gl.enableVertexAttribArray(
+                    programInfo.attribLocations.vertexNormal);
+                // Bind the normal buffer.
+                gl.bindBuffer(gl.ARRAY_BUFFER, buffer['normal']);
+                gl.vertexAttribPointer(
+                    programInfo.attribLocations.vertexNormal,
+                    numComponents,
+                    type,
+                    normalize,
+                    stride,
+                    offset);
+            }
+
+
+            // Animate the rotation
+            if (!!buffer['rotation'] && buffer['rotation'].length === 3) {
+                const modelXRotationRadians = cubeRotation * buffer['rotation'][0];
+                const modelYRotationRadians = cubeRotation * buffer['rotation'][1];
+                const modelZRotationRadians = cubeRotation * buffer['rotation'][2];
+
+                mat4.rotateX(worldMatrix, worldMatrix, modelXRotationRadians);
+                mat4.rotateY(worldMatrix, worldMatrix, modelYRotationRadians);
+                mat4.rotateZ(worldMatrix, worldMatrix, modelZRotationRadians);
+            }
+
+            // Set the uniforms
+            gl.uniformMatrix4fv(projectionLocation, false, projectionMatrix);
+            gl.uniformMatrix4fv(viewLocation, false, viewMatrix);
+            gl.uniformMatrix4fv(worldLocation, false, worldMatrix);
+            // Set the drawing position to the "identity" point, which is
+            // the center of the scene.
+            gl.uniform3fv(worldCameraPositionLocation, worldCameraPosition);
+
+            // Tell the shader to use texture unit 0 for u_texture
+            gl.uniform1i(textureLocation, 0);
+
+            // gl.drawArrays(gl.TRIANGLES, 0, buffer['positionSize'] / 3);
+
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffer['index']);
+            gl.drawElements(gl.TRIANGLES, buffer['indexSize'], gl.UNSIGNED_SHORT, 0);
+            gl.bindBuffer(gl.ARRAY_BUFFER, null);
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+        }
     }
-
-    // Tell WebGL how to pull normals out of normalBuffer (ARRAY_BUFFER)
-    {
-        const numComponents = 3; // 3 components per iteration
-        const type = gl.FLOAT;   // the data is 32bit floating point values
-        const normalize = false; // normalize the data (convert from 0-255 to 0-1)
-        const stride = 0;        // 0 = move forward size * sizeof(type) each iteration to get the next position
-        const offset = 0;        // start at the beginning of the buffer
-        gl.enableVertexAttribArray(
-            programInfo.attribLocations.vertexNormal);
-        // Bind the normal buffer.
-        gl.bindBuffer(gl.ARRAY_BUFFER, buffers['normal']);
-        gl.vertexAttribPointer(
-            programInfo.attribLocations.vertexNormal,
-            numComponents,
-            type,
-            normalize,
-            stride,
-            offset);
-    }
-
-    // Set the uniforms
-    gl.uniformMatrix4fv(projectionLocation, false, projectionMatrix);
-    gl.uniformMatrix4fv(viewLocation, false, viewMatrix);
-    gl.uniformMatrix4fv(worldLocation, false, worldMatrix);
-    // Set the drawing position to the "identity" point, which is
-    // the center of the scene.
-    gl.uniform3fv(worldCameraPositionLocation, worldCameraPosition);
-
-    // Tell the shader to use texture unit 0 for u_texture
-    gl.uniform1i(textureLocation, 0);
-
-    // gl.drawArrays(gl.TRIANGLES, 0, buffers['positionSize'] / 3);
-
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffers['index']);
-    gl.drawElements(gl.TRIANGLES, buffers['indexSize'], gl.UNSIGNED_SHORT, 0);
-    gl.bindBuffer(gl.ARRAY_BUFFER, null);
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 
 }
 
