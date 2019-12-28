@@ -4,7 +4,7 @@ import createContext from './modules/content/context';
 import initBuffers from "./modules/content/cube-buffers";
 import innerBuffers from "./modules/content/inner-cube-buffers";
 import outerBuffers from "./modules/content/outer-cube-buffers";
-import initShaderProgram from "./modules/content/cubemap-shaders";
+import initShaderProgram from "./modules/content/basic-shaders";
 import generateFace from "./modules/content/grid-generator";
 
 const canvas: HTMLCanvasElement = (window.document.querySelector('canvas#cv') !== null) ?
@@ -115,7 +115,7 @@ function main () {
                 timeout = setInterval(() => {
                         window['userTriggered'] = true;
 
-                        if (++frame > 100) {
+                        if (++frame > 90) {
                             updateContext(gl, {
                                 'buffers': [
                                     outerBuffers,
@@ -127,7 +127,7 @@ function main () {
                             });
                         } else {
                             updateContext(gl, {
-                                'cameraDelta': [0, 0, +0.035],
+                                'cameraDelta': [0, 0, +0.0375],
                                 'viewPosition': [0, 0, -1],
                                 'worldCameraPosition': [0, 0, -1]
                             });

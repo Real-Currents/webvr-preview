@@ -2,28 +2,35 @@ export default function initShaderProgram(gl) {
 
     // Vertex shader program
 
-    const vertexShader = loadShader(gl, gl.VERTEX_SHADER,`
-attribute vec4 aVertexPosition;
-attribute vec4 aVertexColor;
+    const vertexShader = loadShader(gl, gl.VERTEX_SHADER,`#version 300 es
+precision mediump float;
+
+in vec4 aVertexColor;
+in vec3 aVertexNormal;
+in vec3 aVertexPosition;
 
 uniform mat4 uModelViewMatrix;
 uniform mat4 uProjectionMatrix;
 
-varying lowp vec4 vColor;
+out vec4 vVertexColor;
 
 void main(void) {
-  gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
-  vColor = aVertexColor;
+  gl_Position = uProjectionMatrix * uModelViewMatrix * vec4(aVertexPosition, 1.0);
+  vVertexColor = aVertexColor;
 }
 `);
 
     // Fragment shader program
 
-    const fragmentShader = loadShader(gl, gl.FRAGMENT_SHADER, `
-varying lowp vec4 vColor;
+    const fragmentShader = loadShader(gl, gl.FRAGMENT_SHADER, `#version 300 es
+precision mediump float;
+
+in vec4 vVertexColor;
+
+out mediump vec4 fragColor;
 
 void main(void) {
-  gl_FragColor = vColor;
+  fragColor = vVertexColor;
 }
 `);
 

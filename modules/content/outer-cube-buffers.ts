@@ -1,5 +1,8 @@
+import initShaderProgram from './outer-cube-shaders';
+
 export default function initBuffers (gl: WebGLRenderingContext):
     {
+        program: Function, // init gl shader program
         position: WebGLBuffer, positionSize: number,
         normal: WebGLBuffer, normalSize: number,
         index: WebGLBuffer, indexSize: number,
@@ -11,47 +14,47 @@ export default function initBuffers (gl: WebGLRenderingContext):
     // Define vertex (position) buffer and vertex values
     const vertexBuffer: WebGLBuffer = gl.createBuffer();
     const vertices = [
-        -1.0, 1.0, -1.0,
-        -1.0, -1.0, -1.0,
-        1.0, -1.0, -1.0,
-        1.0, 1.0, -1.0,
-        -1.0, 1.0, -1.0,
-        1.0, -1.0, -1.0,
+        -50.0, 50.0, -50.0,
+        -50.0, -50.0, -50.0,
+        50.0, -50.0, -50.0,
+        50.0, 50.0, -50.0,
+        -50.0, 50.0, -50.0,
+        50.0, -50.0, -50.0,
 
-        -1.0, 1.0, 1.0,
-        -1.0, 1.0, -1.0,
-        1.0, 1.0, -1.0,
-        1.0, 1.0, 1.0,
-        -1.0, 1.0, 1.0,
-        1.0, 1.0, -1.0,
+        -50.0, 50.0, 50.0,
+        -50.0, 50.0, -50.0,
+        50.0, 50.0, -50.0,
+        50.0, 50.0, 50.0,
+        -50.0, 50.0, 50.0,
+        50.0, 50.0, -50.0,
 
-        1.0, -1.0, 1.0,
-        -1.0, -1.0, 1.0,
-        -1.0, 1.0, 1.0,
-        1.0, -1.0, 1.0,
-        -1.0, 1.0, 1.0,
-        1.0, 1.0, 1.0,
+        50.0, -50.0, 50.0,
+        -50.0, -50.0, 50.0,
+        -50.0, 50.0, 50.0,
+        50.0, -50.0, 50.0,
+        -50.0, 50.0, 50.0,
+        50.0, 50.0, 50.0,
 
-        1.0, -1.0, -1.0,
-        -1.0, -1.0, -1.0,
-        -1.0, -1.0, 1.0,
-        1.0, -1.0, -1.0,
-        -1.0, -1.0, 1.0,
-        1.0, -1.0, 1.0,
+        50.0, -50.0, -50.0,
+        -50.0, -50.0, -50.0,
+        -50.0, -50.0, 50.0,
+        50.0, -50.0, -50.0,
+        -50.0, -50.0, 50.0,
+        50.0, -50.0, 50.0,
 
-        -1.0, -1.0, 1.0,
-        -1.0, -1.0, -1.0,
-        -1.0, 1.0, -1.0,
-        -1.0, 1.0, 1.0,
-        -1.0, -1.0, 1.0,
-        -1.0, 1.0, -1.0,
+        -50.0, -50.0, 50.0,
+        -50.0, -50.0, -50.0,
+        -50.0, 50.0, -50.0,
+        -50.0, 50.0, 50.0,
+        -50.0, -50.0, 50.0,
+        -50.0, 50.0, -50.0,
 
-        1.0, 1.0, -1.0,
-        1.0, -1.0, -1.0,
-        1.0, -1.0, 1.0,
-        1.0, 1.0, -1.0,
-        1.0, -1.0, 1.0,
-        1.0, 1.0, 1.0
+        50.0, 50.0, -50.0,
+        50.0, -50.0, -50.0,
+        50.0, -50.0, 50.0,
+        50.0, 50.0, -50.0,
+        50.0, -50.0, 50.0,
+        50.0, 50.0, 50.0
     ];
 
     // Create a buffer to put normals in
@@ -211,12 +214,13 @@ export default function initBuffers (gl: WebGLRenderingContext):
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 
     return {
+        program: initShaderProgram(gl),
         position: vertexBuffer, positionSize: vertices.length,
         normal: normalBuffer, normalSize: normals.length,
         index: indexBuffer, indexSize: indices.length,
         color: colorBuffer, colorSize: colors.length,
         rotation: [ 0.0, 0.0, 0.0 ],
-        scale: [ 1.0, 1.0, 1.0 ],
+        scale: [ 50.0, 50.0, 50.0 ],
         translation: [ 0.0, 0.0, 0.0 ]
     }
 }
