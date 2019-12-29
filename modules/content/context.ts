@@ -277,9 +277,9 @@ function drawScene(gl: WebGL2RenderingContext, shaderProgram, buffers, projectio
             const programInfo = {
                 program: program,
                 attribLocations: {
+                    vertexNormal: gl.getAttribLocation(program, 'aVertexNormal'),
                     vertexPosition: gl.getAttribLocation(program, 'aVertexPosition'),
                     vertexColor: gl.getAttribLocation(program, 'aVertexColor'),
-                    vertexNormal: gl.getAttribLocation(program, 'aVertexNormal')
                 },
                 uniformLocations: {
                     projectionMatrix: gl.getUniformLocation(program, 'uProjectionMatrix'),
@@ -294,26 +294,6 @@ function drawScene(gl: WebGL2RenderingContext, shaderProgram, buffers, projectio
             // Tell WebGL to use our program when drawing
             gl.useProgram(programInfo.program);
 
-            // Tell WebGL how to pull out the positions from the position
-            // buffer into the vertexPosition attribute
-            {
-                const numComponents = 3;
-                const type = gl.FLOAT;
-                const normalize = false;
-                const stride = 0;
-                const offset = 0;
-                gl.enableVertexAttribArray(
-                    programInfo.attribLocations.vertexPosition);
-                gl.bindBuffer(gl.ARRAY_BUFFER, buffers['position']);
-                gl.vertexAttribPointer(
-                    programInfo.attribLocations.vertexPosition,
-                    numComponents,
-                    type,
-                    normalize,
-                    stride,
-                    offset);
-            }
-
             // Tell WebGL how to pull out the colors from the color buffer
             // into the vertexColor attribute.
             {
@@ -324,9 +304,31 @@ function drawScene(gl: WebGL2RenderingContext, shaderProgram, buffers, projectio
                 const offset = 0;
                 gl.enableVertexAttribArray(
                     programInfo.attribLocations.vertexColor);
-                gl.bindBuffer(gl.ARRAY_BUFFER, buffers['color']);
+                gl.bindBuffer(gl.ARRAY_BUFFER, buffer['color']);
                 gl.vertexAttribPointer(
                     programInfo.attribLocations.vertexColor,
+                    numComponents,
+                    type,
+                    normalize,
+                    stride,
+                    offset);
+                gl.enableVertexAttribArray(
+                    programInfo.attribLocations.vertexColor);
+            }
+
+            // Tell WebGL how to pull out the positions from the position
+            // buffer into the vertexPosition attribute
+            {
+                const numComponents = 3;
+                const type = gl.FLOAT;
+                const normalize = false;
+                const stride = 0;
+                const offset = 0;
+                gl.enableVertexAttribArray(
+                    programInfo.attribLocations.vertexPosition);
+                gl.bindBuffer(gl.ARRAY_BUFFER, buffer['position']);
+                gl.vertexAttribPointer(
+                    programInfo.attribLocations.vertexPosition,
                     numComponents,
                     type,
                     normalize,
@@ -344,7 +346,7 @@ function drawScene(gl: WebGL2RenderingContext, shaderProgram, buffers, projectio
                 gl.enableVertexAttribArray(
                     programInfo.attribLocations.vertexNormal);
                 // Bind the normal buffer.
-                gl.bindBuffer(gl.ARRAY_BUFFER, buffers['normal']);
+                gl.bindBuffer(gl.ARRAY_BUFFER, buffer['normal']);
                 gl.vertexAttribPointer(
                     programInfo.attribLocations.vertexNormal,
                     numComponents,

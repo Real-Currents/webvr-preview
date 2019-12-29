@@ -1,5 +1,8 @@
+import initShaderProgram from './cubemap-shaders';
+
 export default function initBuffers (gl: WebGLRenderingContext):
     {
+        program: Function, // init gl shader program
         position: WebGLBuffer, positionSize: number,
         normal: WebGLBuffer, normalSize: number,
         index: WebGLBuffer, indexSize: number,
@@ -52,6 +55,28 @@ export default function initBuffers (gl: WebGLRenderingContext):
         0.05, -0.05, 0.05,
         0.05, 0.05, -0.05,
         0.05, 0.05, 0.05
+    ];
+
+    // Define index buffer and index values
+    const indexBuffer: WebGLBuffer = gl.createBuffer();
+    const indices = [
+        0, 1, 2,
+        3, 4, 5,
+
+        6, 7, 8,
+        9, 10, 11,
+
+        12, 13, 14,
+        15, 16, 17,
+
+        18, 19, 20,
+        21, 22, 23,
+
+        24, 25, 26,
+        27, 28, 29,
+
+        30, 31, 32,
+        33, 34, 35
     ];
 
     // Create a buffer to put normals in
@@ -154,29 +179,42 @@ export default function initBuffers (gl: WebGLRenderingContext):
         0, 0, 1, 1,
         0, 1, 0, 1,
         0, 0, 1, 1,
+        1, 0, 0, 1,
+
+        0, 0, 1, 1,
+        0, 1, 0, 1,
+        0, 0, 1, 1,
+        1, 0, 0, 1,
+
+        0, 0, 1, 1,
+        0, 1, 0, 1,
+        0, 0, 1, 1,
+        1, 0, 0, 1,
+
+        0, 0, 1, 1,
+        0, 1, 0, 1,
+        0, 0, 1, 1,
+        1, 0, 0, 1,
+
+        0, 0, 1, 1,
+        0, 1, 0, 1,
+        0, 0, 1, 1,
+        1, 0, 0, 1,
+
+        0, 0, 1, 1,
+        0, 1, 0, 1,
+        0, 0, 1, 1,
+        1, 0, 0, 1,
+
+        0, 0, 1, 1,
+        0, 1, 0, 1,
+        0, 0, 1, 1,
+        1, 0, 0, 1,
+
+        0, 0, 1, 1,
+        0, 1, 0, 1,
+        0, 0, 1, 1,
         1, 0, 0, 1
-    ];
-
-    // Define index buffer and index values
-    const indexBuffer: WebGLBuffer = gl.createBuffer();
-    const indices = [
-        0, 1, 2,
-        3, 4, 5,
-
-        6, 7, 8,
-        9, 10, 11,
-
-        12, 13, 14,
-        15, 16, 17,
-
-        18, 19, 20,
-        21, 22, 23,
-
-        24, 25, 26,
-        27, 28, 29,
-
-        30, 31, 32,
-        33, 34, 35
     ];
 
     // Load vertex value into bound buffer
@@ -201,6 +239,7 @@ export default function initBuffers (gl: WebGLRenderingContext):
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 
     return {
+        program: initShaderProgram(gl),
         position: vertexBuffer, positionSize: vertices.length,
         normal: normalBuffer, normalSize: normals.length,
         index: indexBuffer, indexSize: indices.length,
