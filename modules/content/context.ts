@@ -242,7 +242,7 @@ function drawScene(gl: WebGL2RenderingContext, shaderProgram, buffers, projectio
 
     const cameraPosition = (viewPosition !== null) ?
         viewPosition :
-        [ 0, 0, worldCameraPosition[2] / 2 ];
+        [ 0, 0, worldCameraPosition[2] / 1.5 ];
     const target = [ 0, 0, 0] ;
     const up = [ 0, 1, 0 ];
     // Compute the camera's matrix using look at.

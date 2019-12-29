@@ -25,7 +25,7 @@ out lowp vec4 vVertexColor;
 
 void main() {
   
-  // vVertexColor = aVertexColor;
+  vVertexColor = aVertexColor;
   
   // gl_Position = uProjectionMatrix * uModelViewMatrix * vec4(aVertexPosition, 1.0); // vec4 aVertexPosition
   
