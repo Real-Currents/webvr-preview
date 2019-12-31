@@ -89,7 +89,7 @@ void main() {
   // fragColor = textureCube(uTexture, normalize(v_normal));
   
   vec3 worldNormal = normalize(v_worldNormal);
-  vec3 eyeToSurfaceDir = normalize(v_worldPosition - uWorldCameraPosition);
+  vec3 eyeToSurfaceDir = normalize(uWorldCameraPosition - v_worldPosition);
   vec3 direction = reflect(eyeToSurfaceDir, worldNormal);
  
   fragColor = texture(uTexture, direction);
