@@ -72,27 +72,12 @@ precision mediump float;
 // The texture.
 uniform samplerCube uTexture;
 
-// The position of the camera
-uniform vec3 uWorldCameraPosition;
-
 // Passed in from the vertex shader.
-in vec3 v_normal;
-in vec3 v_worldNormal;
 in vec3 v_worldPosition;
-
-in mediump vec4 vVertexColor;
 
 out mediump vec4 fragColor;
 
 void main() {
-  // fragColor = vVertexColor;
-  // fragColor = textureCube(uTexture, normalize(v_normal));
-  
-  vec3 worldNormal = normalize(v_worldNormal);
-  vec3 eyeToSurfaceDir = normalize(v_worldPosition - uWorldCameraPosition);
-  vec3 direction = reflect(eyeToSurfaceDir, worldNormal);
- 
-  // fragColor = texture(uTexture, direction);
   fragColor = texture(uTexture, v_worldPosition);
 }
 `);
