@@ -92,8 +92,8 @@ void main() {
   vec3 eyeToSurfaceDir = normalize(v_worldPosition - uWorldCameraPosition);
   vec3 direction = reflect(eyeToSurfaceDir, worldNormal);
  
-  // fragColor = texture(uTexture, direction);
-  fragColor = texture(uTexture, v_worldPosition);
+  fragColor = texture(uTexture, direction);
+  // fragColor = texture(uTexture, v_worldPosition);
 }
 `);
 

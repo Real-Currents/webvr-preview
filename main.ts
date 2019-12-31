@@ -1,9 +1,10 @@
 // import createContext from './modules/basic/webvr-context';
 import backgroundUpdater from "./modules/basic/background-update";
 import createContext from './modules/content/context';
+import initShaderProgram from "./modules/content/cubemap-shaders";
 import initBuffers from "./modules/content/cube-buffers";
 import innerBuffers from "./modules/content/inner-cube-buffers";
-import initShaderProgram from "./modules/content/cubemap-shaders";
+import outerBuffers from "./modules/content/outer-cube-buffers";
 import generateFace from "./modules/content/grid-generator";
 
 const canvas: HTMLCanvasElement = (window.document.querySelector('canvas#cv') !== null) ?
@@ -54,25 +55,6 @@ function main () {
     let lastKeyPress = (new Date()).getTime();
     window['userTriggered'] = false;
 
-    const aCanvas = document.createElement('canvas');
-    const bCanvas = document.createElement('canvas');
-    const cCanvas = document.createElement('canvas');
-    const dCanvas = document.createElement('canvas');
-    const eCanvas = document.createElement('canvas');
-    const fCanvas = document.createElement('canvas');
-    aCanvas.width =
-        bCanvas.width =
-            cCanvas.width =
-                dCanvas.width =
-                    eCanvas.width =
-                        fCanvas.width = ctx.canvas.width;
-    aCanvas.height =
-        bCanvas.height =
-            cCanvas.height =
-                dCanvas.height =
-                    eCanvas.height =
-                        fCanvas.height = ctx.canvas.height;
-
     const faceInfos = [
         { target: gl.TEXTURE_CUBE_MAP_POSITIVE_X, faceColor: '#F00', textColor: '#0FF', text: '+X' },
         { target: gl.TEXTURE_CUBE_MAP_NEGATIVE_X, faceColor: '#FF0', textColor: '#00F', text: '-X' },
@@ -90,14 +72,6 @@ function main () {
 
         img.id = '' + (i + 1);
 
-        // Initialize offscreen canvases with face generator to generate 6 images
-        const offscreen_ctx = (+img.id === 1) ? aCanvas.getContext('2d') :
-            (+img.id === 2) ? bCanvas.getContext('2d') :
-                (+img.id === 3) ? cCanvas.getContext('2d') :
-                    (+img.id === 4) ? dCanvas.getContext('2d') :
-                        (+img.id === 5) ? eCanvas.getContext('2d') :
-                            fCanvas.getContext('2d');
-        offscreen_ctx.globalAlpha = 1.0;
         // Use 2d face generator to generate 6 images
         generateFace(ctx, faceColor, 32);
 
@@ -125,35 +99,6 @@ function main () {
             img.src = URL.createObjectURL(blob);
         });
 
-        // setInterval(d => {
-        //     // Update texture from off-screen canvases
-        //     switch ((+img.id)) {
-        //         case 1:
-        //             ctx.drawImage(aCanvas, 0, 0, aCanvas.width, aCanvas.height);
-        //             break;
-        //         case 2:
-        //             ctx.drawImage(bCanvas, 0, 0, bCanvas.width, bCanvas.height);
-        //             break;
-        //         case 3:
-        //             ctx.drawImage(cCanvas, 0, 0, cCanvas.width, cCanvas.height);
-        //             break;
-        //         case 4:
-        //             ctx.drawImage(dCanvas, 0, 0, dCanvas.width, dCanvas.height);
-        //             break;
-        //         case 5:
-        //             ctx.drawImage(eCanvas, 0, 0, eCanvas.width, eCanvas.height);
-        //             break;
-        //         default:
-        //             ctx.drawImage(fCanvas, 0, 0, fCanvas.width, fCanvas.height);
-        //     }
-        //
-        //     // show the result
-        //     ctx.canvas.toBlob((blob) => {
-        //         img.src = URL.createObjectURL(blob);
-        //     });
-        //
-        // }, 66);
-
         // Setup each face so it's immediately renderable
         gl.texImage2D(target, level, internalFormat, width, height, 0, format, type, null);
     });
@@ -170,16 +115,19 @@ function main () {
                 timeout = setInterval(() => {
                         window['userTriggered'] = true;
 
-                        if (++frame > 100) {
+                        if (++frame > 90) {
                             updateContext(gl, {
-                                'buffers': innerBuffers,
+                                'buffers': [
+                                    outerBuffers,
+                                    innerBuffers
+                                ],
                                 'cameraDelta': [0, 0, +0.05],
                                 'viewPosition': null,
                                 'worldCameraPosition': [0, 0, -2.5]
                             });
                         } else {
                             updateContext(gl, {
-                                'cameraDelta': [0, 0, +0.035],
+                                'cameraDelta': [0, 0, +0.0375],
                                 'viewPosition': [0, 0, -1],
                                 'worldCameraPosition': [0, 0, -1]
                             });

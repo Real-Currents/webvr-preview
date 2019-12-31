@@ -4,21 +4,9 @@ import { lookAt } from 'gl-matrix/mat4';
 let cubeRotation: number = 0.0;
 let inVR = false;
 let vrDisplay;
-let positionLocation: number;
-let normalLocation: number;
-let projectionLocation: WebGLUniformLocation;
-let viewLocation: WebGLUniformLocation;
-let worldLocation: WebGLUniformLocation;
-let textureLocation: WebGLUniformLocation;
-let worldCameraPositionLocation: WebGLUniformLocation;
 let viewPosition = [ 0, 0, -5 ];
 let worldCameraPosition = [ 0, 0, -2.5 ];
-let buffers: {
-    position: WebGLBuffer, positionSize: number,
-    normal: WebGLBuffer, normalSize: number,
-    index: WebGLBuffer, indexSize: number,
-    color: WebGLBuffer , colorSize: number
-} = null;
+let buffers = [];
 
 export default function createContext (
     canvas: HTMLCanvasElement,
@@ -40,41 +28,9 @@ export default function createContext (
     // for the vertices and so forth is established.
     const shaderProgram = initShaders(gl);
 
-// look up where the vertex data needs to go.
-    positionLocation = gl.getAttribLocation(shaderProgram, "aVertexPosition");
-    normalLocation = gl.getAttribLocation(shaderProgram, "aVertexNormal");
-
-// lookup uniforms
-    projectionLocation = gl.getUniformLocation(shaderProgram, "uProjectionMatrix");
-    viewLocation = gl.getUniformLocation(shaderProgram, "uModelViewMatrix");
-    worldLocation = gl.getUniformLocation(shaderProgram, "uWorldMatrix");
-    textureLocation = gl.getUniformLocation(shaderProgram, "uTexture");
-    worldCameraPositionLocation = gl.getUniformLocation(shaderProgram, "uWorldCameraPosition");
-
-    // Collect all the info needed to use the shader program.
-    // Look up which attributes our shader program is using
-    // for aVertexPosition, aVevrtexColor and also
-    // look up uniform locations.
-    const programInfo = {
-        program: shaderProgram,
-        attribLocations: {
-            vertexNormal: gl.getAttribLocation(shaderProgram, 'aVertexNormal'),
-            vertexPosition: gl.getAttribLocation(shaderProgram, 'aVertexPosition'),
-            vertexColor: gl.getAttribLocation(shaderProgram, 'aVertexColor'),
-        },
-        uniformLocations: {
-            projectionMatrix: gl.getUniformLocation(shaderProgram, 'uProjectionMatrix'),
-            modelViewMatrix: gl.getUniformLocation(shaderProgram, 'uModelViewMatrix'),
-            normalMatrix: gl.getUniformLocation(shaderProgram, "uNormalMatrix"),
-            worldMatrix: gl.getUniformLocation(shaderProgram, "uWorldMatrix"),
-            textureLocation: gl.getUniformLocation(shaderProgram, "uTexture"),
-            worldCameraPositionLocation: gl.getUniformLocation(shaderProgram, "uWorldCameraPosition")
-        },
-    };
-
     // Here's where we call the routine that builds all the
     // objects we'll be drawing.
-    buffers = initBuffers(gl);
+    buffers.push(initBuffers(gl));
 
     let then = 0;
 
@@ -90,7 +46,7 @@ export default function createContext (
             const deltaTime = now - then;
             then = now;
 
-            render(canvas, gl, programInfo, buffers, deltaTime);
+            render(canvas, gl, shaderProgram, buffers, deltaTime);
 
             (<any>window).requestAnimationFrame(nonVRCallback);
         }
@@ -110,12 +66,12 @@ export default function createContext (
         then = now;
 
         // render scene
-        renderVR(canvas, gl, programInfo, buffers, deltaTime);
+        renderVR(canvas, gl, shaderProgram, buffers, deltaTime);
     };
     // register callback
 
     // Ensure VR is all set up
-    vrSetup(canvas, gl, programInfo, buffers, nonVRCallback, vrCallback);
+    vrSetup(canvas, gl, shaderProgram, buffers, nonVRCallback, vrCallback);
 
     // Start rendering
     (<any>window).requestAnimationFrame(nonVRCallback);
@@ -144,8 +100,11 @@ export default function createContext (
 
 function updateContext (gl: WebGL2RenderingContext, contextProperties: any) {
     for (const prop in contextProperties) {
-        if (prop === 'buffers' && typeof contextProperties['buffers'] === 'function') {
-            buffers = contextProperties['buffers'](gl);
+        if (prop === 'buffers' && contextProperties['buffers'].length > 0) {
+            buffers = [];
+            for (const buffer of contextProperties['buffers']) {
+                buffers.push(buffer(gl));
+            }
         }
 
         if (prop === 'viewPosition' && !!Array.isArray(contextProperties['viewPosition'])) {
@@ -206,7 +165,7 @@ function updateContext (gl: WebGL2RenderingContext, contextProperties: any) {
 // entry point for non-WebVR rendering
 // called by whatever mechanism (likely keyboard/mouse events)
 // you used before to trigger redraws
-function render (canvas: HTMLCanvasElement, gl: WebGL2RenderingContext, programInfo, buffers, deltaTime) {
+function render (canvas: HTMLCanvasElement, gl: WebGL2RenderingContext, shaderProgram, buffers, deltaTime) {
     gl.viewport(0, 0, canvas.width, canvas.height);
     gl.enable(gl.CULL_FACE);
     gl.enable(gl.DEPTH_TEST);                               // Enable depth testing
@@ -236,23 +195,23 @@ function render (canvas: HTMLCanvasElement, gl: WebGL2RenderingContext, programI
         zNear,
         zFar);
 
-    drawScene(gl, programInfo, buffers, projectionMatrix, null, deltaTime);
+    drawScene(gl, shaderProgram, buffers, projectionMatrix, null, deltaTime);
 }
 
 // entry point for WebVR, called by vrCallback()
-function renderVR(canvas: HTMLCanvasElement, gl: WebGL2RenderingContext, programInfo, buffers, deltaTime) {
+function renderVR(canvas: HTMLCanvasElement, gl: WebGL2RenderingContext, shaderProgram, buffers, deltaTime) {
     gl.viewport(0, 0, canvas.width, canvas.height);
     gl.enable(gl.CULL_FACE);
     gl.enable(gl.DEPTH_TEST);                               // Enable depth testing
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);    // Clear everything
     gl.depthFunc(gl.LEQUAL);                                // Near things obscure far things
 
-    renderEye(canvas, gl, programInfo, buffers, true, deltaTime);
-    renderEye(canvas, gl, programInfo, buffers, false, deltaTime);
+    renderEye(canvas, gl, shaderProgram, buffers, true, deltaTime);
+    renderEye(canvas, gl, shaderProgram, buffers, false, deltaTime);
     vrDisplay.submitFrame();
 }
 
-function renderEye(canvas: HTMLCanvasElement, gl: WebGL2RenderingContext, programInfo, buffers, isLeft, deltaTime) {
+function renderEye(canvas: HTMLCanvasElement, gl: WebGL2RenderingContext, shaderProgram, buffers, isLeft, deltaTime) {
     let width = canvas.width;
     let wD2 = canvas.width / 2;
     let height = canvas.height;
@@ -271,23 +230,19 @@ function renderEye(canvas: HTMLCanvasElement, gl: WebGL2RenderingContext, progra
     }
     // we don't want auto-rotation in VR mode, so we directly
     // use the view matrix
-    drawScene(gl, programInfo, buffers, projection, view, deltaTime);
+    drawScene(gl, shaderProgram, buffers, projection, view, deltaTime);
 }
 
 //
 // Draw the scene.
 //
-function drawScene(gl: WebGL2RenderingContext, programInfo, buffers, projectionMatrix, view = null, deltaTime) {
+function drawScene(gl: WebGL2RenderingContext, shaderProgram, buffers, projectionMatrix, view = null, deltaTime) {
 
     cubeRotation += deltaTime;
 
-    // Animate the rotation
-    const modelXRotationRadians = cubeRotation * 0.4;
-    const modelYRotationRadians = cubeRotation * 0.7;
-
     const cameraPosition = (viewPosition !== null) ?
         viewPosition :
-        [ 0, 0, worldCameraPosition[2] / 2 ];
+        [ 0, 0, worldCameraPosition[2] / 1.5 ];
     const target = [ 0, 0, 0] ;
     const up = [ 0, 1, 0 ];
     // Compute the camera's matrix using look at.
@@ -296,75 +251,145 @@ function drawScene(gl: WebGL2RenderingContext, programInfo, buffers, projectionM
     // Make a view matrix from the camera matrix.
     const viewMatrix = mat4.invert(mat4.create(), cameraMatrix);
 
-    const worldMatrix = mat4.rotateX(mat4.create(), mat4.create(), modelXRotationRadians);
-    mat4.rotateY(worldMatrix, worldMatrix, modelYRotationRadians);
-    mat4.rotateZ(worldMatrix, worldMatrix, Math.PI / 2);
+    const worldMatrix = mat4.create()
 
     if (view !== null) {
         // Premultiply the view matrix
         mat4.multiply(viewMatrix, view, viewMatrix);
     }
 
-    // Tell WebGL to use our program when drawing
-    gl.useProgram(programInfo.program);
+    if (buffers.length > 0) {
+        let b = 0;
+        for (const buffer of buffers) {
+            // console.log('Frame ', deltaTime, ': buffer ', ++b);
+            // buffer: {
+            //     position: WebGLBuffer, positionSize: number,
+            //     normal: WebGLBuffer, normalSize: number,
+            //     index: WebGLBuffer, indexSize: number,
+            //     color: WebGLBuffer , colorSize: number
+            // }
 
-    // Tell WebGL how to pull out the positions from the position
-    // buffer into the vertexPosition attribute
-    {
-        const numComponents = 3;
-        const type = gl.FLOAT;
-        const normalize = false;
-        const stride = 0;
-        const offset = 0;
-        gl.enableVertexAttribArray(
-            programInfo.attribLocations.vertexPosition);
-        gl.bindBuffer(gl.ARRAY_BUFFER, buffers['position']);
-        gl.vertexAttribPointer(
-            programInfo.attribLocations.vertexPosition,
-            numComponents,
-            type,
-            normalize,
-            stride,
-            offset);
+            // Collect all the info needed to use the shader program.
+            // Look up which attributes our shader program is using
+            // for aVertexPosition, aVevrtexColor and also
+            // look up uniform locations.
+            const program = (!!buffer['program']) ? buffer['program'] : shaderProgram
+            const programInfo = {
+                program: program,
+                attribLocations: {
+                    vertexNormal: gl.getAttribLocation(program, 'aVertexNormal'),
+                    vertexPosition: gl.getAttribLocation(program, 'aVertexPosition'),
+                    vertexColor: gl.getAttribLocation(program, 'aVertexColor'),
+                },
+                uniformLocations: {
+                    projectionMatrix: gl.getUniformLocation(program, 'uProjectionMatrix'),
+                    modelViewMatrix: gl.getUniformLocation(program, 'uModelViewMatrix'),
+                    normalMatrix: gl.getUniformLocation(program, "uNormalMatrix"),
+                    worldMatrix: gl.getUniformLocation(program, "uWorldMatrix"),
+                    textureLocation: gl.getUniformLocation(program, "uTexture"),
+                    worldCameraPositionLocation: gl.getUniformLocation(program, "uWorldCameraPosition")
+                },
+            };
+
+            // Tell WebGL to use our program when drawing
+            gl.useProgram(programInfo.program);
+
+            // Tell WebGL how to pull out the colors from the color buffer
+            // into the vertexColor attribute.
+            {
+                const numComponents = 4;
+                const type = gl.FLOAT;
+                const normalize = false;
+                const stride = 0;
+                const offset = 0;
+                gl.enableVertexAttribArray(
+                    programInfo.attribLocations.vertexColor);
+                gl.bindBuffer(gl.ARRAY_BUFFER, buffer['color']);
+                gl.vertexAttribPointer(
+                    programInfo.attribLocations.vertexColor,
+                    numComponents,
+                    type,
+                    normalize,
+                    stride,
+                    offset);
+                gl.enableVertexAttribArray(
+                    programInfo.attribLocations.vertexColor);
+            }
+
+            // Tell WebGL how to pull out the positions from the position
+            // buffer into the vertexPosition attribute
+            {
+                const numComponents = 3;
+                const type = gl.FLOAT;
+                const normalize = false;
+                const stride = 0;
+                const offset = 0;
+                gl.enableVertexAttribArray(
+                    programInfo.attribLocations.vertexPosition);
+                gl.bindBuffer(gl.ARRAY_BUFFER, buffer['position']);
+                gl.vertexAttribPointer(
+                    programInfo.attribLocations.vertexPosition,
+                    numComponents,
+                    type,
+                    normalize,
+                    stride,
+                    offset);
+            }
+
+            // Tell WebGL how to pull normals out of normalBuffer (ARRAY_BUFFER)
+            {
+                const numComponents = 3; // 3 components per iteration
+                const type = gl.FLOAT;   // the data is 32bit floating point values
+                const normalize = false; // normalize the data (convert from 0-255 to 0-1)
+                const stride = 0;        // 0 = move forward size * sizeof(type) each iteration to get the next position
+                const offset = 0;        // start at the beginning of the buffer
+                gl.enableVertexAttribArray(
+                    programInfo.attribLocations.vertexNormal);
+                // Bind the normal buffer.
+                gl.bindBuffer(gl.ARRAY_BUFFER, buffer['normal']);
+                gl.vertexAttribPointer(
+                    programInfo.attribLocations.vertexNormal,
+                    numComponents,
+                    type,
+                    normalize,
+                    stride,
+                    offset);
+            }
+
+            // Animate the rotation
+            if (!!buffer['rotation'] && buffer['rotation'].length === 3) {
+                const modelXRotationRadians = cubeRotation * buffer['rotation'][0];
+                const modelYRotationRadians = cubeRotation * buffer['rotation'][1];
+                const modelZRotationRadians = cubeRotation * buffer['rotation'][2];
+
+                mat4.rotateX(worldMatrix, worldMatrix, modelXRotationRadians);
+                mat4.rotateY(worldMatrix, worldMatrix, modelYRotationRadians);
+                mat4.rotateZ(worldMatrix, worldMatrix, modelZRotationRadians);
+
+            } else if (buffer.length > 1 && b === 1) {
+                // For some reason texture(uTexture, direction) is upside-down
+                mat4.rotateZ(worldMatrix, worldMatrix, Math.PI / 2);
+            }
+
+            // Set the uniforms
+            gl.uniformMatrix4fv(programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
+            gl.uniformMatrix4fv(programInfo.uniformLocations.modelViewMatrix, false, viewMatrix);
+            gl.uniformMatrix4fv(programInfo.uniformLocations.worldMatrix, false, worldMatrix);
+            // Set the drawing position to the "identity" point, which is
+            // the center of the scene.
+            gl.uniform3fv(programInfo.uniformLocations.worldCameraPositionLocation, worldCameraPosition);
+
+            // Tell the shader to use texture unit 0 for u_texture
+            gl.uniform1i(programInfo.uniformLocations.textureLocation, 0);
+
+            // gl.drawArrays(gl.TRIANGLES, 0, buffer['positionSize'] / 3);
+
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffer['index']);
+            gl.drawElements(gl.TRIANGLES, buffer['indexSize'], gl.UNSIGNED_SHORT, 0);
+            gl.bindBuffer(gl.ARRAY_BUFFER, null);
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+        }
     }
-
-    // Tell WebGL how to pull normals out of normalBuffer (ARRAY_BUFFER)
-    {
-        const numComponents = 3; // 3 components per iteration
-        const type = gl.FLOAT;   // the data is 32bit floating point values
-        const normalize = false; // normalize the data (convert from 0-255 to 0-1)
-        const stride = 0;        // 0 = move forward size * sizeof(type) each iteration to get the next position
-        const offset = 0;        // start at the beginning of the buffer
-        gl.enableVertexAttribArray(
-            programInfo.attribLocations.vertexNormal);
-        // Bind the normal buffer.
-        gl.bindBuffer(gl.ARRAY_BUFFER, buffers['normal']);
-        gl.vertexAttribPointer(
-            programInfo.attribLocations.vertexNormal,
-            numComponents,
-            type,
-            normalize,
-            stride,
-            offset);
-    }
-
-    // Set the uniforms
-    gl.uniformMatrix4fv(projectionLocation, false, projectionMatrix);
-    gl.uniformMatrix4fv(viewLocation, false, viewMatrix);
-    gl.uniformMatrix4fv(worldLocation, false, worldMatrix);
-    // Set the drawing position to the "identity" point, which is
-    // the center of the scene.
-    gl.uniform3fv(worldCameraPositionLocation, worldCameraPosition);
-
-    // Tell the shader to use texture unit 0 for u_texture
-    gl.uniform1i(textureLocation, 0);
-
-    // gl.drawArrays(gl.TRIANGLES, 0, buffers['positionSize'] / 3);
-
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffers['index']);
-    gl.drawElements(gl.TRIANGLES, buffers['indexSize'], gl.UNSIGNED_SHORT, 0);
-    gl.bindBuffer(gl.ARRAY_BUFFER, null);
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 
 }
 
