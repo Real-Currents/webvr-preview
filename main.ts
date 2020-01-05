@@ -43,8 +43,8 @@ function main () {
     // Get A 2D context for dynamic textures
     /** @type {Canvas2DRenderingContext} */
     const ctx = document.createElement("canvas").getContext("2d");
-    ctx.canvas.width = 512;
-    ctx.canvas.height = 512;
+    ctx.canvas.width = 128;
+    ctx.canvas.height = 128;
 
     // Create a texture.
     const texture = gl.createTexture();
