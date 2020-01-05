@@ -17,6 +17,7 @@ const canvas: HTMLCanvasElement = (window.document.querySelector('canvas#cv') !=
 function main () {
     // Attach canvas to window
     if (canvas.id !== 'cv') {
+        canvas.id = 'cv';
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         canvas.style.display = 'block';
@@ -73,7 +74,7 @@ function main () {
         img.id = '' + (i + 1);
 
         // Use 2d face generator to generate 6 images
-        generateFace(ctx, faceColor, 32);
+        generateFace(ctx, faceColor, 16);
 
         // Upload the canvas to the cubemap face.
         const level = 0;
@@ -105,38 +106,48 @@ function main () {
     gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
     gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
 
+    const trigger = function (event) {
+        // console.log(lastKeyPress, ((new Date()).getTime() - lastKeyPress));
+        // console.log(startVideo);
+
+        if (((new Date()).getTime() - lastKeyPress) > 500) {
+            if (!window['userTriggered']) {
+                timeout = setInterval(() => {
+                    window['userTriggered'] = true;
+
+                    if (++frame > 90) {
+                        updateContext(gl, {
+                            'buffers': [
+                                outerBuffers,
+                                innerBuffers
+                            ],
+                            'cameraDelta': [0, 0, +0.05],
+                            'viewPosition': null,
+                            'worldCameraPosition': [0, 0, -2.5]
+                        });
+                    } else {
+                        updateContext(gl, {
+                            'cameraDelta': [0, 0, +0.0375],
+                            'viewPosition': [0, 0, -1],
+                            'worldCameraPosition': [0, 0, -1]
+                        });
+                    }
+                }, 33);
+            } else {
+                window['userTriggered'] = false;
+                clearInterval(timeout);
+            }
+
+        }
+    };
+
     window.addEventListener('keydown', function (event: (any | KeyboardEvent)) {
         const kbEvent = (event || window['event']); // cross-browser shenanigans
         // console.log(lastKeyPress, ((new Date()).getTime() - lastKeyPress));
         // console.log(startVideo);
 
-        if (kbEvent['keyCode'] === 32 && ((new Date()).getTime() - lastKeyPress) > 500) { // this is the spacebar
-            if (!window['userTriggered']) {
-                timeout = setInterval(() => {
-                        window['userTriggered'] = true;
-
-                        if (++frame > 90) {
-                            updateContext(gl, {
-                                'buffers': [
-                                    outerBuffers,
-                                    innerBuffers
-                                ],
-                                'cameraDelta': [0, 0, +0.05],
-                                'viewPosition': null,
-                                'worldCameraPosition': [0, 0, -2.5]
-                            });
-                        } else {
-                            updateContext(gl, {
-                                'cameraDelta': [0, 0, +0.0375],
-                                'viewPosition': [0, 0, -1],
-                                'worldCameraPosition': [0, 0, -1]
-                            });
-                        }
-                    }, 33);
-            } else {
-                window['userTriggered'] = false;
-                clearInterval(timeout);
-            }
+        if (kbEvent['keyCode'] === 32) { // this is the spacebar
+            trigger(event)
 
             kbEvent.preventDefault();
 
@@ -144,6 +155,57 @@ function main () {
 
         } else return false;
     });
+
+    const touchHit = function touchHit(event) {
+        console.log(event.touches);
+        // mouse_x = (event.touches[0].clientX - cv_pos.left + doc.scrollLeft()) * cv_w;
+        // mouse_y = (event.touches[0].clientY - cv_pos.top + doc.scrollTop()) * cv_h;
+    };
+
+    const mouseHit = function mouseHit(event) {
+        console.log('mouse coords captured', event.clientX, ',', event.clientY);
+        // mouse_x = (event.clientX - cv_pos.left + doc.scrollLeft()) * cv_w;
+        // mouse_y = (event.clientY - cv_pos.top + doc.scrollTop()) * cv_h;
+    };
+
+    if ('ontouchmove' in document.createElement('div'))  {
+        canvas.addEventListener('touchstart', function(e){
+            console.log('MouseDown');
+            // mouse_down = true;
+            // mouse_up = false;
+            touchHit(e);
+            e.preventDefault();
+        });
+        canvas.addEventListener('touchmove', function(e){
+            touchHit(e);
+            e.preventDefault();
+        });
+        canvas.addEventListener('touchend', function(e){
+            console.log('MouseUp');
+            // mouse_down = false;
+            // mouse_up = true;
+            trigger(e);
+            e.preventDefault();
+        });
+        console.log('touch is present');
+
+    } else {
+        canvas.addEventListener('mousedown', function(e) {
+            console.log('MouseDown');
+            // mouse_down = true;
+            // mouse_up = false;
+            mouseHit(e);
+            e.preventDefault();
+        });
+        canvas.addEventListener('mousemove', mouseHit);
+        canvas.addEventListener('mouseup', function (e) {
+            console.log('MouseUp');
+            // mouse_down = false;
+            // mouse_up = true;
+            trigger(e);
+            e.preventDefault();
+        });
+    }
 }
 
 main();
