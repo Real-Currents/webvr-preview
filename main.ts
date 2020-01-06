@@ -106,7 +106,22 @@ function main () {
     gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
     gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
 
-    const trigger = function (event) {
+    const cameras = [
+        {
+            'viewPosition': [ 0, 0, -5 ],
+            'viewTarget': [ 0, 0, 0 ]
+        },
+        {
+            'viewPosition': [ 0.5, 0, 2.5 ],
+            'viewTarget': [ 0, 0, 0 ]
+        }
+    ]
+    let camera = 0;
+    const changeCamera = function (event) {;
+        updateContext(gl, cameras[camera]);
+    }
+
+    const triggerMovement = function (event) {
         // console.log(lastKeyPress, ((new Date()).getTime() - lastKeyPress));
         // console.log(startVideo);
 
@@ -122,7 +137,7 @@ function main () {
                                 innerBuffers
                             ],
                             'cameraDelta': [0, 0, +0.05],
-                            'viewPosition': null,
+                            'viewPosition': cameras[camera]['viewPosition'],
                             'worldCameraPosition': [0, 0, -2.5]
                         });
                     } else {
@@ -147,7 +162,7 @@ function main () {
         // console.log(startVideo);
 
         if (kbEvent['keyCode'] === 32) { // this is the spacebar
-            trigger(event)
+            triggerMovement(event)
 
             kbEvent.preventDefault();
 
@@ -184,7 +199,7 @@ function main () {
             console.log('MouseUp');
             // mouse_down = false;
             // mouse_up = true;
-            trigger(e);
+            triggerMovement(e);
             e.preventDefault();
         });
         console.log('touch is present');
@@ -202,7 +217,7 @@ function main () {
             console.log('MouseUp');
             // mouse_down = false;
             // mouse_up = true;
-            trigger(e);
+            triggerMovement(e);
             e.preventDefault();
         });
     }

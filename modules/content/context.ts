@@ -5,6 +5,7 @@ let cubeRotation: number = 0.0;
 let inVR = false;
 let vrDisplay;
 let viewPosition = [ 0, 0, -5 ];
+let viewTarget = [ 0, 0, 0 ];
 let worldCameraPosition = [ 0, 0, -2.5 ];
 let buffers = [];
 
@@ -115,7 +116,7 @@ function updateContext (gl: WebGL2RenderingContext, contextProperties: any) {
 
                 wcd.forEach((v, i, a) => {
                     if (!!vp[i]) {
-                        if (viewPosition[i] < vp[i]) { // Don't go closer than specified worldCameraPosition
+                        if ((Math.abs(viewPosition[i] - viewTarget[i])) > (Math.abs(vp[i] - viewTarget[i]))) { // Don't go closer than specified viewPosition to viewTarget
                             viewPosition[i] = (viewPosition[i] + v);
                         } else {
                             viewPosition[i] = vp[i];
@@ -243,13 +244,13 @@ function drawScene(gl: WebGL2RenderingContext, shaderProgram, buffers, projectio
     const cameraPosition = (viewPosition !== null) ?
         viewPosition :
         [ 0, 0, worldCameraPosition[2] / 1.5 ];
-    const target = [ 0, 0, 0] ;
+    const target = viewTarget;
     const up = [ 0, 1, 0 ];
     // Compute the camera's matrix using look at.
     const cameraMatrix = mat4.lookAt(mat4.create(), cameraPosition, target, up);
 
     // Make a view matrix from the camera matrix.
-    const viewMatrix = mat4.invert(mat4.create(), cameraMatrix);
+    const viewMatrix = cameraMatrix; // mat4.invert(mat4.create(), cameraMatrix);
 
     const worldMatrix = mat4.create()
 
