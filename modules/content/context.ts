@@ -1,19 +1,26 @@
-import { gl, inverse$1, mat4, vec4 }  from 'gl-matrix';
-import { lookAt } from 'gl-matrix/mat4';
+import { mat4, vec4 }  from 'gl-matrix';
+import drawScene from "./draw-scene";
 
-let cubeRotation: number = 0.0;
-let inVR = false;
-let vrDisplay;
-let viewPosition = [ 0, 0, -5 ];
-let viewTarget = [ 0, 0, 0 ];
-let worldCameraPosition = [ 0, 0, -2.5 ];
-let buffers = [];
+const context = {
+    buffers: [],
+    inVR: false,
+    vrDisplay:  null,
+    viewPosition:  [0, 0, -5],
+    viewTarget: [0, 0, 0],
+    worldCameraPosition: [0, 0, -2.5]
+}
 
 export default function createContext (
-    canvas: HTMLCanvasElement,
+    initContext: any = {
+        canvas: window.document.createElement('canvas'),
+        viewPosition: [ 0, 0, -5 ],
+        viewTarget: [ 0, 0, 0 ],
+        worldCameraPosition: [ 0, 0, -2.5 ]
+    },
     initBuffers: Function,
     initShaders: Function
 ): { gl: WebGL2RenderingContext, updateContext: Function } {
+    const canvas: HTMLCanvasElement = (initContext.canvas) as any as HTMLCanvasElement;
     const gl: WebGL2RenderingContext = (
         (canvas.getContext('webgl2') || canvas.getContext('experimental-webgl')
         ) as any as WebGLRenderingContextStrict) as any as WebGL2RenderingContext;
@@ -31,14 +38,14 @@ export default function createContext (
 
     // Here's where we call the routine that builds all the
     // objects we'll be drawing.
-    buffers.push(initBuffers(gl));
+    context.buffers.push(initBuffers(gl));
 
     let then = 0;
 
     gl.clearColor(1.0, 1.0, 1.0, 1.0);  // Clear to white, fully opaque
 
     const nonVRCallback = (now) => {
-        if (inVR) {
+        if (context.inVR) {
             return;
 
         } else {
@@ -47,19 +54,19 @@ export default function createContext (
             const deltaTime = now - then;
             then = now;
 
-            render(canvas, gl, shaderProgram, buffers, deltaTime);
+            render(canvas, gl, shaderProgram, context.buffers, deltaTime);
 
             (<any>window).requestAnimationFrame(nonVRCallback);
         }
     };
 
     const vrCallback = (now) => {
-        if (vrDisplay == null || !inVR) {
+        if (context.vrDisplay == null || !context.inVR) {
             return;
         }
 
         // reregister callback if we're still in VR
-        vrDisplay.requestAnimationFrame(vrCallback);
+        context.vrDisplay.requestAnimationFrame(vrCallback);
 
         // calculate time delta for rotation
         now *= 0.001;  // convert to seconds
@@ -67,12 +74,12 @@ export default function createContext (
         then = now;
 
         // render scene
-        renderVR(canvas, gl, shaderProgram, buffers, deltaTime);
+        renderVR(canvas, gl, shaderProgram, context.buffers, deltaTime);
     };
     // register callback
 
     // Ensure VR is all set up
-    vrSetup(canvas, gl, shaderProgram, buffers, nonVRCallback, vrCallback);
+    vrSetup(canvas, gl, shaderProgram, context.buffers, nonVRCallback, vrCallback);
 
     // Start rendering
     (<any>window).requestAnimationFrame(nonVRCallback);
@@ -82,10 +89,10 @@ export default function createContext (
     (<any>window).vrButton.onclick = function enterVR() {
         console.log('Enter VR');
 
-        if (vrDisplay != null) {
-            inVR = true;
+        if (context.vrDisplay != null) {
+            context.inVR = true;
             // hand the canvas to the WebVR API
-            vrDisplay.requestPresent([{ source: canvas }]);
+            context.vrDisplay.requestPresent([{ source: canvas }]);
 
             // requestPresent() will request permission to enter VR mode,
             // and once the user has done this our `vrdisplaypresentchange`
@@ -102,9 +109,9 @@ export default function createContext (
 function updateContext (gl: WebGL2RenderingContext, contextProperties: any) {
     for (const prop in contextProperties) {
         if (prop === 'buffers' && contextProperties['buffers'].length > 0) {
-            buffers = [];
+            context.buffers = [];
             for (const buffer of contextProperties['buffers']) {
-                buffers.push(buffer(gl));
+                context.buffers.push(buffer(gl));
             }
         }
 
@@ -116,24 +123,24 @@ function updateContext (gl: WebGL2RenderingContext, contextProperties: any) {
 
                 wcd.forEach((v, i, a) => {
                     if (!!vp[i]) {
-                        if ((Math.abs(viewPosition[i] - viewTarget[i])) > (Math.abs(vp[i] - viewTarget[i]))) { // Don't go closer than specified viewPosition to viewTarget
-                            viewPosition[i] = (viewPosition[i] + v);
+                        if ((Math.abs(context.viewPosition[i] - context.viewTarget[i])) > (Math.abs(vp[i] - context.viewTarget[i]))) { // Don't go closer than specified viewPosition to viewTarget
+                            context.viewPosition[i] = (context.viewPosition[i] + v);
                         } else {
-                            viewPosition[i] = vp[i];
+                            context.viewPosition[i] = vp[i];
                         }
                     } else {
-                        viewPosition[i] = (viewPosition[i] + v);
+                        context.viewPosition[i] = (context.viewPosition[i] + v);
                     }
                 });
 
                 // console.log("Move view", viewPosition);
 
             } else {
-                vp.forEach((v, i, a) => viewPosition[i] = v);
+                vp.forEach((v, i, a) => context.viewPosition[i] = v);
             }
 
         } else if (prop === 'viewPosition' ) {
-            viewPosition = contextProperties['viewPosition'];
+            context.viewPosition = contextProperties['viewPosition'];
             // console.log("Hold position");
         }
 
@@ -144,20 +151,20 @@ function updateContext (gl: WebGL2RenderingContext, contextProperties: any) {
                 const wcd: [number] = contextProperties['cameraDelta'] as [number];
                 wcd.forEach((v, i, a) => {
                     if (!!wcp[i]) {
-                        if (worldCameraPosition[i] < wcp[i]) { // Don't go closer than specified worldCameraPosition
-                            worldCameraPosition[i] = (worldCameraPosition[i] + v);
+                        if (context.worldCameraPosition[i] < wcp[i]) { // Don't go closer than specified worldCameraPosition
+                            context.worldCameraPosition[i] = (context.worldCameraPosition[i] + v);
                         } else {
-                            worldCameraPosition[i] = wcp[i];
+                            context.worldCameraPosition[i] = wcp[i];
                         }
                     } else {
-                        worldCameraPosition[i] = (worldCameraPosition[i] + v);
+                        context.worldCameraPosition[i] = (context.worldCameraPosition[i] + v);
                     }
                 });
 
                 // console.log("Move camera", worldCameraPosition);
 
             } else {
-                wcp.forEach((v, i, a) => worldCameraPosition[i] = v);
+                wcp.forEach((v, i, a) => context.worldCameraPosition[i] = v);
             }
         }
     }
@@ -196,7 +203,7 @@ function render (canvas: HTMLCanvasElement, gl: WebGL2RenderingContext, shaderPr
         zNear,
         zFar);
 
-    drawScene(gl, shaderProgram, buffers, projectionMatrix, null, deltaTime);
+    drawScene(context, gl, shaderProgram, buffers, projectionMatrix, null, deltaTime);
 }
 
 // entry point for WebVR, called by vrCallback()
@@ -209,7 +216,7 @@ function renderVR(canvas: HTMLCanvasElement, gl: WebGL2RenderingContext, shaderP
 
     renderEye(canvas, gl, shaderProgram, buffers, true, deltaTime);
     renderEye(canvas, gl, shaderProgram, buffers, false, deltaTime);
-    vrDisplay.submitFrame();
+    context.vrDisplay.submitFrame();
 }
 
 function renderEye(canvas: HTMLCanvasElement, gl: WebGL2RenderingContext, shaderProgram, buffers, isLeft, deltaTime) {
@@ -218,7 +225,7 @@ function renderEye(canvas: HTMLCanvasElement, gl: WebGL2RenderingContext, shader
     let height = canvas.height;
     let projection, view;
     let frameData = new VRFrameData();
-    vrDisplay.getFrameData(frameData);
+    context.vrDisplay.getFrameData(frameData);
     // choose which half of the canvas to draw on
     if (isLeft) {
         gl.viewport(0, 0, wD2, height);
@@ -231,167 +238,7 @@ function renderEye(canvas: HTMLCanvasElement, gl: WebGL2RenderingContext, shader
     }
     // we don't want auto-rotation in VR mode, so we directly
     // use the view matrix
-    drawScene(gl, shaderProgram, buffers, projection, view, deltaTime);
-}
-
-//
-// Draw the scene.
-//
-function drawScene(gl: WebGL2RenderingContext, shaderProgram, buffers, projectionMatrix, view = null, deltaTime) {
-
-    cubeRotation += deltaTime;
-
-    const cameraPosition = (viewPosition !== null) ?
-        viewPosition :
-        [ 0, 0, worldCameraPosition[2] / 1.5 ];
-    const target = viewTarget;
-    const up = [ 0, 1, 0 ];
-    // Compute the camera's matrix using look at.
-    const cameraMatrix = mat4.lookAt(mat4.create(), cameraPosition, target, up);
-
-    // Make a view matrix from the camera matrix.
-    const viewMatrix = cameraMatrix; // mat4.invert(mat4.create(), cameraMatrix);
-
-    const worldMatrix = mat4.create()
-
-    if (view !== null) {
-        // Premultiply the view matrix
-        mat4.multiply(viewMatrix, view, viewMatrix);
-    }
-
-    if (buffers.length > 0) {
-        let b = 0;
-        for (const buffer of buffers) {
-            // console.log('Frame ', deltaTime, ': buffer ', ++b);
-            // buffer: {
-            //     position: WebGLBuffer, positionSize: number,
-            //     normal: WebGLBuffer, normalSize: number,
-            //     index: WebGLBuffer, indexSize: number,
-            //     color: WebGLBuffer , colorSize: number
-            // }
-
-            // Collect all the info needed to use the shader program.
-            // Look up which attributes our shader program is using
-            // for aVertexPosition, aVevrtexColor and also
-            // look up uniform locations.
-            const program = (!!buffer['program']) ? buffer['program'] : shaderProgram
-            const programInfo = {
-                program: program,
-                attribLocations: {
-                    vertexNormal: gl.getAttribLocation(program, 'aVertexNormal'),
-                    vertexPosition: gl.getAttribLocation(program, 'aVertexPosition'),
-                    vertexColor: gl.getAttribLocation(program, 'aVertexColor'),
-                },
-                uniformLocations: {
-                    projectionMatrix: gl.getUniformLocation(program, 'uProjectionMatrix'),
-                    modelViewMatrix: gl.getUniformLocation(program, 'uModelViewMatrix'),
-                    normalMatrix: gl.getUniformLocation(program, "uNormalMatrix"),
-                    worldMatrix: gl.getUniformLocation(program, "uWorldMatrix"),
-                    textureLocation: gl.getUniformLocation(program, "uTexture"),
-                    worldCameraPositionLocation: gl.getUniformLocation(program, "uWorldCameraPosition")
-                },
-            };
-
-            // Tell WebGL to use our program when drawing
-            gl.useProgram(programInfo.program);
-
-            // Tell WebGL how to pull out the colors from the color buffer
-            // into the vertexColor attribute.
-            {
-                const numComponents = 4;
-                const type = gl.FLOAT;
-                const normalize = false;
-                const stride = 0;
-                const offset = 0;
-                gl.enableVertexAttribArray(
-                    programInfo.attribLocations.vertexColor);
-                gl.bindBuffer(gl.ARRAY_BUFFER, buffer['color']);
-                gl.vertexAttribPointer(
-                    programInfo.attribLocations.vertexColor,
-                    numComponents,
-                    type,
-                    normalize,
-                    stride,
-                    offset);
-                gl.enableVertexAttribArray(
-                    programInfo.attribLocations.vertexColor);
-            }
-
-            // Tell WebGL how to pull out the positions from the position
-            // buffer into the vertexPosition attribute
-            {
-                const numComponents = 3;
-                const type = gl.FLOAT;
-                const normalize = false;
-                const stride = 0;
-                const offset = 0;
-                gl.enableVertexAttribArray(
-                    programInfo.attribLocations.vertexPosition);
-                gl.bindBuffer(gl.ARRAY_BUFFER, buffer['position']);
-                gl.vertexAttribPointer(
-                    programInfo.attribLocations.vertexPosition,
-                    numComponents,
-                    type,
-                    normalize,
-                    stride,
-                    offset);
-            }
-
-            // Tell WebGL how to pull normals out of normalBuffer (ARRAY_BUFFER)
-            {
-                const numComponents = 3; // 3 components per iteration
-                const type = gl.FLOAT;   // the data is 32bit floating point values
-                const normalize = false; // normalize the data (convert from 0-255 to 0-1)
-                const stride = 0;        // 0 = move forward size * sizeof(type) each iteration to get the next position
-                const offset = 0;        // start at the beginning of the buffer
-                gl.enableVertexAttribArray(
-                    programInfo.attribLocations.vertexNormal);
-                // Bind the normal buffer.
-                gl.bindBuffer(gl.ARRAY_BUFFER, buffer['normal']);
-                gl.vertexAttribPointer(
-                    programInfo.attribLocations.vertexNormal,
-                    numComponents,
-                    type,
-                    normalize,
-                    stride,
-                    offset);
-            }
-
-            // Animate the rotation
-            if (!!buffer['rotation'] && buffer['rotation'].length === 3) {
-                const modelXRotationRadians = cubeRotation * buffer['rotation'][0];
-                const modelYRotationRadians = cubeRotation * buffer['rotation'][1];
-                const modelZRotationRadians = cubeRotation * buffer['rotation'][2];
-
-                mat4.rotateX(worldMatrix, worldMatrix, modelXRotationRadians);
-                mat4.rotateY(worldMatrix, worldMatrix, modelYRotationRadians);
-                mat4.rotateZ(worldMatrix, worldMatrix, modelZRotationRadians);
-
-            } else if (buffer.length > 1 && b === 1) {
-                // For some reason texture(uTexture, direction) is upside-down
-                mat4.rotateZ(worldMatrix, worldMatrix, Math.PI / 2);
-            }
-
-            // Set the uniforms
-            gl.uniformMatrix4fv(programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
-            gl.uniformMatrix4fv(programInfo.uniformLocations.modelViewMatrix, false, viewMatrix);
-            gl.uniformMatrix4fv(programInfo.uniformLocations.worldMatrix, false, worldMatrix);
-            // Set the drawing position to the "identity" point, which is
-            // the center of the scene.
-            gl.uniform3fv(programInfo.uniformLocations.worldCameraPositionLocation, worldCameraPosition);
-
-            // Tell the shader to use texture unit 0 for u_texture
-            gl.uniform1i(programInfo.uniformLocations.textureLocation, 0);
-
-            // gl.drawArrays(gl.TRIANGLES, 0, buffer['positionSize'] / 3);
-
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffer['index']);
-            gl.drawElements(gl.TRIANGLES, buffer['indexSize'], gl.UNSIGNED_SHORT, 0);
-            gl.bindBuffer(gl.ARRAY_BUFFER, null);
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
-        }
-    }
-
+    drawScene(context, gl, shaderProgram, buffers, projection, view, deltaTime);
 }
 
 // Set up the VR display and callbacks
@@ -404,32 +251,32 @@ function vrSetup(canvas, gl, programInfo, buffers, noVRRender, vrCallback) {
     navigator.getVRDisplays().then(displays => {
         if (displays !== null && displays.length > 0) {
             // Assign last returned display to vrDisplay
-            vrDisplay = displays[displays.length - 1];
+            context.vrDisplay = displays[displays.length - 1];
 
             // optional, but recommended
-            vrDisplay.depthNear = 0.1;
-            vrDisplay.depthFar = 100.0;
+            context.vrDisplay.depthNear = 0.1;
+            context.vrDisplay.depthFar = 100.0;
         }
     });
 
     (<any>window).addEventListener('vrdisplaypresentchange', () => {
 
         // Are we entering or exiting VR?
-        if (vrDisplay != null && vrDisplay.isPresenting) {
+        if (context.vrDisplay != null && context.vrDisplay.isPresenting) {
             // We should make our canvas the size expected
             // by WebVR
-            const eye = vrDisplay.getEyeParameters("left");
+            const eye = context.vrDisplay.getEyeParameters("left");
             // multiply by two since we're rendering both eyes side
             // by side
             canvas.width = eye.renderWidth * 2;
             canvas.height = eye.renderHeight;
 
-            vrDisplay.requestAnimationFrame(vrCallback);
+            context.vrDisplay.requestAnimationFrame(vrCallback);
 
-        } else if (vrDisplay !== null) {
+        } else if (context.vrDisplay !== null) {
             console.log('Exit VR');
 
-            inVR = false;
+            context.inVR = false;
             canvas.width = 640;
             canvas.height = 480;
 
