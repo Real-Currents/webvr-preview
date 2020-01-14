@@ -126,9 +126,14 @@ export default function drawScene (context: any, gl: WebGL2RenderingContext, sha
                     modelYRotationRadians: 0.0,
                     modelZRotationRadians: 0.0
                 }
-                transformationBuffers['rotationBuffers'][n]['modelXRotationRadians'] = deltaTime * buffer['rotation'][0] + transformationBuffers['rotationBuffers'][n]['modelXRotationRadians'];
-                transformationBuffers['rotationBuffers'][n]['modelYRotationRadians'] = deltaTime * buffer['rotation'][1] + transformationBuffers['rotationBuffers'][n]['modelYRotationRadians'];
-                transformationBuffers['rotationBuffers'][n]['modelZRotationRadians'] = deltaTime * buffer['rotation'][2] + transformationBuffers['rotationBuffers'][n]['modelZRotationRadians'];
+                transformationBuffers['rotationBuffers'][n]['modelXRotationRadians'] = buffer['rotation'][0];
+                transformationBuffers['rotationBuffers'][n]['modelYRotationRadians'] = buffer['rotation'][1];
+                transformationBuffers['rotationBuffers'][n]['modelZRotationRadians'] = buffer['rotation'][2];
+
+                // Delta
+                // transformationBuffers['rotationBuffers'][n]['modelXRotationRadians'] = deltaTime * buffer['rotation'][0] + transformationBuffers['rotationBuffers'][n]['modelXRotationRadians'];
+                // transformationBuffers['rotationBuffers'][n]['modelYRotationRadians'] = deltaTime * buffer['rotation'][1] + transformationBuffers['rotationBuffers'][n]['modelYRotationRadians'];
+                // transformationBuffers['rotationBuffers'][n]['modelZRotationRadians'] = deltaTime * buffer['rotation'][2] + transformationBuffers['rotationBuffers'][n]['modelZRotationRadians'];
 
                 mat4.rotateX(worldMatrix, worldMatrix, transformationBuffers['rotationBuffers'][n]['modelXRotationRadians']);
                 mat4.rotateY(worldMatrix, worldMatrix, transformationBuffers['rotationBuffers'][n]['modelYRotationRadians']);
