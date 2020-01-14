@@ -117,7 +117,7 @@ function main () {
         }
     ]
     let camera = 0;
-    const changeCamera = function (event) {;
+    const changeCamera = function (event) {
         updateContext(gl, cameras[camera]);
     }
 
