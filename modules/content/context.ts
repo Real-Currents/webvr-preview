@@ -11,7 +11,7 @@ let worldLocation: WebGLUniformLocation;
 let textureLocation: WebGLUniformLocation;
 let worldCameraPositionLocation: WebGLUniformLocation;
 
-export default function createContext (canvas: HTMLCanvasElement, initBuffers: Function, initShaders: Function): WebGL2RenderingContext {
+export default async function createContext (canvas: HTMLCanvasElement, initBuffers: Function, initShaders: Function): Promise<WebGL2RenderingContext> {
     const gl: WebGL2RenderingContext = (
         (canvas.getContext('webgl2') || canvas.getContext('experimental-webgl')
         ) as any as WebGLRenderingContextStrict) as any as WebGL2RenderingContext;
@@ -64,7 +64,9 @@ export default function createContext (canvas: HTMLCanvasElement, initBuffers: F
 
     // Here's where we call the routine that builds all the
     // objects we'll be drawing.
-    const buffers = initBuffers(gl);
+    const buffers = await initBuffers(gl);
+
+    console.log(buffers);
 
     let then = 0;
 
@@ -222,7 +224,7 @@ function drawScene(gl, programInfo, buffers, projection, view = null, deltaTime)
 
     mat4.translate(modelViewMatrix,     // destination matrix
         modelViewMatrix,     // matrix to translate
-        [-0.0, 0.0, -2.5]);  // amount to translate
+        [0.0, 0.0, -25]);  // amount to translate
 
     mat4.rotate(modelViewMatrix,  // destination matrix
         modelViewMatrix,  // matrix to rotate
@@ -243,7 +245,7 @@ function drawScene(gl, programInfo, buffers, projection, view = null, deltaTime)
     }
 
     const lightDiffuseColor = [1, 1, 1];
-    const lightDirection = [0, -0.5, -1];
+    const lightDirection = [0, -0.5, -10];
     const materialColor = [0.5, 0.75, 0.25];
     const normalMatrix = mat4.create();
 
