@@ -3,8 +3,8 @@ import backgroundUpdater from "./modules/basic/background-update";
 import createContext from './modules/content/context';
 import initBuffers from "./modules/content/cube-buffers";
 // import initBuffers from "./modules/content/firewood-buffers";
-// import initShaderProgram from "./modules/content/basic-shaders";
-import initShaderProgram from "./modules/content/normal-shaders";
+import initShaderProgram from "./modules/content/basic-shaders";
+// import initShaderProgram from "./modules/content/normal-shaders";
 import generateFace from "./modules/content/face-generator";
 
 const canvas: HTMLCanvasElement = (window.document.querySelector('canvas#cv') !== null) ?
