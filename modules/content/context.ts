@@ -10,7 +10,7 @@ const context = {
     worldCameraPosition: [0, 0, -2.5]
 }
 
-export default function createContext (
+export default async function createContext (
     initContext: any = {
         canvas: window.document.createElement('canvas'),
         viewPosition: [ 0, 0, -5 ],
@@ -19,7 +19,7 @@ export default function createContext (
     },
     initBuffers: Function,
     initShaders: Function
-): { gl: WebGL2RenderingContext, updateContext: Function } {
+): Promise<{ gl: WebGL2RenderingContext, updateContext: Function }> {
     const canvas: HTMLCanvasElement = (initContext.canvas) as any as HTMLCanvasElement;
     const gl: WebGL2RenderingContext = (
         (canvas.getContext('webgl2') || canvas.getContext('experimental-webgl')
@@ -38,7 +38,7 @@ export default function createContext (
 
     // Here's where we call the routine that builds all the
     // objects we'll be drawing.
-    context.buffers.push(initBuffers(gl));
+    context.buffers.push(await initBuffers(gl));
 
     let then = 0;
 

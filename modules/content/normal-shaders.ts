@@ -39,8 +39,8 @@ void main() {
   float lambertTerm = dot(N, -L);
 
   // Calculating the diffuse color based on the Lambertian reflection model
-  // vec3 Id = uMaterialDiffuse * uLightDiffuse * lambertTerm;
-  vec3 Id = aVertexColor.rgb * uLightDiffuse * lambertTerm;
+  vec3 Id = uMaterialDiffuse * uLightDiffuse * lambertTerm;
+  // vec3 Id = aVertexColor.rgb * uLightDiffuse * lambertTerm;
 
   // Set the varying to be used inside of the fragment shader
   vVertexColor = vec4(Id, 1.0);

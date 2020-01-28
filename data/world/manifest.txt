@@ -1,0 +1,2 @@
+original OBJ file: modules/world/cube.obj
+part1.json > alias: Cube
