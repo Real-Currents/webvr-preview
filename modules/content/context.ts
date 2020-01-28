@@ -228,28 +228,33 @@ function drawScene(gl, programInfo, buffers, projection, view = null, deltaTime)
 
     mat4.rotate(modelViewMatrix,  // destination matrix
         modelViewMatrix,  // matrix to rotate
-        modelXRotationRadians     ,// amount to rotate in radians
+        modelXRotationRadians, // amount to rotate in radians
         [1, 0, 0]);       // axis to rotate around (X)
     mat4.rotate(modelViewMatrix,  // destination matrix
         modelViewMatrix,  // matrix to rotate
         modelYRotationRadians, // amount to rotate in radians
         [0, 1, 0]);       // axis to rotate around (Y)
-    // mat4.rotate(modelViewMatrix,  // destination matrix
-    //     modelViewMatrix,  // matrix to rotate
-    //     cubeRotation,     // amount to rotate in radians
-    //     [0, 0, 1]);       // axis to rotate around (Z)
 
     if (view !== null) {
         // Premultiply the view matrix
         mat4.multiply(modelViewMatrix, view, modelViewMatrix);
     }
 
-    const lightDiffuseColor = [1, 1, 1];
-    const lightDirection = [0, -0.5, -10];
-    const materialColor = [0.5, 0.75, 0.25];
+    const lightDiffuseColor = [ 1, 1, 1 ];
+    const lightDirection = [ -1.0, -0.5, 0.0 ] ;
+    const materialColor = [ 0.5, 0.75, 0.25 ];
     const normalMatrix = mat4.create();
 
     mat4.copy(normalMatrix, modelViewMatrix);
+    // Exclude light direction from modelview rotations
+    mat4.rotate(normalMatrix,  // destination matrix
+        normalMatrix,  // matrix to rotate
+        -modelYRotationRadians, // amount to rotate in radians
+        [0, 1, 0]);       // axis to rotate around (Y)
+    mat4.rotate(normalMatrix,  // destination matrix
+        normalMatrix,  // matrix to rotate
+        -modelXRotationRadians, // amount to rotate in radians
+        [1, 0, 0]);       // axis to rotate around (X)
     mat4.invert(normalMatrix, normalMatrix);
     mat4.transpose(normalMatrix, normalMatrix);
 
