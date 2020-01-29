@@ -7,9 +7,9 @@ import {stringify} from "querystring";
 //
 export default function drawScene (context: any, gl: WebGL2RenderingContext, shaderProgram, buffers, projectionMatrix, view = null, deltaTime) {
 
-    const cameraPosition = (context.viewPosition !== null) ?
-        context.viewPosition :
-        [ 0, 0, context.worldCameraPosition[2] / 1.5 ];
+    const cameraPosition = [ 0, 0, -25 ] ; //(context.viewPosition !== null) ?
+        // context.viewPosition :
+        // [ 0, 0, context.worldCameraPosition[2] / 1.5 ];
     const target = context.viewTarget;
     const up = [ 0, 1, 0 ];
     // Compute the camera's matrix using look at.
@@ -57,6 +57,26 @@ export default function drawScene (context: any, gl: WebGL2RenderingContext, sha
             // Tell WebGL to use our program when drawing
             gl.useProgram(programInfo.program);
 
+            // Tell WebGL how to pull out the positions from the position
+            // buffer into the vertexPosition attribute
+            {
+                const numComponents = 3;
+                const type = gl.FLOAT;
+                const normalize = false;
+                const stride = 0;
+                const offset = 0;
+                gl.enableVertexAttribArray(
+                    programInfo.attribLocations.vertexPosition);
+                gl.bindBuffer(gl.ARRAY_BUFFER, buffer['position']);
+                gl.vertexAttribPointer(
+                    programInfo.attribLocations.vertexPosition,
+                    numComponents,
+                    type,
+                    normalize,
+                    stride,
+                    offset);
+            }
+
             // Tell WebGL how to pull out the colors from the color buffer
             // into the vertexColor attribute.
             {
@@ -79,26 +99,6 @@ export default function drawScene (context: any, gl: WebGL2RenderingContext, sha
                     programInfo.attribLocations.vertexColor);
             }
 
-            // Tell WebGL how to pull out the positions from the position
-            // buffer into the vertexPosition attribute
-            {
-                const numComponents = 3;
-                const type = gl.FLOAT;
-                const normalize = false;
-                const stride = 0;
-                const offset = 0;
-                gl.enableVertexAttribArray(
-                    programInfo.attribLocations.vertexPosition);
-                gl.bindBuffer(gl.ARRAY_BUFFER, buffer['position']);
-                gl.vertexAttribPointer(
-                    programInfo.attribLocations.vertexPosition,
-                    numComponents,
-                    type,
-                    normalize,
-                    stride,
-                    offset);
-            }
-
             // Tell WebGL how to pull normals out of normalBuffer (ARRAY_BUFFER)
             {
                 const numComponents = 3; // 3 components per iteration
@@ -119,7 +119,26 @@ export default function drawScene (context: any, gl: WebGL2RenderingContext, sha
                     offset);
             }
 
-            // Animate the rotation
+            // Translation
+            if (!!buffer['translation'] && buffer['translation'].length === 3) {
+                if (!(n in transformationBuffers['translationBuffers'])) transformationBuffers['translationBuffers'][n] = {
+                    modelXRotationRadians: 0.0,
+                    modelYRotationRadians: 0.0,
+                    modelZRotationRadians: 0.0
+                }
+                transformationBuffers['translationBuffers'][n]['modelXTranslation'] = buffer['translation'][0];
+                transformationBuffers['translationBuffers'][n]['modelYTranslation'] = buffer['translation'][1];
+                transformationBuffers['translationBuffers'][n]['modelZTranslation'] = buffer['translation'][2];
+
+                mat4.translate(worldMatrix, worldMatrix, [
+                    -transformationBuffers['translationBuffers'][n]['modelXTranslation'],
+                    transformationBuffers['translationBuffers'][n]['modelYTranslation'],
+                    transformationBuffers['translationBuffers'][n]['modelZTranslation']
+                ])
+
+            }
+
+            // Rotation
             if (!!buffer['rotation'] && buffer['rotation'].length === 3) {
                 if (!(n in transformationBuffers['rotationBuffers'])) transformationBuffers['rotationBuffers'][n] = {
                     modelXRotationRadians: 0.0,

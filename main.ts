@@ -1,7 +1,8 @@
 // import createContext from './modules/basic/webvr-context';
 import backgroundUpdater from "./modules/basic/background-update";
 import createContext from './modules/content/context';
-import initShaderProgram from "./modules/content/cubemap-shaders";
+import initShaderProgram from "./modules/content/basic-shaders";
+// import initShaderProgram from "./modules/content/cubemap-shaders";
 import initBuffers from "./modules/content/cube-buffers";
 import innerBuffers from "./modules/content/inner-cube-buffers";
 import outerBuffers from "./modules/content/outer-cube-buffers";
@@ -108,7 +109,7 @@ function main () {
 
     const cameras = [
         {
-            'viewPosition': [ 0, 0, -5 ],
+            'viewPosition': [ 0, 0, -25 ],
             'viewTarget': [ 0, 0, 0 ]
         },
         {
