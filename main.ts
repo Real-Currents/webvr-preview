@@ -1,7 +1,7 @@
 // import createContext from './modules/basic/webvr-context';
 import backgroundUpdater from "./modules/basic/background-update";
 import createContext from './modules/content/context';
-import initShaderProgram from "./modules/content/basic-shaders";
+import initShaderProgram from "./modules/basic/basic-shaders";
 // import initShaderProgram from "./modules/content/cubemap-shaders";
 // import initShaderProgram from "./modules/content/normal-shaders";
 import initBuffers from "./modules/content/cube-buffers";
@@ -51,17 +51,42 @@ function main () {
         ctx.canvas.width = 128;
         ctx.canvas.height = 128;
 
-        let frame = 0;
-        let timeout = null;
-        let lastKeyPress = (new Date()).getTime();
+        let camera = {
+            current: 0,
+            changeCamera: function (event) {
+                updateContext(gl, this.viewPoints[this.current]);
+            },
+            viewPoints: [
+                {
+                    'viewPosition': [ 0, 0, -5 ],
+                    'viewTarget': [ 0, 0, 0 ]
+                },
+                {
+                    'viewPosition': [ 0.5, 0, 2.5 ],
+                    'viewTarget': [ 0, 0, 0 ]
+                }
+            ]
+        };
 
-        const { gl, updateContext } = await createContext({ canvas }, initBuffers, initShaderProgram);
+        const { gl, updateContext } = await createContext(
+            {
+                canvas,
+                viewPosition: camera.viewPoints[0].viewPosition,
+                viewTarget: camera.viewPoints[0].viewTarget
+            },
+            initBuffers,
+            initShaderProgram);
 
         backgroundUpdater(gl);
 
         // Create a texture.
         const texture = gl.createTexture();
         gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
+
+        let frame = 0;
+        let timeout = null;
+        let lastKeyPress = (new Date()).getTime();
+        window['userTriggered'] = false;
 
         const faceInfos = [
             { target: gl.TEXTURE_CUBE_MAP_POSITIVE_X, faceColor: '#F00', textColor: '#0FF', text: '+X' },
@@ -114,21 +139,6 @@ function main () {
         gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
         gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
 
-        const cameras = [
-            {
-                'viewPosition': [ 0, 0, -5 ],
-                'viewTarget': [ 0, 0, 0 ]
-            },
-            {
-                'viewPosition': [ 0.5, 0, 2.5 ],
-                'viewTarget': [ 0, 0, 0 ]
-            }
-        ]
-        let camera = 0;
-        const changeCamera = function (event) {
-            updateContext(gl, cameras[camera]);
-        }
-
         const triggerMovement = function (event) {
             // console.log(lastKeyPress, ((new Date()).getTime() - lastKeyPress));
             // console.log(startVideo);
@@ -145,7 +155,7 @@ function main () {
                                     innerBuffers
                                 ],
                                 'cameraDelta': [0, 0, +0.05],
-                                'viewPosition': cameras[camera]['viewPosition'],
+                                'viewPosition': camera.viewPoints[camera.current]['viewPosition'],
                                 'worldCameraPosition': [0, 0, -2.5]
                             });
                         } else {
@@ -235,139 +245,3 @@ function main () {
 }
 
 main();
-
-    // // DRAW
-    // // Set the drawing position to the "identity" point, which is
-    // // the center of the scene.
-    // const modelViewMatrix = mat4.create();
-    //
-    // cubeRotation += deltaTime;
-    //
-    // // Animate the rotation
-    // const modelXRotationRadians = cubeRotation * 0.4;
-    // const modelYRotationRadians = cubeRotation * 0.7;
-    //
-    // // Now move the drawing position a bit to where we want to
-    // // start drawing the square.
-    //
-    // mat4.translate(modelViewMatrix,     // destination matrix
-    //     modelViewMatrix,     // matrix to translate
-    //     [0.0, 0.0, -25]);  // amount to translate
-    //
-    // mat4.rotate(modelViewMatrix,  // destination matrix
-    //     modelViewMatrix,  // matrix to rotate
-    //     modelXRotationRadians, // amount to rotate in radians
-    //     [1, 0, 0]);       // axis to rotate around (X)
-    // mat4.rotate(modelViewMatrix,  // destination matrix
-    //     modelViewMatrix,  // matrix to rotate
-    //     modelYRotationRadians, // amount to rotate in radians
-    //     [0, 1, 0]);       // axis to rotate around (Y)
-    //
-    // if (view !== null) {
-    //     // Premultiply the view matrix
-    //     mat4.multiply(modelViewMatrix, view, modelViewMatrix);
-    // }
-    //
-    // const lightDiffuseColor = [ 1, 1, 1 ];
-    // const lightDirection = [ -1.0, -0.5, 0.0 ] ;
-    // const materialColor = [ 0.5, 0.75, 0.25 ];
-    // const normalMatrix = mat4.create();
-    //
-    // mat4.copy(normalMatrix, modelViewMatrix);
-    // // Exclude light direction from modelview rotations
-    // mat4.rotate(normalMatrix,  // destination matrix
-    //     normalMatrix,  // matrix to rotate
-    //     -modelYRotationRadians, // amount to rotate in radians
-    //     [0, 1, 0]);       // axis to rotate around (Y)
-    // mat4.rotate(normalMatrix,  // destination matrix
-    //     normalMatrix,  // matrix to rotate
-    //     -modelXRotationRadians, // amount to rotate in radians
-    //     [1, 0, 0]);       // axis to rotate around (X)
-    // mat4.invert(normalMatrix, normalMatrix);
-    // mat4.transpose(normalMatrix, normalMatrix);
-    //
-    // // Tell WebGL how to pull out the positions from the position
-    // // buffer into the vertexPosition attribute
-    // {
-    //     const numComponents = 3;
-    //     const type = gl.FLOAT;
-    //     const normalize = false;
-    //     const stride = 0;
-    //     const offset = 0;
-    //     gl.enableVertexAttribArray(
-    //         programInfo.attribLocations.vertexPosition);
-    //     gl.bindBuffer(gl.ARRAY_BUFFER, buffers['position']);
-    //     gl.vertexAttribPointer(
-    //         programInfo.attribLocations.vertexPosition,
-    //         numComponents,
-    //         type,
-    //         normalize,
-    //         stride,
-    //         offset);
-    // }
-    //
-    // // Tell WebGL how to pull out the colors from the color buffer
-    // // into the vertexColor attribute.
-    // {
-    //     const numComponents = 4;
-    //     const type = gl.FLOAT;
-    //     const normalize = false;
-    //     const stride = 0;
-    //     const offset = 0;
-    //     gl.enableVertexAttribArray(
-    //         programInfo.attribLocations.vertexColor);
-    //     gl.bindBuffer(gl.ARRAY_BUFFER, buffers['color']);
-    //     gl.vertexAttribPointer(
-    //         programInfo.attribLocations.vertexColor,
-    //         numComponents,
-    //         type,
-    //         normalize,
-    //         stride,
-    //         offset);
-    // }
-    //
-    // // Tell WebGL how to pull normals out of normalBuffer (ARRAY_BUFFER)
-    // {
-    //     const numComponents = 3; // 3 components per iteration
-    //     const type = gl.FLOAT;   // the data is 32bit floating point values
-    //     const normalize = false; // normalize the data (convert from 0-255 to 0-1)
-    //     const stride = 0;        // 0 = move forward size * sizeof(type) each iteration to get the next position
-    //     const offset = 0;        // start at the beginning of the buffer
-    //     gl.enableVertexAttribArray(
-    //         programInfo.attribLocations.vertexNormal);
-    //     // Bind the normal buffer.
-    //     gl.bindBuffer(gl.ARRAY_BUFFER, buffers['normal']);
-    //     gl.vertexAttribPointer(
-    //         programInfo.attribLocations.vertexNormal,
-    //         numComponents,
-    //         type,
-    //         normalize,
-    //         stride,
-    //         offset);
-    // }
-    //
-    // // Tell WebGL to use our program when drawing
-    // gl.useProgram(programInfo.program);
-    //
-    // gl.uniformMatrix4fv(
-    //     programInfo.uniformLocations.projectionMatrix,
-    //     false,
-    //     projection);
-    //
-    // gl.uniformMatrix4fv(
-    //     programInfo.uniformLocations.modelViewMatrix,
-    //     false,
-    //     modelViewMatrix);
-    //
-    // gl.uniformMatrix4fv(programInfo.uniformLocations.normalMatrix, false, normalMatrix);
-    //
-    // gl.uniform3fv(programInfo.uniformLocations.lightDirection, lightDirection);
-    // gl.uniform3fv(programInfo.uniformLocations.lightDiffuse, lightDiffuseColor);
-    // gl.uniform3fv(programInfo.uniformLocations.materialDiffuse, materialColor);
-    //
-    // {
-    //     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffers['index']);
-    //     gl.drawElements(gl.TRIANGLES, buffers['indexSize'], gl.UNSIGNED_SHORT, 0);
-    //     gl.bindBuffer(gl.ARRAY_BUFFER, null);
-    //     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
-    // }

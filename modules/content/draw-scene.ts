@@ -7,22 +7,22 @@ import {stringify} from "querystring";
 //
 export default function drawScene (context: any, gl: WebGL2RenderingContext, shaderProgram, buffers, projectionMatrix, view = null, deltaTime) {
 
-    const cameraPosition = [ 0, 0, -15 ] ; //(context.viewPosition !== null) ?
-        // context.viewPosition :
-        // [ 0, 0, context.worldCameraPosition[2] / 1.5 ];
+    const cameraPosition = (context.viewPosition !== null) ?
+        context.viewPosition :
+        [ 0, 0, context.worldCameraPosition[2] / 1.5 ];
     const target = context.viewTarget;
     const up = [ 0, 1, 0 ];
     // Compute the camera's matrix using look at.
     const cameraMatrix = mat4.lookAt(mat4.create(), cameraPosition, target, up);
 
     // Make a view matrix from the camera matrix.
-    const viewMatrix = cameraMatrix; // mat4.invert(mat4.create(), cameraMatrix);
+    const modelViewMatrix = cameraMatrix; // mat4.invert(mat4.create(), cameraMatrix);
 
     const worldMatrix = mat4.create()
 
     if (view !== null) {
         // Premultiply the view matrix
-        mat4.multiply(viewMatrix, view, viewMatrix);
+        mat4.multiply(modelViewMatrix, view, modelViewMatrix);
     }
 
     const lightDiffuseColor = [ 1, 1, 1 ];
@@ -42,6 +42,10 @@ export default function drawScene (context: any, gl: WebGL2RenderingContext, sha
             // for aVertexPosition, aVevrtexColor and also
             // look up uniform locations.
             const program = (!!buffer['program']) ? buffer['program'] : shaderProgram
+
+            // Tell WebGL to use our program when drawing
+            gl.useProgram(program);
+
             const programInfo = {
                 program: program,
                 attribLocations: {
@@ -50,15 +54,15 @@ export default function drawScene (context: any, gl: WebGL2RenderingContext, sha
                     vertexColor: gl.getAttribLocation(program, 'aVertexColor'),
                 },
                 uniformLocations: {
-                    projectionMatrix: gl.getUniformLocation(program, 'uProjectionMatrix'),
                     modelViewMatrix: gl.getUniformLocation(program, 'uModelViewMatrix'),
-                    normalMatrix: gl.getUniformLocation(program, "uNormalMatrix"),
+                    projectionMatrix: gl.getUniformLocation(program, 'uProjectionMatrix'),
                     worldMatrix: gl.getUniformLocation(program, "uWorldMatrix"),
+                    lightDirection: gl.getUniformLocation(program, 'uLightDirection'),
+                    lightDiffuse: gl.getUniformLocation(program, "uLightDiffuse"),
+                    materialDiffuse: gl.getUniformLocation(program, "uMaterialDiffuse"),
+                    normalMatrix: gl.getUniformLocation(program, "uNormalMatrix"),
                     textureLocation: gl.getUniformLocation(program, "uTexture"),
-                    worldCameraPositionLocation: gl.getUniformLocation(program, "uWorldCameraPosition"),
-                    lightDirection: gl.getUniformLocation(shaderProgram, 'uLightDirection'),
-                    lightDiffuse: gl.getUniformLocation(shaderProgram, "uLightDiffuse"),
-                    materialDiffuse: gl.getUniformLocation(shaderProgram, "uMaterialDiffuse")
+                    worldCameraPositionLocation: gl.getUniformLocation(program, "uWorldCameraPosition")
                 },
             };
 
@@ -75,26 +79,6 @@ export default function drawScene (context: any, gl: WebGL2RenderingContext, sha
                 gl.bindBuffer(gl.ARRAY_BUFFER, buffer['position']);
                 gl.vertexAttribPointer(
                     programInfo.attribLocations.vertexPosition,
-                    numComponents,
-                    type,
-                    normalize,
-                    stride,
-                    offset);
-            }
-
-            // Tell WebGL how to pull normals out of normalBuffer (ARRAY_BUFFER)
-            {
-                const numComponents = 3; // 3 components per iteration
-                const type = gl.FLOAT;   // the data is 32bit floating point values
-                const normalize = false; // normalize the data (convert from 0-255 to 0-1)
-                const stride = 0;        // 0 = move forward size * sizeof(type) each iteration to get the next position
-                const offset = 0;        // start at the beginning of the buffer
-                gl.enableVertexAttribArray(
-                    programInfo.attribLocations.vertexNormal);
-                // Bind the normal buffer.
-                gl.bindBuffer(gl.ARRAY_BUFFER, buffer['normal']);
-                gl.vertexAttribPointer(
-                    programInfo.attribLocations.vertexNormal,
                     numComponents,
                     type,
                     normalize,
@@ -124,6 +108,28 @@ export default function drawScene (context: any, gl: WebGL2RenderingContext, sha
                     programInfo.attribLocations.vertexColor);
             }
 
+            // Tell WebGL how to pull normals out of normalBuffer (ARRAY_BUFFER)
+            {
+                const numComponents = 3; // 3 components per iteration
+                const type = gl.FLOAT;   // the data is 32bit floating point values
+                const normalize = false; // normalize the data (convert from 0-255 to 0-1)
+                const stride = 0;        // 0 = move forward size * sizeof(type) each iteration to get the next position
+                const offset = 0;        // start at the beginning of the buffer
+                gl.enableVertexAttribArray(
+                    programInfo.attribLocations.vertexNormal);
+                // Bind the normal buffer.
+                gl.bindBuffer(gl.ARRAY_BUFFER, buffer['normal']);
+                gl.vertexAttribPointer(
+                    programInfo.attribLocations.vertexNormal,
+                    numComponents,
+                    type,
+                    normalize,
+                    stride,
+                    offset);
+            }
+
+            // mat4.copy(normalMatrix, viewMatrix);
+
             // Translation
             if (!!buffer['translation'] && buffer['translation'].length === 3) {
                 if (!(n in transformationBuffers['translationBuffers'])) transformationBuffers['translationBuffers'][n] = {
@@ -143,7 +149,7 @@ export default function drawScene (context: any, gl: WebGL2RenderingContext, sha
 
             }
 
-            // Animate the rotation
+            // Rotation
             if (!!buffer['rotation'] && buffer['rotation'].length === 3) {
                 if (!(n in transformationBuffers['rotationBuffers'])) transformationBuffers['rotationBuffers'][n] = {
                     modelXRotationRadians: 0.0,
@@ -165,41 +171,38 @@ export default function drawScene (context: any, gl: WebGL2RenderingContext, sha
                 mat4.rotateY(worldMatrix, worldMatrix, transformationBuffers['rotationBuffers'][n]['modelYRotationRadians']);
                 mat4.rotateZ(worldMatrix, worldMatrix, transformationBuffers['rotationBuffers'][n]['modelZRotationRadians']);
 
-                mat4.copy(normalMatrix, viewMatrix);
-                // Exclude light direction from view matrix transformations
-                mat4.rotate(normalMatrix,  // destination matrix
-                    normalMatrix,  // matrix to rotate
-                    -transformationBuffers['rotationBuffers'][n]['modelZRotationRadians'], // amount to rotate in radians
-                    [0, 0, 1]);       // axis to rotate around (Y)
-                mat4.rotate(normalMatrix,  // destination matrix
-                    normalMatrix,  // matrix to rotate
-                    -transformationBuffers['rotationBuffers'][n]['modelYRotationRadians'], // amount to rotate in radians
-                    [0, 1, 0]);       // axis to rotate around (Y)
-                mat4.rotate(normalMatrix,  // destination matrix
-                    normalMatrix,  // matrix to rotate
-                    -transformationBuffers['rotationBuffers'][n]['modelXRotationRadians'], // amount to rotate in radians
-                    [1, 0, 0]);       // axis to rotate around (X)
-                mat4.invert(normalMatrix, normalMatrix);
-                mat4.transpose(normalMatrix, normalMatrix);
+                // // Exclude light direction from view matrix transformations
+                // mat4.rotate(normalMatrix,  // destination matrix
+                //     normalMatrix,  // matrix to rotate
+                //     -transformationBuffers['rotationBuffers'][n]['modelZRotationRadians'], // amount to rotate in radians
+                //     [0, 0, 1]);       // axis to rotate around (Y)
+                // mat4.rotate(normalMatrix,  // destination matrix
+                //     normalMatrix,  // matrix to rotate
+                //     -transformationBuffers['rotationBuffers'][n]['modelYRotationRadians'], // amount to rotate in radians
+                //     [0, 1, 0]);       // axis to rotate around (Y)
+                // mat4.rotate(normalMatrix,  // destination matrix
+                //     normalMatrix,  // matrix to rotate
+                //     -transformationBuffers['rotationBuffers'][n]['modelXRotationRadians'], // amount to rotate in radians
+                //     [1, 0, 0]);       // axis to rotate around (X)
 
             } else if (buffer.length > 1 && b === 1) {
                 // For some reason texture(uTexture, direction) is upside-down
                 mat4.rotateZ(worldMatrix, worldMatrix, Math.PI / 2);
             }
 
-            // Tell WebGL to use our program when drawing
-            gl.useProgram(programInfo.program);
+            mat4.invert(normalMatrix, normalMatrix);
+            mat4.transpose(normalMatrix, normalMatrix);
 
             // Set the uniforms
+            gl.uniformMatrix4fv(programInfo.uniformLocations.modelViewMatrix, false, modelViewMatrix);
             gl.uniformMatrix4fv(programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
-            gl.uniformMatrix4fv(programInfo.uniformLocations.modelViewMatrix, false, viewMatrix);
             gl.uniformMatrix4fv(programInfo.uniformLocations.worldMatrix, false, worldMatrix);
 
+            gl.uniform3fv(programInfo.uniformLocations.lightDirection, lightDirection);
+            gl.uniform3fv(programInfo.uniformLocations.lightDiffuse, lightDiffuseColor);
+            gl.uniform3fv(programInfo.uniformLocations.materialDiffuse, materialColor);
+
             gl.uniformMatrix4fv(programInfo.uniformLocations.normalMatrix, false, normalMatrix);
-            //
-            // gl.uniform3fv(programInfo.uniformLocations.lightDirection, lightDirection);
-            // gl.uniform3fv(programInfo.uniformLocations.lightDiffuse, lightDiffuseColor);
-            // gl.uniform3fv(programInfo.uniformLocations.materialDiffuse, materialColor);
 
             // Set the drawing position to the "identity" point, which is
             // the center of the scene.
@@ -209,7 +212,6 @@ export default function drawScene (context: any, gl: WebGL2RenderingContext, sha
             gl.uniform1i(programInfo.uniformLocations.textureLocation, 0);
 
             {
-
                 // gl.drawArrays(gl.TRIANGLES, 0, buffer['positionSize'] / 3);
                 gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffer['index']);
                 gl.drawElements(gl.TRIANGLES, buffer['indexSize'], gl.UNSIGNED_SHORT, 0);

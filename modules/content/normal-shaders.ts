@@ -10,12 +10,13 @@ in vec3 aVertexNormal;
 in vec3 aVertexPosition;
 
 uniform mat4 uModelViewMatrix;
-uniform mat4 uNormalMatrix;
+uniform mat4 uProjectionMatrix;
+uniform mat4 uWorldMatrix;
+
 uniform vec3 uLightDirection;
 uniform vec3 uLightDiffuse;
 uniform vec3 uMaterialDiffuse;
-uniform mat4 uProjectionMatrix;
-uniform mat4 uWorldMatrix;
+uniform mat4 uNormalMatrix;
 
 out vec3 v_normal;
 out vec3 v_worldNormal;
@@ -39,8 +40,8 @@ void main() {
   float lambertTerm = dot(N, -L);
 
   // Calculating the diffuse color based on the Lambertian reflection model
-  // vec3 Id = uMaterialDiffuse * uLightDiffuse * lambertTerm;
-  vec3 Id = aVertexColor.rgb * uLightDiffuse * lambertTerm;
+  vec3 Id = uMaterialDiffuse * uLightDiffuse * lambertTerm;
+  // vec3 Id = aVertexColor.rgb * uLightDiffuse * lambertTerm;
 
   // Set the varying to be used inside of the fragment shader
   vVertexColor = vec4(Id, 1.0);
