@@ -7,9 +7,9 @@ import {stringify} from "querystring";
 //
 export default function drawScene (context: any, gl: WebGL2RenderingContext, shaderProgram, buffers, projectionMatrix, view = null, deltaTime) {
 
-    const cameraPosition = (context.viewPosition !== null) ?
-        context.viewPosition :
-        [ 0, 0, context.worldCameraPosition[2] / 1.5 ];
+    const cameraPosition = [ 0, 0, -15 ] ; //(context.viewPosition !== null) ?
+        // context.viewPosition :
+        // [ 0, 0, context.worldCameraPosition[2] / 1.5 ];
     const target = context.viewTarget;
     const up = [ 0, 1, 0 ];
     // Compute the camera's matrix using look at.
@@ -29,7 +29,6 @@ export default function drawScene (context: any, gl: WebGL2RenderingContext, sha
     const lightDirection = [ -1.0, -0.5, 0.0 ] ;
     const materialColor = [ 0.5, 0.75, 0.25 ];
     const normalMatrix = mat4.create();
-
 
     if (buffers.length > 0) {
         let b = 0;
@@ -125,6 +124,25 @@ export default function drawScene (context: any, gl: WebGL2RenderingContext, sha
                     programInfo.attribLocations.vertexColor);
             }
 
+            // Translation
+            if (!!buffer['translation'] && buffer['translation'].length === 3) {
+                if (!(n in transformationBuffers['translationBuffers'])) transformationBuffers['translationBuffers'][n] = {
+                    modelXRotationRadians: 0.0,
+                    modelYRotationRadians: 0.0,
+                    modelZRotationRadians: 0.0
+                }
+                transformationBuffers['translationBuffers'][n]['modelXTranslation'] = buffer['translation'][0];
+                transformationBuffers['translationBuffers'][n]['modelYTranslation'] = buffer['translation'][1];
+                transformationBuffers['translationBuffers'][n]['modelZTranslation'] = buffer['translation'][2];
+
+                mat4.translate(worldMatrix, worldMatrix, [
+                    -transformationBuffers['translationBuffers'][n]['modelXTranslation'],
+                    transformationBuffers['translationBuffers'][n]['modelYTranslation'],
+                    transformationBuffers['translationBuffers'][n]['modelZTranslation']
+                ])
+
+            }
+
             // Animate the rotation
             if (!!buffer['rotation'] && buffer['rotation'].length === 3) {
                 if (!(n in transformationBuffers['rotationBuffers'])) transformationBuffers['rotationBuffers'][n] = {
@@ -134,14 +152,14 @@ export default function drawScene (context: any, gl: WebGL2RenderingContext, sha
                 }
 
                 // Static
-                transformationBuffers['rotationBuffers'][n]['modelXRotationRadians'] = buffer['rotation'][0];
-                transformationBuffers['rotationBuffers'][n]['modelYRotationRadians'] = buffer['rotation'][1];
-                transformationBuffers['rotationBuffers'][n]['modelZRotationRadians'] = buffer['rotation'][2];
+                // transformationBuffers['rotationBuffers'][n]['modelXRotationRadians'] = buffer['rotation'][0];
+                // transformationBuffers['rotationBuffers'][n]['modelYRotationRadians'] = buffer['rotation'][1];
+                // transformationBuffers['rotationBuffers'][n]['modelZRotationRadians'] = buffer['rotation'][2];
 
                 // Delta
-                // transformationBuffers['rotationBuffers'][n]['modelXRotationRadians'] = deltaTime * buffer['rotation'][0] + transformationBuffers['rotationBuffers'][n]['modelXRotationRadians'];
-                // transformationBuffers['rotationBuffers'][n]['modelYRotationRadians'] = deltaTime * buffer['rotation'][1] + transformationBuffers['rotationBuffers'][n]['modelYRotationRadians'];
-                // transformationBuffers['rotationBuffers'][n]['modelZRotationRadians'] = deltaTime * buffer['rotation'][2] + transformationBuffers['rotationBuffers'][n]['modelZRotationRadians'];
+                transformationBuffers['rotationBuffers'][n]['modelXRotationRadians'] = deltaTime * buffer['rotation'][0] + transformationBuffers['rotationBuffers'][n]['modelXRotationRadians'];
+                transformationBuffers['rotationBuffers'][n]['modelYRotationRadians'] = deltaTime * buffer['rotation'][1] + transformationBuffers['rotationBuffers'][n]['modelYRotationRadians'];
+                transformationBuffers['rotationBuffers'][n]['modelZRotationRadians'] = deltaTime * buffer['rotation'][2] + transformationBuffers['rotationBuffers'][n]['modelZRotationRadians'];
 
                 mat4.rotateX(worldMatrix, worldMatrix, transformationBuffers['rotationBuffers'][n]['modelXRotationRadians']);
                 mat4.rotateY(worldMatrix, worldMatrix, transformationBuffers['rotationBuffers'][n]['modelYRotationRadians']);
@@ -164,9 +182,9 @@ export default function drawScene (context: any, gl: WebGL2RenderingContext, sha
                 mat4.invert(normalMatrix, normalMatrix);
                 mat4.transpose(normalMatrix, normalMatrix);
 
-            // } else if (buffer.length > 1 && b === 1) {
-            //     // For some reason texture(uTexture, direction) is upside-down
-            //     mat4.rotateZ(worldMatrix, worldMatrix, Math.PI / 2);
+            } else if (buffer.length > 1 && b === 1) {
+                // For some reason texture(uTexture, direction) is upside-down
+                mat4.rotateZ(worldMatrix, worldMatrix, Math.PI / 2);
             }
 
             // Tell WebGL to use our program when drawing
@@ -177,8 +195,8 @@ export default function drawScene (context: any, gl: WebGL2RenderingContext, sha
             gl.uniformMatrix4fv(programInfo.uniformLocations.modelViewMatrix, false, viewMatrix);
             gl.uniformMatrix4fv(programInfo.uniformLocations.worldMatrix, false, worldMatrix);
 
-            // gl.uniformMatrix4fv(programInfo.uniformLocations.normalMatrix, false, normalMatrix);
-
+            gl.uniformMatrix4fv(programInfo.uniformLocations.normalMatrix, false, normalMatrix);
+            //
             // gl.uniform3fv(programInfo.uniformLocations.lightDirection, lightDirection);
             // gl.uniform3fv(programInfo.uniformLocations.lightDiffuse, lightDiffuseColor);
             // gl.uniform3fv(programInfo.uniformLocations.materialDiffuse, materialColor);

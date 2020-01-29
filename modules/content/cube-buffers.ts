@@ -3,7 +3,10 @@ export default function initBuffers (gl: WebGLRenderingContext):
         position: WebGLBuffer, positionSize: number,
         normal: WebGLBuffer, normalSize: number,
         index: WebGLBuffer, indexSize: number,
-        color: WebGLBuffer , colorSize: number
+        color: WebGLBuffer , colorSize: number,
+        rotation: Array<number>,
+        scale: Array<number>,
+        translation: Array<number>
     }> {
 
     return (fetch('data/world/json/part1.json'))
@@ -14,32 +17,157 @@ export default function initBuffers (gl: WebGLRenderingContext):
 
             // Define vertex (position) buffer and vertex values
             const vertexBuffer: WebGLBuffer = gl.createBuffer();
-            const vertices = [-8.392287, -1.0, -1.570847, -8.392287, 1.0, -1.570847, -7.96828, -1.0, -3.525385, -7.96828, 1.0, -3.525385, -6.437749, -1.0, -1.14684, -6.437749, 1.0, -1.14684, -6.013742, -1.0, -3.101378, -6.013742, 1.0, -3.101378];
-            // const vertices = CubeObj['vertices'];
+            const vertices = [
+                -0.5, -0.5, -0.5,
+                -0.5, 0.5, -0.5,
+                0.5, -0.5, -0.5,
+                -0.5, 0.5, -0.5,
+                0.5, 0.5, -0.5,
+                0.5, -0.5, -0.5,
 
-            // Create a buffer to put normals in
-            var normalBuffer = gl.createBuffer();
-            var cubeNormals =
-                [
-                    -1, -1, -1,
-                    -1, 1, -1,
-                    1, 1, -1,
-                    1, -1, -1,
+                -0.5, -0.5, 0.5,
+                0.5, -0.5, 0.5,
+                -0.5, 0.5, 0.5,
+                -0.5, 0.5, 0.5,
+                0.5, -0.5, 0.5,
+                0.5, 0.5, 0.5,
 
-                    -1, -1, 1,
-                    1, -1, 1,
-                    1, 1, 1,
-                    -1, 1, 1
-                ];
+                -0.5, 0.5, -0.5,
+                -0.5, 0.5, 0.5,
+                0.5, 0.5, -0.5,
+                -0.5, 0.5, 0.5,
+                0.5, 0.5, 0.5,
+                0.5, 0.5, -0.5,
+
+                -0.5, -0.5, -0.5,
+                0.5, -0.5, -0.5,
+                -0.5, -0.5, 0.5,
+                -0.5, -0.5, 0.5,
+                0.5, -0.5, -0.5,
+                0.5, -0.5, 0.5,
+
+                -0.5, -0.5, -0.5,
+                -0.5, -0.5, 0.5,
+                -0.5, 0.5, -0.5,
+                -0.5, -0.5, 0.5,
+                -0.5, 0.5, 0.5,
+                -0.5, 0.5, -0.5,
+
+                0.5, -0.5, -0.5,
+                0.5, 0.5, -0.5,
+                0.5, -0.5, 0.5,
+                0.5, -0.5, 0.5,
+                0.5, 0.5, -0.5,
+                0.5, 0.5, 0.5,
+
+            ];
 
             // Define index buffer and index values
             const indexBuffer: WebGLBuffer = gl.createBuffer();
-            const indices = [1, 2, 0, 3, 6, 2, 7, 4, 6, 5, 0, 4, 6, 0, 2, 3, 5, 7, 1, 3, 2, 3, 7, 6, 7, 5, 4, 5, 1, 0, 6, 4, 0, 3, 1, 5];
-            // const indices = CubeObj['indices'];
+            const indices = [
+                0, 1, 2,
+                3, 4, 5,
+
+                6, 7, 8,
+                9, 10, 11,
+
+                12, 13, 14,
+                15, 16, 17,
+
+                18, 19, 20,
+                21, 22, 23,
+
+                24, 25, 26,
+                27, 28, 29,
+
+                30, 31, 32,
+                33, 34, 35,
+            ];
+
+            // Create a buffer to put normals in
+            var normalBuffer = gl.createBuffer();
+            var cubeNormals =[
+                0, 0, -1,
+                0, 0, -1,
+                0, 0, -1,
+                0, 0, -1,
+                0, 0, -1,
+                0, 0, -1,
+
+                0, 1, 0,
+                0, 1, 0,
+                0, 1, 0,
+                0, 1, 0,
+                0, 1, 0,
+                0, 1, 0,
+
+                0, 0, 1,
+                0, 0, 1,
+                0, 0, 1,
+                0, 0, 1,
+                0, 0, 1,
+                0, 0, 1,
+
+                0, -1, 0,
+                0, -1, 0,
+                0, -1, 0,
+                0, -1, 0,
+                0, -1, 0,
+                0, -1, 0,
+
+                -1, 0, 0,
+                -1, 0, 0,
+                -1, 0, 0,
+                -1, 0, 0,
+                -1, 0, 0,
+                -1, 0, 0,
+
+                1, 0, 0,
+                1, 0, 0,
+                1, 0, 0,
+                1, 0, 0,
+                1, 0, 0,
+                1, 0, 0,
+            ];
 
             // Define color buffer and color values (per vertex)
             const colorBuffer: WebGLBuffer = gl.createBuffer();
             const cubeColors = [
+                0, 0, 1, 1,
+                0, 1, 0, 1,
+                0, 0, 1, 1,
+                1, 0, 0, 1,
+
+                0, 0, 1, 1,
+                0, 1, 0, 1,
+                0, 0, 1, 1,
+                1, 0, 0, 1,
+
+                0, 0, 1, 1,
+                0, 1, 0, 1,
+                0, 0, 1, 1,
+                1, 0, 0, 1,
+
+                0, 0, 1, 1,
+                0, 1, 0, 1,
+                0, 0, 1, 1,
+                1, 0, 0, 1,
+
+                0, 0, 1, 1,
+                0, 1, 0, 1,
+                0, 0, 1, 1,
+                1, 0, 0, 1,
+
+                0, 0, 1, 1,
+                0, 1, 0, 1,
+                0, 0, 1, 1,
+                1, 0, 0, 1,
+
+                0, 0, 1, 1,
+                0, 1, 0, 1,
+                0, 0, 1, 1,
+                1, 0, 0, 1,
+
                 0, 0, 1, 1,
                 0, 1, 0, 1,
                 0, 0, 1, 1,
@@ -77,7 +205,10 @@ export default function initBuffers (gl: WebGLRenderingContext):
                 position: vertexBuffer, positionSize: vertices.length,
                 normal: normalBuffer, normalSize: cubeNormals.length,
                 index: indexBuffer, indexSize: indices.length,
-                color: colorBuffer, colorSize: cubeColors.length
+                color: colorBuffer, colorSize: cubeColors.length,
+                rotation: [ 0.4, 0.7, 0.0 ],
+                scale: [ 1.0, 1.0, 1.0 ],
+                translation: [ -5.0, 0.0, 0.0 ]
             }
         });
 }

@@ -1,3 +1,5 @@
 export const transformationBuffers: any = {
-    rotationBuffers: []
+    rotationBuffers: [],
+    scaleBuffers: [],
+    translationBuffers: []
 };

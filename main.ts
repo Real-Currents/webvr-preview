@@ -1,13 +1,14 @@
 // import createContext from './modules/basic/webvr-context';
 import backgroundUpdater from "./modules/basic/background-update";
 import createContext from './modules/content/context';
-// import initBuffers from "./modules/content/cube-buffers";
-import initBuffers from "./modules/content/inner-cube-buffers";
+import initShaderProgram from "./modules/content/basic-shaders";
+// import initShaderProgram from "./modules/content/cubemap-shaders";
+// import initShaderProgram from "./modules/content/normal-shaders";
+import initBuffers from "./modules/content/cube-buffers";
+// import initBuffers from "./modules/content/inner-cube-buffers";
 // import initBuffers from "./modules/content/firewood-buffers";
 import innerBuffers from "./modules/content/inner-cube-buffers";
 import outerBuffers from "./modules/content/outer-cube-buffers";
-import initShaderProgram from "./modules/content/basic-shaders";
-// import initShaderProgram from "./modules/content/normal-shaders";
 import generateFace from "./modules/content/face-generator";
 // import generateFace from "./modules/content/grid-generator";
 
@@ -44,24 +45,23 @@ function main () {
         window.document.body.style.margin = '0px';
         window.document.body.style.overflow = 'hidden';
 
-        const { gl, updateContext } = await createContext({ canvas }, initBuffers, initShaderProgram);
-
-        backgroundUpdater(gl);
-
         // Get A 2D context for dynamic textures
         /** @type {Canvas2DRenderingContext} */
         const ctx = document.createElement("canvas").getContext("2d");
         ctx.canvas.width = 128;
         ctx.canvas.height = 128;
 
-        // Create a texture.
-        const texture = gl.createTexture();
-        gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
-
         let frame = 0;
         let timeout = null;
         let lastKeyPress = (new Date()).getTime();
-        window['userTriggered'] = false;
+
+        const { gl, updateContext } = await createContext({ canvas }, initBuffers, initShaderProgram);
+
+        backgroundUpdater(gl);
+
+        // Create a texture.
+        const texture = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
 
         const faceInfos = [
             { target: gl.TEXTURE_CUBE_MAP_POSITIVE_X, faceColor: '#F00', textColor: '#0FF', text: '+X' },
@@ -231,6 +231,7 @@ function main () {
         }
     })();
 
+    window['userTriggered'] = false;
 }
 
 main();

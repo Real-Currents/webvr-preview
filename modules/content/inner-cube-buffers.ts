@@ -1,4 +1,4 @@
-import initShaderProgram from './normal-shaders';
+import initShaderProgram from './cubemap-shaders';
 
 export default function initBuffers (gl: WebGLRenderingContext):
     {

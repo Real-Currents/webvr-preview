@@ -39,15 +39,14 @@ void main() {
   float lambertTerm = dot(N, -L);
 
   // Calculating the diffuse color based on the Lambertian reflection model
-  vec3 Id = uMaterialDiffuse * uLightDiffuse * lambertTerm;
-  // vec3 Id = aVertexColor.rgb * uLightDiffuse * lambertTerm;
+  // vec3 Id = uMaterialDiffuse * uLightDiffuse * lambertTerm;
+  vec3 Id = aVertexColor.rgb * uLightDiffuse * lambertTerm;
 
   // Set the varying to be used inside of the fragment shader
   vVertexColor = vec4(Id, 1.0);
-  // vVertexColor = vec4(uMaterialDiffuse, 1.0);
 
   // Setting the vertex position
-  gl_Position = uProjectionMatrix * uModelViewMatrix * vec4(aVertexPosition, 1.0);
+  // gl_Position = uProjectionMatrix * uModelViewMatrix * vec4(aVertexPosition, 1.0);
 
   // Pass a normal. Since the positions
   // centered around the origin we can just 
@@ -55,7 +54,7 @@ void main() {
   v_normal = normalize(aVertexPosition.xyz);
   
   // Multiply the position by the matrix.
-  // gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition * uWorldMatrix;
+  gl_Position = uProjectionMatrix * uModelViewMatrix * uWorldMatrix * vec4(aVertexPosition, 1.0);
    
   // send the view position to the fragment shader
   // v_worldPosition = (uWorldMatrix * aVertexPosition).xyz;
