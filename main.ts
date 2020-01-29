@@ -1,12 +1,11 @@
 // import createContext from './modules/basic/webvr-context';
 import backgroundUpdater from "./modules/basic/background-update";
 import createContext from './modules/content/context';
-import initShaderProgram from "./modules/basic/basic-shaders";
+// import initShaderProgram from "./modules/basic/basic-shaders";
 // import initShaderProgram from "./modules/content/cubemap-shaders";
-// import initShaderProgram from "./modules/content/normal-shaders";
-import initBuffers from "./modules/content/cube-buffers";
-// import initBuffers from "./modules/content/inner-cube-buffers";
-// import initBuffers from "./modules/content/firewood-buffers";
+import initShaderProgram from "./modules/content/normal-shaders";
+// import initBuffers from "./modules/content/cube-buffers";
+import initBuffers from "./modules/content/firewood-buffers";
 import innerBuffers from "./modules/content/inner-cube-buffers";
 import outerBuffers from "./modules/content/outer-cube-buffers";
 import generateFace from "./modules/content/face-generator";
@@ -53,26 +52,64 @@ function main () {
 
         let camera = {
             current: 0,
-            changeCamera: function (event) {
-                updateContext(gl, this.viewPoints[this.current]);
+            viewPoints: [],
+            get viewPoint() {
+                return this.viewPoints[this.current]
             },
-            viewPoints: [
-                {
-                    'viewPosition': [ 0, 0, -5 ],
-                    'viewTarget': [ 0, 0, 0 ]
-                },
-                {
-                    'viewPosition': [ 0.5, 0, 2.5 ],
-                    'viewTarget': [ 0, 0, 0 ]
-                }
-            ]
+            nextViewPoint: function (event) {
+                const viewPoints = this.viewPoints;
+                this.current = (++this.current < viewPoints.length) ? this.current : 0;
+                console.log(this.current, this.viewPoints);
+                const x = this.viewPoint.viewPosition[0]
+                const y = this.viewPoint.viewPosition[1]
+                const z = this.viewPoint.viewPosition[2]
+                updateContext(gl, {
+                    viewPosition: [
+                        this.viewPoint.viewPosition[0],
+                        this.viewPoint.viewPosition[1],
+                        this.viewPoint.viewPosition[2]
+                    ]
+                });
+            },
+            prevViewPoint: function (event) {
+                const viewPoints = this.viewPoints;
+                this.current = (--this.current > -1) ? this.current : viewPoints.length - 1;
+                console.log(this.current, this.viewPoints);
+                updateContext(gl, {
+                    viewPosition: [
+                        this.viewPoint.viewPosition[0],
+                        this.viewPoint.viewPosition[1],
+                        this.viewPoint.viewPosition[2]
+                    ]
+                });
+            }
         };
+
+        camera.viewPoints.push({
+            'viewPosition': [ 0, 0, -5 ],
+            'viewTarget': [ 0, 0, 0 ]
+        });
+
+        camera.viewPoints.push({
+            'viewPosition': [ 0.5, 0, 25 ],
+            'viewTarget': [ 0, 0, 0 ]
+        });
+
+        console.log(camera.viewPoints);
 
         const { gl, updateContext } = await createContext(
             {
                 canvas,
-                viewPosition: camera.viewPoints[0].viewPosition,
-                viewTarget: camera.viewPoints[0].viewTarget
+                viewPosition: [
+                    camera.viewPoint.viewPosition[0],
+                    camera.viewPoint.viewPosition[1],
+                    camera.viewPoint.viewPosition[2]
+                ],
+                viewTarget: [
+                    camera.viewPoint.viewTarget[0],
+                    camera.viewPoint.viewTarget[1],
+                    camera.viewPoint.viewTarget[2]
+                ]
             },
             initBuffers,
             initShaderProgram);
@@ -155,7 +192,11 @@ function main () {
                                     innerBuffers
                                 ],
                                 'cameraDelta': [0, 0, +0.05],
-                                'viewPosition': camera.viewPoints[camera.current]['viewPosition'],
+                                'viewPosition': [
+                                    camera.viewPoint.viewPosition[0],
+                                    camera.viewPoint.viewPosition[1],
+                                    camera.viewPoint.viewPosition[2]
+                                ],
                                 'worldCameraPosition': [0, 0, -2.5]
                             });
                         } else {
@@ -166,6 +207,7 @@ function main () {
                             });
                         }
                     }, 33);
+
                 } else {
                     window['userTriggered'] = false;
                     clearInterval(timeout);
@@ -184,9 +226,26 @@ function main () {
 
                 kbEvent.preventDefault();
 
-                return true; // treat all other keys normally;
+                return true;
 
-            } else return false;
+            } else if (kbEvent['keyCode'] === 61) { // this is +/=
+                camera.nextViewPoint(event);
+
+                kbEvent.preventDefault();
+
+                return true;
+
+            }  else if (kbEvent['keyCode'] === 173) { // this is +/=
+                camera.prevViewPoint(event);
+
+                kbEvent.preventDefault();
+
+                return true;
+
+            } else {
+                console.log('Keyboard Event: ', kbEvent['keyCode']);
+                return false;
+            }
         });
 
         const touchHit = function touchHit(event) {
@@ -217,7 +276,7 @@ function main () {
                 console.log('MouseUp');
                 // mouse_down = false;
                 // mouse_up = true;
-                triggerMovement(e);
+                if (camera.current === 0) triggerMovement(e);
                 e.preventDefault();
             });
             console.log('touch is present');
@@ -235,7 +294,7 @@ function main () {
                 console.log('MouseUp');
                 // mouse_down = false;
                 // mouse_up = true;
-                triggerMovement(e);
+                if (camera.current === 0) triggerMovement(e);
                 e.preventDefault();
             });
         }

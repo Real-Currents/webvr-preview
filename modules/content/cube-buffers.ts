@@ -80,6 +80,6 @@ export default function initBuffers (gl: WebGLRenderingContext):
                 rotation: [ 0.0, 0.0, 0.0 ],
                 scale: [ 1.0, 1.0, 1.0 ],
                 translation: [ -7.5, 0.0, 5.0 ]
-            }
+            };
         });
 }
