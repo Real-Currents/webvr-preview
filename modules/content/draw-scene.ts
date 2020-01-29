@@ -25,6 +25,12 @@ export default function drawScene (context: any, gl: WebGL2RenderingContext, sha
         mat4.multiply(viewMatrix, view, viewMatrix);
     }
 
+    const lightDiffuseColor = [ 1, 1, 1 ];
+    const lightDirection = [ -1.0, -0.5, 0.0 ] ;
+    const materialColor = [ 0.5, 0.75, 0.25 ];
+    const normalMatrix = mat4.create();
+
+
     if (buffers.length > 0) {
         let b = 0;
         for (const buffer of buffers) {
@@ -50,34 +56,12 @@ export default function drawScene (context: any, gl: WebGL2RenderingContext, sha
                     normalMatrix: gl.getUniformLocation(program, "uNormalMatrix"),
                     worldMatrix: gl.getUniformLocation(program, "uWorldMatrix"),
                     textureLocation: gl.getUniformLocation(program, "uTexture"),
-                    worldCameraPositionLocation: gl.getUniformLocation(program, "uWorldCameraPosition")
+                    worldCameraPositionLocation: gl.getUniformLocation(program, "uWorldCameraPosition"),
+                    lightDirection: gl.getUniformLocation(shaderProgram, 'uLightDirection'),
+                    lightDiffuse: gl.getUniformLocation(shaderProgram, "uLightDiffuse"),
+                    materialDiffuse: gl.getUniformLocation(shaderProgram, "uMaterialDiffuse")
                 },
             };
-
-            // Tell WebGL to use our program when drawing
-            gl.useProgram(programInfo.program);
-
-            // Tell WebGL how to pull out the colors from the color buffer
-            // into the vertexColor attribute.
-            {
-                const numComponents = 4;
-                const type = gl.FLOAT;
-                const normalize = false;
-                const stride = 0;
-                const offset = 0;
-                gl.enableVertexAttribArray(
-                    programInfo.attribLocations.vertexColor);
-                gl.bindBuffer(gl.ARRAY_BUFFER, buffer['color']);
-                gl.vertexAttribPointer(
-                    programInfo.attribLocations.vertexColor,
-                    numComponents,
-                    type,
-                    normalize,
-                    stride,
-                    offset);
-                gl.enableVertexAttribArray(
-                    programInfo.attribLocations.vertexColor);
-            }
 
             // Tell WebGL how to pull out the positions from the position
             // buffer into the vertexPosition attribute
@@ -119,6 +103,28 @@ export default function drawScene (context: any, gl: WebGL2RenderingContext, sha
                     offset);
             }
 
+            // Tell WebGL how to pull out the colors from the color buffer
+            // into the vertexColor attribute.
+            {
+                const numComponents = 4;
+                const type = gl.FLOAT;
+                const normalize = false;
+                const stride = 0;
+                const offset = 0;
+                gl.enableVertexAttribArray(
+                    programInfo.attribLocations.vertexColor);
+                gl.bindBuffer(gl.ARRAY_BUFFER, buffer['color']);
+                gl.vertexAttribPointer(
+                    programInfo.attribLocations.vertexColor,
+                    numComponents,
+                    type,
+                    normalize,
+                    stride,
+                    offset);
+                gl.enableVertexAttribArray(
+                    programInfo.attribLocations.vertexColor);
+            }
+
             // Animate the rotation
             if (!!buffer['rotation'] && buffer['rotation'].length === 3) {
                 if (!(n in transformationBuffers['rotationBuffers'])) transformationBuffers['rotationBuffers'][n] = {
@@ -126,6 +132,8 @@ export default function drawScene (context: any, gl: WebGL2RenderingContext, sha
                     modelYRotationRadians: 0.0,
                     modelZRotationRadians: 0.0
                 }
+
+                // Static
                 transformationBuffers['rotationBuffers'][n]['modelXRotationRadians'] = buffer['rotation'][0];
                 transformationBuffers['rotationBuffers'][n]['modelYRotationRadians'] = buffer['rotation'][1];
                 transformationBuffers['rotationBuffers'][n]['modelZRotationRadians'] = buffer['rotation'][2];
@@ -139,15 +147,42 @@ export default function drawScene (context: any, gl: WebGL2RenderingContext, sha
                 mat4.rotateY(worldMatrix, worldMatrix, transformationBuffers['rotationBuffers'][n]['modelYRotationRadians']);
                 mat4.rotateZ(worldMatrix, worldMatrix, transformationBuffers['rotationBuffers'][n]['modelZRotationRadians']);
 
-            } else if (buffer.length > 1 && b === 1) {
-                // For some reason texture(uTexture, direction) is upside-down
-                mat4.rotateZ(worldMatrix, worldMatrix, Math.PI / 2);
+                mat4.copy(normalMatrix, viewMatrix);
+                // Exclude light direction from view matrix transformations
+                mat4.rotate(normalMatrix,  // destination matrix
+                    normalMatrix,  // matrix to rotate
+                    -transformationBuffers['rotationBuffers'][n]['modelZRotationRadians'], // amount to rotate in radians
+                    [0, 0, 1]);       // axis to rotate around (Y)
+                mat4.rotate(normalMatrix,  // destination matrix
+                    normalMatrix,  // matrix to rotate
+                    -transformationBuffers['rotationBuffers'][n]['modelYRotationRadians'], // amount to rotate in radians
+                    [0, 1, 0]);       // axis to rotate around (Y)
+                mat4.rotate(normalMatrix,  // destination matrix
+                    normalMatrix,  // matrix to rotate
+                    -transformationBuffers['rotationBuffers'][n]['modelXRotationRadians'], // amount to rotate in radians
+                    [1, 0, 0]);       // axis to rotate around (X)
+                mat4.invert(normalMatrix, normalMatrix);
+                mat4.transpose(normalMatrix, normalMatrix);
+
+            // } else if (buffer.length > 1 && b === 1) {
+            //     // For some reason texture(uTexture, direction) is upside-down
+            //     mat4.rotateZ(worldMatrix, worldMatrix, Math.PI / 2);
             }
+
+            // Tell WebGL to use our program when drawing
+            gl.useProgram(programInfo.program);
 
             // Set the uniforms
             gl.uniformMatrix4fv(programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
             gl.uniformMatrix4fv(programInfo.uniformLocations.modelViewMatrix, false, viewMatrix);
             gl.uniformMatrix4fv(programInfo.uniformLocations.worldMatrix, false, worldMatrix);
+
+            // gl.uniformMatrix4fv(programInfo.uniformLocations.normalMatrix, false, normalMatrix);
+
+            // gl.uniform3fv(programInfo.uniformLocations.lightDirection, lightDirection);
+            // gl.uniform3fv(programInfo.uniformLocations.lightDiffuse, lightDiffuseColor);
+            // gl.uniform3fv(programInfo.uniformLocations.materialDiffuse, materialColor);
+
             // Set the drawing position to the "identity" point, which is
             // the center of the scene.
             gl.uniform3fv(programInfo.uniformLocations.worldCameraPositionLocation, context.worldCameraPosition);
@@ -155,12 +190,14 @@ export default function drawScene (context: any, gl: WebGL2RenderingContext, sha
             // Tell the shader to use texture unit 0 for u_texture
             gl.uniform1i(programInfo.uniformLocations.textureLocation, 0);
 
-            // gl.drawArrays(gl.TRIANGLES, 0, buffer['positionSize'] / 3);
+            {
 
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffer['index']);
-            gl.drawElements(gl.TRIANGLES, buffer['indexSize'], gl.UNSIGNED_SHORT, 0);
-            gl.bindBuffer(gl.ARRAY_BUFFER, null);
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+                // gl.drawArrays(gl.TRIANGLES, 0, buffer['positionSize'] / 3);
+                gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffer['index']);
+                gl.drawElements(gl.TRIANGLES, buffer['indexSize'], gl.UNSIGNED_SHORT, 0);
+                gl.bindBuffer(gl.ARRAY_BUFFER, null);
+                gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+            }
         }
     }
 

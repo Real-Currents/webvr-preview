@@ -7,7 +7,7 @@ const context = {
     vrDisplay:  null,
     viewPosition:  [0, 0, -5],
     viewTarget: [0, 0, 0],
-    worldCameraPosition: [0, 0, -2.5]
+    worldCameraPosition: [0, 0, -25]
 }
 
 export default async function createContext (
@@ -15,7 +15,7 @@ export default async function createContext (
         canvas: window.document.createElement('canvas'),
         viewPosition: [ 0, 0, -5 ],
         viewTarget: [ 0, 0, 0 ],
-        worldCameraPosition: [ 0, 0, -2.5 ]
+        worldCameraPosition: [ 0, 0, -25 ]
     },
     initBuffers: Function,
     initShaders: Function

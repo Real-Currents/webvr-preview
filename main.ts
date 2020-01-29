@@ -1,7 +1,8 @@
 // import createContext from './modules/basic/webvr-context';
 import backgroundUpdater from "./modules/basic/background-update";
 import createContext from './modules/content/context';
-import initBuffers from "./modules/content/cube-buffers";
+// import initBuffers from "./modules/content/cube-buffers";
+import initBuffers from "./modules/content/inner-cube-buffers";
 // import initBuffers from "./modules/content/firewood-buffers";
 import innerBuffers from "./modules/content/inner-cube-buffers";
 import outerBuffers from "./modules/content/outer-cube-buffers";
@@ -234,138 +235,138 @@ function main () {
 
 main();
 
-// DRAW
-// // Set the drawing position to the "identity" point, which is
-// // the center of the scene.
-// const modelViewMatrix = mat4.create();
-//
-// cubeRotation += deltaTime;
-//
-// // Animate the rotation
-// const modelXRotationRadians = cubeRotation * 0.4;
-// const modelYRotationRadians = cubeRotation * 0.7;
-//
-// // Now move the drawing position a bit to where we want to
-// // start drawing the square.
-//
-// mat4.translate(modelViewMatrix,     // destination matrix
-//     modelViewMatrix,     // matrix to translate
-//     [0.0, 0.0, -25]);  // amount to translate
-//
-// mat4.rotate(modelViewMatrix,  // destination matrix
-//     modelViewMatrix,  // matrix to rotate
-//     modelXRotationRadians, // amount to rotate in radians
-//     [1, 0, 0]);       // axis to rotate around (X)
-// mat4.rotate(modelViewMatrix,  // destination matrix
-//     modelViewMatrix,  // matrix to rotate
-//     modelYRotationRadians, // amount to rotate in radians
-//     [0, 1, 0]);       // axis to rotate around (Y)
-//
-// if (view !== null) {
-//     // Premultiply the view matrix
-//     mat4.multiply(modelViewMatrix, view, modelViewMatrix);
-// }
-//
-// const lightDiffuseColor = [ 1, 1, 1 ];
-// const lightDirection = [ -1.0, -0.5, 0.0 ] ;
-// const materialColor = [ 0.5, 0.75, 0.25 ];
-// const normalMatrix = mat4.create();
-//
-// mat4.copy(normalMatrix, modelViewMatrix);
-// // Exclude light direction from modelview rotations
-// mat4.rotate(normalMatrix,  // destination matrix
-//     normalMatrix,  // matrix to rotate
-//     -modelYRotationRadians, // amount to rotate in radians
-//     [0, 1, 0]);       // axis to rotate around (Y)
-// mat4.rotate(normalMatrix,  // destination matrix
-//     normalMatrix,  // matrix to rotate
-//     -modelXRotationRadians, // amount to rotate in radians
-//     [1, 0, 0]);       // axis to rotate around (X)
-// mat4.invert(normalMatrix, normalMatrix);
-// mat4.transpose(normalMatrix, normalMatrix);
-//
-// // Tell WebGL how to pull out the positions from the position
-// // buffer into the vertexPosition attribute
-// {
-//     const numComponents = 3;
-//     const type = gl.FLOAT;
-//     const normalize = false;
-//     const stride = 0;
-//     const offset = 0;
-//     gl.enableVertexAttribArray(
-//         programInfo.attribLocations.vertexPosition);
-//     gl.bindBuffer(gl.ARRAY_BUFFER, buffers['position']);
-//     gl.vertexAttribPointer(
-//         programInfo.attribLocations.vertexPosition,
-//         numComponents,
-//         type,
-//         normalize,
-//         stride,
-//         offset);
-// }
-//
-// // Tell WebGL how to pull out the colors from the color buffer
-// // into the vertexColor attribute.
-// {
-//     const numComponents = 4;
-//     const type = gl.FLOAT;
-//     const normalize = false;
-//     const stride = 0;
-//     const offset = 0;
-//     gl.enableVertexAttribArray(
-//         programInfo.attribLocations.vertexColor);
-//     gl.bindBuffer(gl.ARRAY_BUFFER, buffers['color']);
-//     gl.vertexAttribPointer(
-//         programInfo.attribLocations.vertexColor,
-//         numComponents,
-//         type,
-//         normalize,
-//         stride,
-//         offset);
-// }
-//
-// // Tell WebGL how to pull normals out of normalBuffer (ARRAY_BUFFER)
-// {
-//     const numComponents = 3; // 3 components per iteration
-//     const type = gl.FLOAT;   // the data is 32bit floating point values
-//     const normalize = false; // normalize the data (convert from 0-255 to 0-1)
-//     const stride = 0;        // 0 = move forward size * sizeof(type) each iteration to get the next position
-//     const offset = 0;        // start at the beginning of the buffer
-//     gl.enableVertexAttribArray(
-//         programInfo.attribLocations.vertexNormal);
-//     // Bind the normal buffer.
-//     gl.bindBuffer(gl.ARRAY_BUFFER, buffers['normal']);
-//     gl.vertexAttribPointer(
-//         programInfo.attribLocations.vertexNormal,
-//         numComponents,
-//         type,
-//         normalize,
-//         stride,
-//         offset);
-// }
-//
-// // Tell WebGL to use our program when drawing
-// gl.useProgram(programInfo.program);
-//
-// gl.uniformMatrix4fv(
-//     programInfo.uniformLocations.projectionMatrix,
-//     false,
-//     projection);
-//
-// gl.uniformMatrix4fv(
-//     programInfo.uniformLocations.modelViewMatrix,
-//     false,
-//     modelViewMatrix);
-//
-// gl.uniformMatrix4fv(programInfo.uniformLocations.normalMatrix, false, normalMatrix);
-//
-// gl.uniform3fv(programInfo.uniformLocations.lightDirection, lightDirection);
-// gl.uniform3fv(programInfo.uniformLocations.lightDiffuse, lightDiffuseColor);
-// gl.uniform3fv(programInfo.uniformLocations.materialDiffuse, materialColor);
-//
-// {
-//     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffers['index']);
-//     gl.drawElements(gl.TRIANGLES, buffers['indexSize'], gl.UNSIGNED_SHORT, 0);
-//     gl.bindBuffer(gl.ARRAY_BUFFER, null);
-//     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
-// }
+    // // DRAW
+    // // Set the drawing position to the "identity" point, which is
+    // // the center of the scene.
+    // const modelViewMatrix = mat4.create();
+    //
+    // cubeRotation += deltaTime;
+    //
+    // // Animate the rotation
+    // const modelXRotationRadians = cubeRotation * 0.4;
+    // const modelYRotationRadians = cubeRotation * 0.7;
+    //
+    // // Now move the drawing position a bit to where we want to
+    // // start drawing the square.
+    //
+    // mat4.translate(modelViewMatrix,     // destination matrix
+    //     modelViewMatrix,     // matrix to translate
+    //     [0.0, 0.0, -25]);  // amount to translate
+    //
+    // mat4.rotate(modelViewMatrix,  // destination matrix
+    //     modelViewMatrix,  // matrix to rotate
+    //     modelXRotationRadians, // amount to rotate in radians
+    //     [1, 0, 0]);       // axis to rotate around (X)
+    // mat4.rotate(modelViewMatrix,  // destination matrix
+    //     modelViewMatrix,  // matrix to rotate
+    //     modelYRotationRadians, // amount to rotate in radians
+    //     [0, 1, 0]);       // axis to rotate around (Y)
+    //
+    // if (view !== null) {
+    //     // Premultiply the view matrix
+    //     mat4.multiply(modelViewMatrix, view, modelViewMatrix);
+    // }
+    //
+    // const lightDiffuseColor = [ 1, 1, 1 ];
+    // const lightDirection = [ -1.0, -0.5, 0.0 ] ;
+    // const materialColor = [ 0.5, 0.75, 0.25 ];
+    // const normalMatrix = mat4.create();
+    //
+    // mat4.copy(normalMatrix, modelViewMatrix);
+    // // Exclude light direction from modelview rotations
+    // mat4.rotate(normalMatrix,  // destination matrix
+    //     normalMatrix,  // matrix to rotate
+    //     -modelYRotationRadians, // amount to rotate in radians
+    //     [0, 1, 0]);       // axis to rotate around (Y)
+    // mat4.rotate(normalMatrix,  // destination matrix
+    //     normalMatrix,  // matrix to rotate
+    //     -modelXRotationRadians, // amount to rotate in radians
+    //     [1, 0, 0]);       // axis to rotate around (X)
+    // mat4.invert(normalMatrix, normalMatrix);
+    // mat4.transpose(normalMatrix, normalMatrix);
+    //
+    // // Tell WebGL how to pull out the positions from the position
+    // // buffer into the vertexPosition attribute
+    // {
+    //     const numComponents = 3;
+    //     const type = gl.FLOAT;
+    //     const normalize = false;
+    //     const stride = 0;
+    //     const offset = 0;
+    //     gl.enableVertexAttribArray(
+    //         programInfo.attribLocations.vertexPosition);
+    //     gl.bindBuffer(gl.ARRAY_BUFFER, buffers['position']);
+    //     gl.vertexAttribPointer(
+    //         programInfo.attribLocations.vertexPosition,
+    //         numComponents,
+    //         type,
+    //         normalize,
+    //         stride,
+    //         offset);
+    // }
+    //
+    // // Tell WebGL how to pull out the colors from the color buffer
+    // // into the vertexColor attribute.
+    // {
+    //     const numComponents = 4;
+    //     const type = gl.FLOAT;
+    //     const normalize = false;
+    //     const stride = 0;
+    //     const offset = 0;
+    //     gl.enableVertexAttribArray(
+    //         programInfo.attribLocations.vertexColor);
+    //     gl.bindBuffer(gl.ARRAY_BUFFER, buffers['color']);
+    //     gl.vertexAttribPointer(
+    //         programInfo.attribLocations.vertexColor,
+    //         numComponents,
+    //         type,
+    //         normalize,
+    //         stride,
+    //         offset);
+    // }
+    //
+    // // Tell WebGL how to pull normals out of normalBuffer (ARRAY_BUFFER)
+    // {
+    //     const numComponents = 3; // 3 components per iteration
+    //     const type = gl.FLOAT;   // the data is 32bit floating point values
+    //     const normalize = false; // normalize the data (convert from 0-255 to 0-1)
+    //     const stride = 0;        // 0 = move forward size * sizeof(type) each iteration to get the next position
+    //     const offset = 0;        // start at the beginning of the buffer
+    //     gl.enableVertexAttribArray(
+    //         programInfo.attribLocations.vertexNormal);
+    //     // Bind the normal buffer.
+    //     gl.bindBuffer(gl.ARRAY_BUFFER, buffers['normal']);
+    //     gl.vertexAttribPointer(
+    //         programInfo.attribLocations.vertexNormal,
+    //         numComponents,
+    //         type,
+    //         normalize,
+    //         stride,
+    //         offset);
+    // }
+    //
+    // // Tell WebGL to use our program when drawing
+    // gl.useProgram(programInfo.program);
+    //
+    // gl.uniformMatrix4fv(
+    //     programInfo.uniformLocations.projectionMatrix,
+    //     false,
+    //     projection);
+    //
+    // gl.uniformMatrix4fv(
+    //     programInfo.uniformLocations.modelViewMatrix,
+    //     false,
+    //     modelViewMatrix);
+    //
+    // gl.uniformMatrix4fv(programInfo.uniformLocations.normalMatrix, false, normalMatrix);
+    //
+    // gl.uniform3fv(programInfo.uniformLocations.lightDirection, lightDirection);
+    // gl.uniform3fv(programInfo.uniformLocations.lightDiffuse, lightDiffuseColor);
+    // gl.uniform3fv(programInfo.uniformLocations.materialDiffuse, materialColor);
+    //
+    // {
+    //     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffers['index']);
+    //     gl.drawElements(gl.TRIANGLES, buffers['indexSize'], gl.UNSIGNED_SHORT, 0);
+    //     gl.bindBuffer(gl.ARRAY_BUFFER, null);
+    //     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+    // }
