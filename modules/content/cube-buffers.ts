@@ -70,8 +70,8 @@ export default function initBuffers (gl: WebGLRenderingContext):
         normal: normalBuffer, normalSize: normals.length,
         index: indexBuffer, indexSize: indices.length,
         color: colorBuffer, colorSize: colors.length,
-        rotation: [ 0.4, 0.7, 0.0 ],
+        rotation: [ 0.0, 0.0, 0.0 ],
         scale: [ 1.0, 1.0, 1.0 ],
-        translation: [ -10.0, 0.0, 0.0 ]
+        translation: [ -7.5, 0.0, 5.0 ]
     }
 }

@@ -10,12 +10,13 @@ in vec3 aVertexNormal;
 in vec3 aVertexPosition;
 
 uniform mat4 uModelViewMatrix;
-uniform mat4 uNormalMatrix;
+uniform mat4 uProjectionMatrix;
+uniform mat4 uWorldMatrix;
+
 uniform vec3 uLightDirection;
 uniform vec3 uLightDiffuse;
 uniform vec3 uMaterialDiffuse;
-uniform mat4 uProjectionMatrix;
-uniform mat4 uWorldMatrix;
+uniform mat4 uNormalMatrix;
 
 out vec3 v_normal;
 out vec3 v_worldNormal;

@@ -1,8 +1,9 @@
 // import createContext from './modules/basic/webvr-context';
 import backgroundUpdater from "./modules/basic/background-update";
 import createContext from './modules/content/context';
-import initShaderProgram from "./modules/content/basic-shaders";
+import initShaderProgram from "./modules/basic/basic-shaders";
 // import initShaderProgram from "./modules/content/cubemap-shaders";
+// import initShaderProgram from "./modules/content/normal-shaders";
 import initBuffers from "./modules/content/cube-buffers";
 import innerBuffers from "./modules/content/inner-cube-buffers";
 import outerBuffers from "./modules/content/outer-cube-buffers";
@@ -38,15 +39,39 @@ function main () {
     window.document.body.style.margin = '0px';
     window.document.body.style.overflow = 'hidden';
 
-    const { gl, updateContext } = createContext({ canvas }, initBuffers, initShaderProgram);
-
-    backgroundUpdater(gl);
-
     // Get A 2D context for dynamic textures
     /** @type {Canvas2DRenderingContext} */
     const ctx = document.createElement("canvas").getContext("2d");
     ctx.canvas.width = 128;
     ctx.canvas.height = 128;
+
+    let camera = {
+        current: 0,
+        changeCamera: function (event) {
+            updateContext(gl, this.viewPoints[this.current]);
+        },
+        viewPoints: [
+            {
+                'viewPosition': [ 0, 0, -5 ],
+                'viewTarget': [ 0, 0, 0 ]
+            },
+            {
+                'viewPosition': [ 0.5, 0, 2.5 ],
+                'viewTarget': [ 0, 0, 0 ]
+            }
+        ]
+    };
+
+    const { gl, updateContext } = createContext(
+        {
+            canvas,
+            viewPosition: camera.viewPoints[0].viewPosition,
+            viewTarget: camera.viewPoints[0].viewTarget
+        },
+        initBuffers,
+        initShaderProgram);
+
+    backgroundUpdater(gl);
 
     // Create a texture.
     const texture = gl.createTexture();
@@ -107,21 +132,6 @@ function main () {
     gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
     gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
 
-    const cameras = [
-        {
-            'viewPosition': [ 0, 0, -25 ],
-            'viewTarget': [ 0, 0, 0 ]
-        },
-        {
-            'viewPosition': [ 0.5, 0, 2.5 ],
-            'viewTarget': [ 0, 0, 0 ]
-        }
-    ]
-    let camera = 0;
-    const changeCamera = function (event) {
-        updateContext(gl, cameras[camera]);
-    }
-
     const triggerMovement = function (event) {
         // console.log(lastKeyPress, ((new Date()).getTime() - lastKeyPress));
         // console.log(startVideo);
@@ -138,7 +148,7 @@ function main () {
                                 innerBuffers
                             ],
                             'cameraDelta': [0, 0, +0.05],
-                            'viewPosition': cameras[camera]['viewPosition'],
+                            'viewPosition': camera.viewPoints[camera.current]['viewPosition'],
                             'worldCameraPosition': [0, 0, -2.5]
                         });
                     } else {
