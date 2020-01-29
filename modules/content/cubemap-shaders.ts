@@ -53,9 +53,6 @@ void main() {
   // centered around the origin we can just 
   // pass the position
   v_normal = normalize(aVertexPosition.xyz);
-  
-  // Multiply the position by the matrix.
-  // gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition * uWorldMatrix;
    
   // send the view position to the fragment shader
   // v_worldPosition = (uWorldMatrix * aVertexPosition).xyz;
