@@ -54,7 +54,7 @@ export default function initBuffers (gl: WebGL2RenderingContext):
         -50.0, 50.0, 50.0,
         50.0, -50.0, 50.0,
         -50.0, 50.0, 50.0,
-        50.0, 50.0, 50.0,
+        50.0, 50.0, 50.0
     ];
 
     // Define index buffer and index values
@@ -165,7 +165,7 @@ export default function initBuffers (gl: WebGL2RenderingContext):
         -1, 1, 1,
         1, -1, 1,
         -1, 1, 1,
-        1, 1, 1,
+        1, 1, 1
     ];
 
     // Define color buffer and color values (per vertex)
