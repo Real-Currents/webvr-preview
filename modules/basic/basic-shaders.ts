@@ -1,4 +1,4 @@
-export default function initShaderProgram(gl) {
+export default function initShaderProgram(gl: WebGL2RenderingContext) {
 
     // Vertex shader program
 

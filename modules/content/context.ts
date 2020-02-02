@@ -5,9 +5,9 @@ const context = {
     buffers: [],
     inVR: false,
     vrDisplay:  null,
-    viewPosition:  [0, 0, -25],
+    viewPosition:  [0, 0, 5],
     viewTarget: [0, 0, 0],
-    worldCameraPosition: [0, 0, -2.5]
+    worldCameraPosition: [0, 0, 5]
 }
 
 export default async function createContext (
@@ -17,8 +17,8 @@ export default async function createContext (
         viewTarget: context.viewTarget,
         worldCameraPosition: context.worldCameraPosition
     },
-    initBuffers: Function,
-    initShaders: Function
+    initBuffers: Array<(gl: WebGL2RenderingContext) => any>,
+    initShaders: (gl: WebGL2RenderingContext) => any
 ): Promise<{ gl: WebGL2RenderingContext, updateContext: Function }> {
     const canvas: HTMLCanvasElement = (initContext.canvas) as any as HTMLCanvasElement;
     const gl: WebGL2RenderingContext = (
@@ -38,7 +38,7 @@ export default async function createContext (
 
     // Here's where we call the routine that builds all the
     // objects we'll be drawing.
-    context.buffers.push(await initBuffers(gl));
+    initBuffers.forEach(async b => context.buffers.push(await b(gl)));
     context.viewPosition = initContext.viewPosition || context.viewPosition;
     context.viewTarget = initContext.viewTarget || context.viewTarget;
     context.worldCameraPosition = initContext.worldCameraPosition || context.worldCameraPosition;

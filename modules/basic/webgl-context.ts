@@ -3,9 +3,9 @@ import { gl, mat4 }  from 'gl-matrix';
 let cubeRotation: number = 0.0;
 
 export default function createContext (canvas: HTMLCanvasElement): WebGLRenderingContext {
-    const gl: WebGLRenderingContext = (
+    const gl: WebGL2RenderingContext = (
       (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')
-    ) as any as WebGLRenderingContextStrict) as any as WebGLRenderingContext;
+    ) as any as WebGLRenderingContextStrict) as any as WebGL2RenderingContext;
 
     // If we don't have a GL context, give up now
 
@@ -92,7 +92,7 @@ export default function createContext (canvas: HTMLCanvasElement): WebGLRenderin
 // Initialize the buffers we'll need. For this demo, we just
 // have one object -- a simple three-dimensional cube.
 //
-function initBuffers(gl) {
+function initBuffers(gl: WebGL2RenderingContext) {
 
     // Create a buffer for the cube's vertex positions.
 

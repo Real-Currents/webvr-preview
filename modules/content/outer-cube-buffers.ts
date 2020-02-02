@@ -1,6 +1,6 @@
 import initShaderProgram from './outer-cube-shaders';
 
-export default function initBuffers (gl: WebGLRenderingContext):
+export default function initBuffers (gl: WebGL2RenderingContext):
     {
         program: Function, // init gl shader program
         position: WebGLBuffer, positionSize: number,
@@ -21,13 +21,6 @@ export default function initBuffers (gl: WebGLRenderingContext):
         -50.0, 50.0, -50.0,
         50.0, -50.0, -50.0,
 
-        50.0, -50.0, 50.0,
-        -50.0, -50.0, 50.0,
-        -50.0, 50.0, 50.0,
-        50.0, -50.0, 50.0,
-        -50.0, 50.0, 50.0,
-        50.0, 50.0, 50.0,
-
         -50.0, 50.0, 50.0,
         -50.0, 50.0, -50.0,
         50.0, 50.0, -50.0,
@@ -54,14 +47,21 @@ export default function initBuffers (gl: WebGLRenderingContext):
         50.0, -50.0, 50.0,
         50.0, 50.0, -50.0,
         50.0, -50.0, 50.0,
-        50.0, 50.0, 50.0
+        50.0, 50.0, 50.0,
+
+        50.0, -50.0, 50.0,
+        -50.0, -50.0, 50.0,
+        -50.0, 50.0, 50.0,
+        50.0, -50.0, 50.0,
+        -50.0, 50.0, 50.0,
+        50.0, 50.0, 50.0,
     ];
 
     // Define index buffer and index values
     const indexBuffer: WebGLBuffer = gl.createBuffer();
     const indices = [
         0, 1, 2,
-        5, 3, 4,
+        3, 4, 5,
 
         6, 7, 8,
         9, 10, 11,
@@ -89,13 +89,6 @@ export default function initBuffers (gl: WebGLRenderingContext):
         0, 0, -1,
         0, 0, -1,
 
-        0, 0, 1,
-        0, 0, 1,
-        0, 0, 1,
-        0, 0, 1,
-        0, 0, 1,
-        0, 0, 1,
-
         0, 1, 0,
         0, 1, 0,
         0, 1, 0,
@@ -122,7 +115,57 @@ export default function initBuffers (gl: WebGLRenderingContext):
         1, 0, 0,
         1, 0, 0,
         1, 0, 0,
-        1, 0, 0
+        1, 0, 0,
+
+        0, 0, 1,
+        0, 0, 1,
+        0, 0, 1,
+        0, 0, 1,
+        0, 0, 1,
+        0, 0, 1,
+    ];
+    var innerNormals = [
+        -1, 1, -1,
+        -1, -1, -1,
+        1, -1, -1,
+        1, 1, -1,
+        -1, 1, -1,
+        1, -1, -1,
+
+        -1, 1, 1,
+        -1, 1, -1,
+        1, 1, -1,
+        1, 1, 1,
+        -1, 1, 1,
+        1, 1, -1,
+
+        1, -1, -1,
+        -1, -1, -1,
+        -1, -1, 1,
+        1, -1, -1,
+        -1, -1, 1,
+        1, -1, 1,
+
+        -1, -1, 1,
+        -1, -1, -1,
+        -1, 1, -1,
+        -1, 1, 1,
+        -1, -1, 1,
+        -1, 1, -1,
+
+        1, 1, -1,
+        1, -1, -1,
+        1, -1, 1,
+        1, 1, -1,
+        1, -1, 1,
+        1, 1, 1,
+
+        1, -1, 1,
+        -1, -1, 1,
+        -1, 1, 1,
+        1, -1, 1,
+        -1, 1, 1,
+        1, 1, 1,
     ];
 
     // Define color buffer and color values (per vertex)
@@ -196,7 +239,7 @@ export default function initBuffers (gl: WebGLRenderingContext):
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 
     return {
-        program: initShaderProgram(gl),
+        program: initShaderProgram,
         position: vertexBuffer, positionSize: vertices.length,
         normal: normalBuffer, normalSize: normals.length,
         index: indexBuffer, indexSize: indices.length,
