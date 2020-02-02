@@ -91,7 +91,7 @@ function main () {
         });
 
         camera.viewPoints.push({
-            'viewPosition': [ 0.5, 0, 2.5 ],
+            'viewPosition': [ 0.5, 0, 15 ],
             'viewTarget': [ 0, 0, 0 ]
         });
 
@@ -111,7 +111,9 @@ function main () {
                     camera.viewPoint.viewTarget[2]
                 ]
             },
-            initBuffers,
+            [
+                initBuffers
+            ],
             initShaderProgram);
 
         backgroundUpdater(gl);
