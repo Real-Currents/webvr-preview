@@ -9,6 +9,8 @@ in vec4 aVertexColor;
 in vec3 aVertexNormal;
 in vec3 aVertexPosition;
 
+in vec2 aVertexTextureCoords;
+
 uniform mat4 uModelViewMatrix;
 uniform mat4 uProjectionMatrix;
 uniform mat4 uWorldMatrix;
@@ -24,9 +26,13 @@ out vec3 v_worldPosition;
 
 out vec4 vVertexColor;
 
+out vec2 vVertexTextureCoords;
+
 void main() {
   
   vVertexColor = aVertexColor;
+  
+  vVertexTextureCoords = aVertexTextureCoords;
   
   // gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition; // vec4 aVertexPosition
   
@@ -71,7 +77,7 @@ void main() {
 precision mediump float;
 
 // The texture.
-uniform samplerCube uTexture;
+uniform sampler2D uTexture;
 
 // The position of the camera
 uniform vec3 uWorldCameraPosition;
@@ -83,11 +89,13 @@ in vec3 v_worldPosition;
 
 in lowp vec4 vVertexColor;
 
+in vec2 vVertexTextureCoords;
+
 out vec4 fragColor;
 
 void main() {
   // fragColor = vVertexColor;
-  fragColor = texture(uTexture, normalize(v_normal)) * vVertexColor;
+  fragColor = texture(uTexture, normalize(vVertexTextureCoords)) * vVertexColor;
   
   // vec3 worldNormal = normalize(v_worldNormal);
   // vec3 eyeToSurfaceDir = normalize(v_worldPosition - uWorldCameraPosition);

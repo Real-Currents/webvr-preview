@@ -2,6 +2,8 @@ import { mat4, vec4 }  from 'gl-matrix';
 import { transformationBuffers} from "./transformation-buffers";
 import {stringify} from "querystring";
 
+const textures = [];
+
 //
 // Draw the scene.
 //
@@ -52,6 +54,7 @@ export default function drawScene (context: any, gl: WebGL2RenderingContext, sha
                     vertexNormal: gl.getAttribLocation(program, 'aVertexNormal'),
                     vertexPosition: gl.getAttribLocation(program, 'aVertexPosition'),
                     vertexColor: gl.getAttribLocation(program, 'aVertexColor'),
+                    textureCoords: gl.getAttribLocation(program, 'aVertexTextureCoords'),
                 },
                 uniformLocations: {
                     modelViewMatrix: gl.getUniformLocation(program, 'uModelViewMatrix'),
@@ -192,6 +195,50 @@ export default function drawScene (context: any, gl: WebGL2RenderingContext, sha
 
             mat4.invert(normalMatrix, normalMatrix);
             mat4.transpose(normalMatrix, normalMatrix);
+
+            if (!!buffer['texture'] && !!buffer['textureSource'] && buffer['textureSource'].length > 0) {
+                gl.enableVertexAttribArray(programInfo.attribLocations.textureCoords);
+                gl.bindBuffer(gl.ARRAY_BUFFER, buffer['texture']);
+                gl.vertexAttribPointer(programInfo.attribLocations.textureCoords, 2, gl.FLOAT, false, 0, 0);
+
+                if (!!textures[n]) {
+                    gl.activeTexture(gl.TEXTURE0);
+                    gl.bindTexture(gl.TEXTURE_2D, textures[n]);
+                    gl.uniform1i(programInfo.uniformLocations.textureLocation, 0);
+                    // gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,  false);
+                    // gl.bindTexture(gl.TEXTURE_2D, null);
+
+                } else {
+                    console.log('Render texture :', buffer['textureSource']);
+                    const img = new Image();
+                    img.crossOrigin = '';
+                    img.style.margin = 'auto';
+                    img.style.position = 'fixed';
+                    img.style.top = '0px';
+                    img.style.left = '0px';
+                    img.addEventListener('load', function () {
+                        // Now that the image has loaded copy it to the texture.
+                        textures[n] = textures[n] || gl.createTexture();
+                        gl.activeTexture(gl.TEXTURE0);
+                        gl.bindTexture(gl.TEXTURE_2D, textures[n]);
+                        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+                        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+                        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+                        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+                        gl.uniform1i(programInfo.uniformLocations.textureLocation, 0);
+                        // gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,  false);
+                        gl.bindTexture(gl.TEXTURE_2D, null);
+                    });
+
+                    img.src = buffer['textureSource'];
+                    document.body.appendChild(img);
+                }
+
+            } else {
+                gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+                // Tell the shader to use texture unit 0 for u_texture
+                gl.uniform1i(programInfo.uniformLocations.textureLocation, 0);
+            }
 
             // Set the uniforms
             gl.uniformMatrix4fv(programInfo.uniformLocations.modelViewMatrix, false, modelViewMatrix);

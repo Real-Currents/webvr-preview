@@ -4,9 +4,11 @@ export default function initBuffers (gl: WebGL2RenderingContext):
         normal: WebGLBuffer, normalSize: number,
         index: WebGLBuffer, indexSize: number,
         color: WebGLBuffer , colorSize: number,
+        texture: WebGLBuffer , textureSize: number,
         rotation: Array<number>,
         scale: Array<number>,
-        translation: Array<number>
+        translation: Array<number>,
+        textureSource: string
     }> {
 
     return (fetch('data/world/super-mario-galaxy-the-library/json/part1.json'))
@@ -275,6 +277,129 @@ export default function initBuffers (gl: WebGL2RenderingContext):
             // const indices = [4,26,28,26,4,5,7,5,4,5,7,6,15,6,7,6,15,17,5,30,26,30,5,8,6,8,5,8,6,9,17,9,6,9,17,19,8,24,30,24,8,0,9,0,8,0,9,3,19,3,9,3,19,11,0,22,24,22,0,1,3,1,0,1,3,2,11,2,3,2,11,13,10,18,16,18,10,20,12,20,10,27,21,29,21,27,31,25,21,31,21,25,23,7,28,15,28,7,4,1,13,22,13,1,2,10,29,21,29,10,16,14,21,23,21,14,10,14,12,10,36,58,60,58,36,37,39,37,36,37,39,38,47,38,39,38,47,49,37,62,58,62,37,40,38,40,37,40,38,41,49,41,38,41,49,51,40,56,62,56,40,32,41,32,40,32,41,35,51,35,41,35,51,43,32,54,56,54,32,33,35,33,32,33,35,34,43,34,35,34,43,45,42,50,48,50,42,52,44,52,42,59,53,61,53,59,63,57,53,63,53,57,55,39,60,47,60,39,36,33,45,54,45,33,34,42,61,53,61,42,48,46,53,55,53,46,42,46,44,42,68,90,92,90,68,69,71,69,68,69,71,70,79,70,71,70,79,81,69,94,90,94,69,72,70,72,69,72,70,73,81,73,70,73,81,83,72,88,94,88,72,64,73,64,72,64,73,67,83,67,73,67,83,75,64,86,88,86,64,65,67,65,64,65,67,66,75,66,67,66,75,77,74,82,80,82,74,84,76,84,74,91,85,93,85,91,95,89,85,95,85,89,87,71,92,79,92,71,68,65,77,86,77,65,66,74,93,85,93,74,80,78,85,87,85,78,74,78,76,74];
             const indices = FirewoodObj['indices'];
 
+            const textureBuffer = gl.createBuffer();
+            const textureCoords = ([
+                1, 1,
+                0, 1,
+                1, 1,
+                0, 1,
+
+                1, 1,
+                0, 1,
+                1, 1,
+                0, 1,
+
+                1, 1,
+                0, 1,
+                1, 1,
+                0, 1,
+
+                1, 1,
+                0, 1,
+                1, 1,
+                0, 1,
+
+                1, 1,
+                0, 1,
+                1, 1,
+                0, 1,
+
+                1, 1,
+                0, 1,
+                1, 1,
+                0, 1,
+
+                1, 1,
+                0, 1,
+                1, 1,
+                0, 1,
+
+                1, 1,
+                0, 1,
+                1, 1,
+                0, 1,
+
+                1, 1,
+                0, 1,
+                1, 1,
+                0, 1,
+
+                1, 1,
+                0, 1,
+                1, 1,
+                0, 1,
+
+                1, 1,
+                0, 1,
+                1, 1,
+                0, 1,
+
+                1, 1,
+                0, 1,
+                1, 1,
+                0, 1,
+
+                1, 1,
+                0, 1,
+                1, 1,
+                0, 1,
+
+                1, 1,
+                0, 1,
+                1, 1,
+                0, 1,
+
+                1, 1,
+                0, 1,
+                1, 1,
+                0, 1,
+
+                1, 1,
+                0, 1,
+                1, 1,
+                0, 1,
+
+                1, 1,
+                0, 1,
+                1, 1,
+                0, 1,
+
+                1, 1,
+                0, 1,
+                1, 1,
+                0, 1,
+
+                1, 1,
+                0, 1,
+                1, 1,
+                0, 1,
+
+                1, 1,
+                0, 1,
+                1, 1,
+                0, 1,
+
+                1, 1,
+                0, 1,
+                1, 1,
+                0, 1,
+
+                1, 1,
+                0, 1,
+                1, 1,
+                0, 1,
+
+                1, 1,
+                0, 1,
+                1, 1,
+                0, 1,
+
+                1, 1,
+                0, 1,
+                1, 1,
+                0, 1
+            ]);
+
             // Load vertex value into bound buffer
             gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
@@ -292,6 +417,9 @@ export default function initBuffers (gl: WebGL2RenderingContext):
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
             gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
 
+            gl.bindBuffer(gl.ARRAY_BUFFER, textureBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoords), gl.STATIC_DRAW);
+
             // Un-bind buffers
             gl.bindBuffer(gl.ARRAY_BUFFER, null);
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
@@ -301,9 +429,11 @@ export default function initBuffers (gl: WebGL2RenderingContext):
                 normal: normalBuffer, normalSize: normals.length,
                 index: indexBuffer, indexSize: indices.length,
                 color: colorBuffer, colorSize: colors.length,
+                texture: textureBuffer, textureSize: textureCoords.length,
                 rotation: [ 0.0, 0.0, 0.0 ],
                 scale: [ 1.0, 1.0, 1.0 ],
-                translation: [ -7.5, 0.0, 5.0 ]
+                translation: [ -7.5, 0.0, 5.0 ],
+                textureSource: 'data/world/super-mario-galaxy-the-library/Grass A.png'
             };
 
         });

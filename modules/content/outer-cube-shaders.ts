@@ -9,6 +9,8 @@ in vec4 aVertexColor;
 in vec3 aVertexNormal;
 in vec3 aVertexPosition;
 
+in vec2 aVertexTextureCoords;
+
 uniform mat4 uModelViewMatrix;
 uniform mat4 uProjectionMatrix;
 uniform mat4 uWorldMatrix;
