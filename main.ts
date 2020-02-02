@@ -1,5 +1,4 @@
 // import createContext from './modules/basic/webvr-context';
-import backgroundUpdater from "./modules/basic/background-update";
 import createContext from './modules/content/context';
 // import initShaderProgram from "./modules/basic/basic-shaders";
 // import initShaderProgram from "./modules/content/cubemap-shaders";
@@ -8,8 +7,6 @@ import initShaderProgram from "./modules/content/normal-shaders";
 import initBuffers from "./modules/content/firewood-buffers";
 import innerBuffers from "./modules/content/inner-cube-buffers";
 import outerBuffers from "./modules/content/outer-cube-buffers";
-import generateFace from "./modules/content/face-generator";
-// import generateFace from "./modules/content/grid-generator";
 
 const canvas: HTMLCanvasElement = (window.document.querySelector('canvas#cv') !== null) ?
     window.document.querySelector('canvas#cv') :
@@ -43,12 +40,6 @@ function main () {
         window.document.body.style.backgroundColor = "#000000";
         window.document.body.style.margin = '0px';
         window.document.body.style.overflow = 'hidden';
-
-        // Get A 2D context for dynamic textures
-        /** @type {Canvas2DRenderingContext} */
-        const ctx = document.createElement("canvas").getContext("2d");
-        ctx.canvas.width = 128;
-        ctx.canvas.height = 128;
 
         let camera = {
             current: 0,
@@ -112,71 +103,15 @@ function main () {
                 ]
             },
             [
+                outerBuffers,
                 initBuffers
             ],
             initShaderProgram);
-
-        backgroundUpdater(gl);
-
-        // Create a texture.
-        const texture = gl.createTexture();
-        gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
 
         let frame = 0;
         let timeout = null;
         let lastKeyPress = (new Date()).getTime();
         window['userTriggered'] = false;
-
-        const faceInfos = [
-            { target: gl.TEXTURE_CUBE_MAP_POSITIVE_X, faceColor: '#F00', textColor: '#0FF', text: '+X' },
-            { target: gl.TEXTURE_CUBE_MAP_NEGATIVE_X, faceColor: '#FF0', textColor: '#00F', text: '-X' },
-            { target: gl.TEXTURE_CUBE_MAP_POSITIVE_Y, faceColor: '#0F0', textColor: '#F0F', text: '+Y' },
-            { target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Y, faceColor: '#0FF', textColor: '#F00', text: '-Y' },
-            { target: gl.TEXTURE_CUBE_MAP_POSITIVE_Z, faceColor: '#00F', textColor: '#FF0', text: '+Z' },
-            { target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Z, faceColor: '#F0F', textColor: '#0F0', text: '-Z' },
-        ];
-
-        faceInfos.forEach((faceInfo, i, a) => {
-            const { target, faceColor, textColor, text } = faceInfo;
-            // Asynchronously load an image
-            const img = new Image();
-            img.crossOrigin = '';
-
-            img.id = '' + (i + 1);
-
-            // Use 2d face generator to generate 6 images
-            generateFace(ctx, faceColor, textColor, text);
-            // generateFace(ctx, faceColor, 16);
-
-            // Upload the canvas to the cubemap face.
-            const level = 0;
-            const internalFormat = gl.RGBA;
-            const format = gl.RGBA;
-            const type = gl.UNSIGNED_BYTE;
-            const width = 512;
-            const height = 512;
-
-            img.style.margin = 'auto';
-            img.style.position = 'fixed';
-            img.style.top = '0px';
-            img.style.left = i * ctx.canvas.width + 'px';
-            img.addEventListener('load', function() {
-                // Now that the image has loaded make copy it to the texture.
-                gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
-                gl.texImage2D(target, level, internalFormat, format, type, img);
-                gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
-            });
-            // document.body.appendChild(img);
-
-            ctx.canvas.toBlob((blob) => {
-                img.src = URL.createObjectURL(blob);
-            });
-
-            // Setup each face so it's immediately renderable
-            gl.texImage2D(target, level, internalFormat, width, height, 0, format, type, null);
-        });
-        gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
-        gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
 
         const triggerMovement = function (event) {
             // console.log(lastKeyPress, ((new Date()).getTime() - lastKeyPress));

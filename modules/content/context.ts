@@ -1,5 +1,7 @@
 import { mat4, vec4 }  from 'gl-matrix';
 import drawScene from "./draw-scene";
+import generateFace from "./face-generator";
+// import generateFace from "./grid-generator";
 
 const context = {
     buffers: [],
@@ -44,6 +46,67 @@ export default async function createContext (
     context.worldCameraPosition = initContext.worldCameraPosition || context.worldCameraPosition;
 
     let then = 0;
+
+    // Get A 2D context for dynamic textures
+    /** @type {Canvas2DRenderingContext} */
+    const ctx = document.createElement("canvas").getContext("2d");
+    ctx.canvas.width = 128;
+    ctx.canvas.height = 128;
+
+    // Create a texture.
+    const texture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
+
+    const faceInfos = [
+        { src: 'data/world/skybox-volume-2/DeepSpaceBlue/leftImage.png', target: gl.TEXTURE_CUBE_MAP_POSITIVE_X, faceColor: '#F00', textColor: '#0FF', text: '+X' },
+        { src: 'data/world/skybox-volume-2/DeepSpaceBlue/rightImage.png', target: gl.TEXTURE_CUBE_MAP_NEGATIVE_X, faceColor: '#FF0', textColor: '#00F', text: '-X' },
+        { src: 'data/world/skybox-volume-2/DeepSpaceBlue/upImage.png', target: gl.TEXTURE_CUBE_MAP_POSITIVE_Y, faceColor: '#0F0', textColor: '#F0F', text: '+Y' },
+        { src: 'data/world/skybox-volume-2/DeepSpaceBlue/downImage.png', target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Y, faceColor: '#0FF', textColor: '#F00', text: '-Y' },
+        { src: 'data/world/skybox-volume-2/DeepSpaceBlue/frontImage.png', target: gl.TEXTURE_CUBE_MAP_POSITIVE_Z, faceColor: '#00F', textColor: '#FF0', text: '+Z' },
+        { src: 'data/world/skybox-volume-2/DeepSpaceBlue/backImage.png', target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Z, faceColor: '#F0F', textColor: '#0F0', text: '-Z' },
+    ];
+
+    faceInfos.forEach((faceInfo, i, a) => {
+        const { src, target, faceColor, textColor, text } = faceInfo;
+        // Asynchronously load an image
+        const img = new Image();
+        img.crossOrigin = '';
+
+        img.id = '' + (i + 1);
+
+        // Use 2d face generator to generate 6 images
+        generateFace(ctx, faceColor, textColor, text);
+        // generateFace(ctx, faceColor, 16);
+
+        // Upload the canvas to the cubemap face.
+        const level = 0;
+        const internalFormat = gl.RGBA;
+        const format = gl.RGBA;
+        const type = gl.UNSIGNED_BYTE;
+        const width = 512;
+        const height = 512;
+
+        img.style.margin = 'auto';
+        img.style.position = 'fixed';
+        img.style.top = '0px';
+        img.style.left = i * ctx.canvas.width + 'px';
+        img.addEventListener('load', function() {
+            // Now that the image has loaded make copy it to the texture.
+            gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
+            gl.texImage2D(target, level, internalFormat, format, type, img);
+            gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
+        });
+        img.src = src;
+        // ctx.canvas.toBlob((blob) => {
+        //     img.src = URL.createObjectURL(blob);
+        // });
+        // document.body.appendChild(img);
+
+        // Setup each face so it's immediately renderable
+        gl.texImage2D(target, level, internalFormat, width, height, 0, format, type, null);
+    });
+    gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
+    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
 
     gl.clearColor(1.0, 1.0, 1.0, 1.0);  // Clear to white, fully opaque
 
