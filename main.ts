@@ -7,7 +7,8 @@ import initShaderProgram from "./modules/basic/basic-shaders";
 import initBuffers from "./modules/content/cube-buffers";
 import innerBuffers from "./modules/content/inner-cube-buffers";
 import outerBuffers from "./modules/content/outer-cube-buffers";
-import generateFace from "./modules/content/grid-generator";
+import generateFace from "./modules/content/face-generator";
+// import generateFace from "./modules/content/grid-generator";
 
 const canvas: HTMLCanvasElement = (window.document.querySelector('canvas#cv') !== null) ?
     window.document.querySelector('canvas#cv') :
@@ -68,7 +69,10 @@ function main () {
             viewPosition: camera.viewPoints[0].viewPosition,
             viewTarget: camera.viewPoints[0].viewTarget
         },
-        initBuffers,
+        [
+            outerBuffers,
+            initBuffers
+        ],
         initShaderProgram);
 
     backgroundUpdater(gl);
@@ -100,7 +104,8 @@ function main () {
         img.id = '' + (i + 1);
 
         // Use 2d face generator to generate 6 images
-        generateFace(ctx, faceColor, 16);
+        generateFace(ctx, faceColor, textColor, text);
+        // generateFace(ctx, faceColor, 16);
 
         // Upload the canvas to the cubemap face.
         const level = 0;

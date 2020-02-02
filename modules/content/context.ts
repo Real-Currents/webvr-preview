@@ -17,8 +17,8 @@ export default function createContext (
         viewTarget: context.viewTarget,
         worldCameraPosition: context.worldCameraPosition
     },
-    initBuffers: Function,
-    initShaders: Function
+    initBuffers: Array<(gl: WebGL2RenderingContext) => any>,
+    initShaders: (gl: WebGL2RenderingContext) => any
 ): { gl: WebGL2RenderingContext, updateContext: Function } {
     const canvas: HTMLCanvasElement = (initContext.canvas) as any as HTMLCanvasElement;
     const gl: WebGL2RenderingContext = (
@@ -38,7 +38,7 @@ export default function createContext (
 
     // Here's where we call the routine that builds all the
     // objects we'll be drawing.
-    context.buffers.push(initBuffers(gl));
+    initBuffers.forEach(b => context.buffers.push(b(gl)));
     context.viewPosition = initContext.viewPosition || context.viewPosition;
     context.viewTarget = initContext.viewTarget || context.viewTarget;
     context.worldCameraPosition = initContext.worldCameraPosition || context.worldCameraPosition;

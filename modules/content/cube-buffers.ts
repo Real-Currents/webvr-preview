@@ -1,4 +1,4 @@
-export default function initBuffers (gl: WebGLRenderingContext):
+export default function initBuffers (gl: WebGL2RenderingContext):
     {
         position: WebGLBuffer, positionSize: number,
         normal: WebGLBuffer, normalSize: number,

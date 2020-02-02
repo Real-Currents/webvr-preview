@@ -41,7 +41,7 @@ export default function drawScene (context: any, gl: WebGL2RenderingContext, sha
             // Look up which attributes our shader program is using
             // for aVertexPosition, aVevrtexColor and also
             // look up uniform locations.
-            const program = (!!buffer['program']) ? buffer['program'] : shaderProgram
+            const program = (!!buffer['program']) ? buffer['program'](gl) : shaderProgram;
 
             // Tell WebGL to use our program when drawing
             gl.useProgram(program);

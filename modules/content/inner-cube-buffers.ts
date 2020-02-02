@@ -1,6 +1,6 @@
 import initShaderProgram from './cubemap-shaders';
 
-export default function initBuffers (gl: WebGLRenderingContext):
+export default function initBuffers (gl: WebGL2RenderingContext):
     {
         program: Function, // init gl shader program
         position: WebGLBuffer, positionSize: number,
@@ -239,7 +239,7 @@ export default function initBuffers (gl: WebGLRenderingContext):
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 
     return {
-        program: initShaderProgram(gl),
+        program: initShaderProgram,
         position: vertexBuffer, positionSize: vertices.length,
         normal: normalBuffer, normalSize: normals.length,
         index: indexBuffer, indexSize: indices.length,
