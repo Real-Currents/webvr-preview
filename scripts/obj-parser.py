@@ -26,18 +26,19 @@ def createWebGLFile():
     for obj in OBJECTS:
         if obj == 'normals':
             continue
-        ver = OBJECTS[obj]['vertices']
 
+        ver = OBJECTS[obj]['vertices']
+        txt = OBJECTS[obj]['texture_coords']
 
         allIndicesForObject = []
 
         if (len(OBJECTS[obj]['group']) > 0):
-            print(OBJECTS[obj]['group'])
+#             print(OBJECTS[obj]['group'])
             for grp in OBJECTS[obj]['group']:                                   # The idea here is to get the minimum index per object
                 allIndicesForObject += OBJECTS[obj]['group'][grp]['indices']    # so the indices of every group belonging to the same object
         else:
-            print(OBJECTS[obj])
-            print(OBJECTS[obj]['indices'])
+#             print(OBJECTS[obj])
+#             print(OBJECTS[obj]['indices'])
             allIndicesForObject += OBJECTS[obj]['indices']    # so the indices of every group belonging to the same object
 
 
@@ -57,10 +58,13 @@ def createWebGLFile():
             for grp in OBJECTS[obj]['group']:
                 ind = OBJECTS[obj]['group'][grp]['indices']
                 normals_idx = OBJECTS[obj]['group'][grp]['normals_idx']
+                texture_idx = OBJECTS[obj]['group'][grp]['texture_idx']
 
                 numIndices = len(ind)
                 numVertices = len(ver)
+                numTextureCoords = len(txt)
                 numIndNormals = len(normals_idx)
+                numTextureIdx = len(texture_idx)
 
                 print('Writing file part'+ str(partNumber)+'.json > [ alias: '+grp+' vertices:' + str(numVertices/3) + ', indices: ' + str(numIndices) +']')
                 mf.write('part'+ str(partNumber)+'.json > alias: '+grp+'\n')
@@ -81,13 +85,21 @@ def createWebGLFile():
                     f.write(str(i-minIndex)+',')
                 f.write(str(ind[numIndices-1]-minIndex)+'],\n')
 
-                #f.write('  "normals" : [')
+                f.write('  "normals" : [')
 
-                #for j in normals_idx[0:numIndNormals-1]:
-                #    jk = 3 * (j-1)
-                #    f.write(str(nor[jk])+','+str(nor[jk+1])+','+str(nor[jk+2])+',')
-                #jk = 3 * (normals_idx[numIndNormals-1]-1)
-                #f.write(str(nor[jk])+','+str(nor[jk+1])+','+str(nor[jk+2])+'],\n')
+                for j in normals_idx[0:numIndNormals-1]:
+                    jk = 3 * (j-1)
+                    f.write(str(nor[jk])+','+str(nor[jk+1])+','+str(nor[jk+2])+',')
+                jk = 3 * (normals_idx[numIndNormals-1]-1)
+                f.write(str(nor[jk])+','+str(nor[jk+1])+','+str(nor[jk+2])+'],\n')
+
+                f.write('  "texture_coords" : [')                   # TextureCoords
+
+                for j in texture_idx[0:numTextureIdx-1]:
+                    jk = 2 * (j-1)
+                    f.write(str(txt[jk])+','+str(txt[jk+1])+',')
+                jk = 2 * (texture_idx[numTextureIdx-1]-1)
+                f.write(str(txt[jk])+','+str(txt[jk+1])+'],\n')
 
                 useMat = OBJECTS[obj]['group'][grp]['material']     # MATERIALS
                 #print(' group ' +grp+' uses mat = ' + useMat)
@@ -124,76 +136,76 @@ def createWebGLFile():
                 f.write('}')
                 f.close()
 
-        elif (len(OBJECTS[obj]['indices']) > 0):
-            print(obj)
-            ind = OBJECTS[obj]['indices']
-            normals_idx = OBJECTS[obj]['normals_idx']
-
-            numIndices = len(ind)
-            numVertices = len(ver)
-            numIndNormals = len(normals_idx)
-
-            print('Writing file part'+ str(partNumber)+'.json > [ alias: '+ obj +' vertices:' + str(numVertices/3) + ', indices: ' + str(numIndices) +']')
-            mf.write('part'+ str(partNumber)+'.json > alias: '+ obj +'\n')
-            f = open('json/part'+str(partNumber)+'.json','w')
-
-            partNumber +=1
-            f.write('{\n')
-            f.write('  "alias" : "'+ obj +'",\n')                 # ALIAS
-
-            f.write('  "vertices" : [')                         # VERTICES
-            for v in ver[0:numVertices-1]:
-                f.write(str(v)+',')
-            f.write(str(ver[numVertices-1])+'],\n')
-
-            f.write('  "indices" : [')                          # INDICES
-
-            for i in ind[0:numIndices-1]:
-                f.write(str(i-minIndex)+',')
-            f.write(str(ind[numIndices-1]-minIndex)+'],\n')
-
-            #f.write('  "normals" : [')
-
-            #for j in normals_idx[0:numIndNormals-1]:
-            #    jk = 3 * (j-1)
-            #    f.write(str(nor[jk])+','+str(nor[jk+1])+','+str(nor[jk+2])+',')
-            #jk = 3 * (normals_idx[numIndNormals-1]-1)
-            #f.write(str(nor[jk])+','+str(nor[jk+1])+','+str(nor[jk+2])+'],\n')
-
-            useMat = OBJECTS[obj]['material']     # MATERIALS
-            #print(' object ' + obj +' uses mat = ' + useMat)
-            if useMat == '(null)' or len(useMat) == 0:
-                print('warning: the group '+ obj +' does not have materials')
-                continue
-            mat = MATERIALS[useMat]
-            numKeys = len(mat)
-            currKey = 1
-            for key in mat:
-                f.write('  "'+key+'" : ')
-                if type(mat[key]) is float:
-                    f.write("%.5f" % mat[key])
-                elif type(mat[key]) is int:
-                    f.write(str(mat[key]))
-                else:
-                    numNum = len(mat[key])
-                    currNum = 1
-                    f.write('[')
-                    for num in mat[key]:
-                        s = "%.5f" % num
-                        f.write(s)
-                        if currNum < numNum:
-                            f.write(',')
-                        currNum +=1
-                    f.write(']')
-
-                if (currKey < numKeys):
-                    f.write(',\n')
-                else:
-                    f.write('\n')
-                currKey+=1
-
-            f.write('}')
-            f.close()
+#         elif (len(OBJECTS[obj]['indices']) > 0):
+#             print(obj)
+#             ind = OBJECTS[obj]['indices']
+#             normals_idx = OBJECTS[obj]['normals_idx']
+#
+#             numIndices = len(ind)
+#             numVertices = len(ver)
+#             numIndNormals = len(normals_idx)
+#
+#             print('Writing file part'+ str(partNumber)+'.json > [ alias: '+ obj +' vertices:' + str(numVertices/3) + ', indices: ' + str(numIndices) +']')
+#             mf.write('part'+ str(partNumber)+'.json > alias: '+ obj +'\n')
+#             f = open('json/part'+str(partNumber)+'.json','w')
+#
+#             partNumber +=1
+#             f.write('{\n')
+#             f.write('  "alias" : "'+ obj +'",\n')                 # ALIAS
+#
+#             f.write('  "vertices" : [')                         # VERTICES
+#             for v in ver[0:numVertices-1]:
+#                 f.write(str(v)+',')
+#             f.write(str(ver[numVertices-1])+'],\n')
+#
+#             f.write('  "indices" : [')                          # INDICES
+#
+#             for i in ind[0:numIndices-1]:
+#                 f.write(str(i-minIndex)+',')
+#             f.write(str(ind[numIndices-1]-minIndex)+'],\n')
+#
+#             #f.write('  "normals" : [')
+#
+#             #for j in normals_idx[0:numIndNormals-1]:
+#             #    jk = 3 * (j-1)
+#             #    f.write(str(nor[jk])+','+str(nor[jk+1])+','+str(nor[jk+2])+',')
+#             #jk = 3 * (normals_idx[numIndNormals-1]-1)
+#             #f.write(str(nor[jk])+','+str(nor[jk+1])+','+str(nor[jk+2])+'],\n')
+#
+#             useMat = OBJECTS[obj]['material']     # MATERIALS
+#             #print(' object ' + obj +' uses mat = ' + useMat)
+#             if useMat == '(null)' or len(useMat) == 0:
+#                 print('warning: the group '+ obj +' does not have materials')
+#                 continue
+#             mat = MATERIALS[useMat]
+#             numKeys = len(mat)
+#             currKey = 1
+#             for key in mat:
+#                 f.write('  "'+key+'" : ')
+#                 if type(mat[key]) is float:
+#                     f.write("%.5f" % mat[key])
+#                 elif type(mat[key]) is int:
+#                     f.write(str(mat[key]))
+#                 else:
+#                     numNum = len(mat[key])
+#                     currNum = 1
+#                     f.write('[')
+#                     for num in mat[key]:
+#                         s = "%.5f" % num
+#                         f.write(s)
+#                         if currNum < numNum:
+#                             f.write(',')
+#                         currNum +=1
+#                     f.write(']')
+#
+#                 if (currKey < numKeys):
+#                     f.write(',\n')
+#                 else:
+#                     f.write('\n')
+#                 currKey+=1
+#
+#             f.write('}')
+#             f.close()
     mf.close()
 
 def parseGeometry(file, hasMaterials):
@@ -209,6 +221,8 @@ def parseGeometry(file, hasMaterials):
     normals     = []
     normals_idx = []
     scalars     = []
+    texture_coords = []
+    texture_idx = []
     material    = {}
 
     nLine = 0
@@ -244,11 +258,15 @@ def parseGeometry(file, hasMaterials):
                 OBJECTS[OBJECT_NAME]['vertices'] = []
                 OBJECTS[OBJECT_NAME]['indices']        = []
                 OBJECTS[OBJECT_NAME]['normals_idx']    = []
+                OBJECTS[OBJECT_NAME]['texture_coords']    = []
+                OBJECTS[OBJECT_NAME]['texture_idx']    = []
 
                 vertices = OBJECTS[OBJECT_NAME]['vertices'] #aliasing
                 normals = OBJECTS['normals']                #aliasing
                 indices = OBJECTS[OBJECT_NAME]['indices']          #aliasing so we can store here
                 normals_idx = OBJECTS[OBJECT_NAME]['normals_idx']    #aliasing so we can store here
+                texture_coords = OBJECTS[OBJECT_NAME]['texture_coords']    #aliasing so we can store here
+                texture_idx = OBJECTS[OBJECT_NAME]['texture_idx']    #aliasing so we can store here
 
                 print('\nObject: ' + OBJECT_NAME)
 
@@ -260,10 +278,43 @@ def parseGeometry(file, hasMaterials):
                 OBJECTS[OBJECT_NAME]['group'][GROUP_NAME]                   = {}
                 OBJECTS[OBJECT_NAME]['group'][GROUP_NAME]['indices']        = []
                 OBJECTS[OBJECT_NAME]['group'][GROUP_NAME]['normals_idx']    = []
+                OBJECTS[OBJECT_NAME]['group'][GROUP_NAME]['texture_idx']    = []
                 indices     = OBJECTS[OBJECT_NAME]['group'][GROUP_NAME]['indices']          #aliasing so we can store here
                 normals_idx = OBJECTS[OBJECT_NAME]['group'][GROUP_NAME]['normals_idx']    #aliasing so we can store here
+                texture_idx = OBJECTS[OBJECT_NAME]['group'][GROUP_NAME]['texture_idx']    #aliasing so we can store here
 
                 print('\tGroup: ' + GROUP_NAME)
+
+            elif location == LOC_GROUP:                                     #Add indices to current group
+                if line.startswith('f '):
+                    f = line[1:len(line)].split()
+                    pl = len(f)
+                    if (pl == 3):                                         #ideal case for WebGL: all faces are triangles
+                        print(f[0])
+                        fa = int(f[0][0:f[0].find('/')])
+                        fb = int(f[1][0:f[1].find('/')])
+                        fc = int(f[2][0:f[2].find('/')])
+                        print(fa)
+                        indices.append(fa)
+                        indices.append(fb)
+                        indices.append(fc)
+                        ta = int(f[0][f[0].find('/')+1:f[0].rfind('/')])
+                        tb = int(f[1][f[1].find('/')+1:f[1].rfind('/')])
+                        tc = int(f[2][f[2].find('/')+1:f[2].rfind('/')])
+                        print(ta)
+                        texture_idx.append(ta)
+                        texture_idx.append(tb)
+                        texture_idx.append(tc)
+                        na = int(f[0][f[0].rfind('/')+1:len(f[0])])
+                        nb = int(f[1][f[1].rfind('/')+1:len(f[1])])
+                        nc = int(f[2][f[2].rfind('/')+1:len(f[2])])
+                        print(na)
+                        normals_idx.append(na)
+                        normals_idx.append(nb)
+                        normals_idx.append(nc)
+                    else:
+                        print('faces need to be triangular')
+                        raise
 
             elif location == LOC_OBJECT:
                 if line.startswith('f '):                           #Add indices to current object
@@ -276,6 +327,13 @@ def parseGeometry(file, hasMaterials):
                         indices.append(fa)
                         indices.append(fb)
                         indices.append(fc)
+                        ta = int(f[0][f[0].find('/')+1:f[0].rfind('/')])
+                        tb = int(f[1][f[1].find('/')+1:f[1].rfind('/')])
+                        tc = int(f[2][f[2].find('/')+1:f[2].rfind('/')])
+                        print(ta)
+                        texture_idx.append(ta)
+                        texture_idx.append(tb)
+                        texture_idx.append(tc)
                         na = int(f[0][f[0].rfind('/')+1:len(f[0])])
                         nb = int(f[1][f[1].rfind('/')+1:len(f[1])])
                         nc = int(f[2][f[2].rfind('/')+1:len(f[2])])
@@ -289,30 +347,13 @@ def parseGeometry(file, hasMaterials):
                     for v in line[1:len(line)].split():
                         vertices.append(float(v))
 
+                if line.startswith('vt '):                           #Add normals to current object
+                    for vt in line[3:len(line)].split():
+                        texture_coords.append(float(vt))
+
                 if line.startswith('vn '):                           #Add normals to current object
                     for vn in line[3:len(line)].split():
                         normals.append(float(vn))
-
-            elif location == LOC_GROUP:                                     #Add indices to current group
-                if line.startswith('f '):
-                    f = line[1:len(line)].split()
-                    pl = len(f)
-                    if (pl == 3):                                         #ideal case for WebGL: all faces are triangles
-                        fa = int(f[0][0:f[0].find('/')])
-                        fb = int(f[1][0:f[1].find('/')])
-                        fc = int(f[2][0:f[2].find('/')])
-                        indices.append(fa)
-                        indices.append(fb)
-                        indices.append(fc)
-                        na = int(f[0][f[0].rfind('/')+1:len(f[0])])
-                        nb = int(f[1][f[1].rfind('/')+1:len(f[1])])
-                        nc = int(f[2][f[2].rfind('/')+1:len(f[2])])
-                        normals_idx.append(na)
-                        normals_idx.append(nb)
-                        normals_idx.append(nc)
-                    else:
-                        print('faces need to be triangular')
-                        raise
 
 
         except:
