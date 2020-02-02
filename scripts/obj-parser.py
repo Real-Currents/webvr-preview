@@ -62,7 +62,7 @@ def createWebGLFile():
                 numVertices = len(ver)
                 numIndNormals = len(normals_idx)
 
-                print('Writing file part'+ str(partNumber)+'.json > [ alias: '+grp+' vertices:' + str(numVertices/3) + ', indices: ' + str(numIndices) +']')
+#                 print('Writing file part'+ str(partNumber)+'.json > [ alias: '+grp+' vertices:' + str(numVertices/3) + ', indices: ' + str(numIndices) +']')
                 mf.write('part'+ str(partNumber)+'.json > alias: '+grp+'\n')
                 f = open('json/part'+str(partNumber)+'.json','w')
 
@@ -124,76 +124,76 @@ def createWebGLFile():
                 f.write('}')
                 f.close()
 
-        elif (len(OBJECTS[obj]['indices']) > 0):
-            print(obj)
-            ind = OBJECTS[obj]['indices']
-            normals_idx = OBJECTS[obj]['normals_idx']
-
-            numIndices = len(ind)
-            numVertices = len(ver)
-            numIndNormals = len(normals_idx)
-
-            print('Writing file part'+ str(partNumber)+'.json > [ alias: '+ obj +' vertices:' + str(numVertices/3) + ', indices: ' + str(numIndices) +']')
-            mf.write('part'+ str(partNumber)+'.json > alias: '+ obj +'\n')
-            f = open('json/part'+str(partNumber)+'.json','w')
-
-            partNumber +=1
-            f.write('{\n')
-            f.write('  "alias" : "'+ obj +'",\n')                 # ALIAS
-
-            f.write('  "vertices" : [')                         # VERTICES
-            for v in ver[0:numVertices-1]:
-                f.write(str(v)+',')
-            f.write(str(ver[numVertices-1])+'],\n')
-
-            f.write('  "indices" : [')                          # INDICES
-
-            for i in ind[0:numIndices-1]:
-                f.write(str(i-minIndex)+',')
-            f.write(str(ind[numIndices-1]-minIndex)+'],\n')
-
-            #f.write('  "normals" : [')
-
-            #for j in normals_idx[0:numIndNormals-1]:
-            #    jk = 3 * (j-1)
-            #    f.write(str(nor[jk])+','+str(nor[jk+1])+','+str(nor[jk+2])+',')
-            #jk = 3 * (normals_idx[numIndNormals-1]-1)
-            #f.write(str(nor[jk])+','+str(nor[jk+1])+','+str(nor[jk+2])+'],\n')
-
-            useMat = OBJECTS[obj]['material']     # MATERIALS
-            #print(' object ' + obj +' uses mat = ' + useMat)
-            if useMat == '(null)' or len(useMat) == 0:
-                print('warning: the group '+ obj +' does not have materials')
-                continue
-            mat = MATERIALS[useMat]
-            numKeys = len(mat)
-            currKey = 1
-            for key in mat:
-                f.write('  "'+key+'" : ')
-                if type(mat[key]) is float:
-                    f.write("%.5f" % mat[key])
-                elif type(mat[key]) is int:
-                    f.write(str(mat[key]))
-                else:
-                    numNum = len(mat[key])
-                    currNum = 1
-                    f.write('[')
-                    for num in mat[key]:
-                        s = "%.5f" % num
-                        f.write(s)
-                        if currNum < numNum:
-                            f.write(',')
-                        currNum +=1
-                    f.write(']')
-
-                if (currKey < numKeys):
-                    f.write(',\n')
-                else:
-                    f.write('\n')
-                currKey+=1
-
-            f.write('}')
-            f.close()
+#         elif (len(OBJECTS[obj]['indices']) > 0):
+#             print(obj)
+#             ind = OBJECTS[obj]['indices']
+#             normals_idx = OBJECTS[obj]['normals_idx']
+#
+#             numIndices = len(ind)
+#             numVertices = len(ver)
+#             numIndNormals = len(normals_idx)
+#
+#             print('Writing file part'+ str(partNumber)+'.json > [ alias: '+ obj +' vertices:' + str(numVertices/3) + ', indices: ' + str(numIndices) +']')
+#             mf.write('part'+ str(partNumber)+'.json > alias: '+ obj +'\n')
+#             f = open('json/part'+str(partNumber)+'.json','w')
+#
+#             partNumber +=1
+#             f.write('{\n')
+#             f.write('  "alias" : "'+ obj +'",\n')                 # ALIAS
+#
+#             f.write('  "vertices" : [')                         # VERTICES
+#             for v in ver[0:numVertices-1]:
+#                 f.write(str(v)+',')
+#             f.write(str(ver[numVertices-1])+'],\n')
+#
+#             f.write('  "indices" : [')                          # INDICES
+#
+#             for i in ind[0:numIndices-1]:
+#                 f.write(str(i-minIndex)+',')
+#             f.write(str(ind[numIndices-1]-minIndex)+'],\n')
+#
+#             #f.write('  "normals" : [')
+#
+#             #for j in normals_idx[0:numIndNormals-1]:
+#             #    jk = 3 * (j-1)
+#             #    f.write(str(nor[jk])+','+str(nor[jk+1])+','+str(nor[jk+2])+',')
+#             #jk = 3 * (normals_idx[numIndNormals-1]-1)
+#             #f.write(str(nor[jk])+','+str(nor[jk+1])+','+str(nor[jk+2])+'],\n')
+#
+#             useMat = OBJECTS[obj]['material']     # MATERIALS
+#             #print(' object ' + obj +' uses mat = ' + useMat)
+#             if useMat == '(null)' or len(useMat) == 0:
+#                 print('warning: the group '+ obj +' does not have materials')
+#                 continue
+#             mat = MATERIALS[useMat]
+#             numKeys = len(mat)
+#             currKey = 1
+#             for key in mat:
+#                 f.write('  "'+key+'" : ')
+#                 if type(mat[key]) is float:
+#                     f.write("%.5f" % mat[key])
+#                 elif type(mat[key]) is int:
+#                     f.write(str(mat[key]))
+#                 else:
+#                     numNum = len(mat[key])
+#                     currNum = 1
+#                     f.write('[')
+#                     for num in mat[key]:
+#                         s = "%.5f" % num
+#                         f.write(s)
+#                         if currNum < numNum:
+#                             f.write(',')
+#                         currNum +=1
+#                     f.write(']')
+#
+#                 if (currKey < numKeys):
+#                     f.write(',\n')
+#                 else:
+#                     f.write('\n')
+#                 currKey+=1
+#
+#             f.write('}')
+#             f.close()
     mf.close()
 
 def parseGeometry(file, hasMaterials):
