@@ -185,7 +185,7 @@ export default function drawScene (context: any, gl: WebGL2RenderingContext, sha
                 //     -transformationBuffers['rotationBuffers'][n]['modelXRotationRadians'], // amount to rotate in radians
                 //     [1, 0, 0]);       // axis to rotate around (X)
 
-            } else if (buffer.length > 1 && b === 1) {
+            } else if (buffer.length > 1 && b === 0) {
                 // For some reason texture(uTexture, direction) is upside-down
                 mat4.rotateZ(worldMatrix, worldMatrix, Math.PI / 2);
             }

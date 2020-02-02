@@ -14,13 +14,6 @@ export default function initBuffers (gl: WebGL2RenderingContext):
     // Define vertex (position) buffer and vertex values
     const vertexBuffer: WebGLBuffer = gl.createBuffer();
     const vertices = [
-        50.0, -50.0, 50.0,
-        -50.0, -50.0, 50.0,
-        -50.0, 50.0, 50.0,
-        50.0, -50.0, 50.0,
-        -50.0, 50.0, 50.0,
-        50.0, 50.0, 50.0,
-
         -50.0, 50.0, -50.0,
         -50.0, -50.0, -50.0,
         50.0, -50.0, -50.0,
@@ -54,7 +47,14 @@ export default function initBuffers (gl: WebGL2RenderingContext):
         50.0, -50.0, 50.0,
         50.0, 50.0, -50.0,
         50.0, -50.0, 50.0,
-        50.0, 50.0, 50.0
+        50.0, 50.0, 50.0,
+
+        50.0, -50.0, 50.0,
+        -50.0, -50.0, 50.0,
+        -50.0, 50.0, 50.0,
+        50.0, -50.0, 50.0,
+        -50.0, 50.0, 50.0,
+        50.0, 50.0, 50.0,
     ];
 
     // Define index buffer and index values
@@ -63,32 +63,25 @@ export default function initBuffers (gl: WebGL2RenderingContext):
         0, 1, 2,
         3, 4, 5,
 
-        // 6, 7, 8,
-        // 9, 10, 11,
-        //
-        // 12, 13, 14,
-        // 15, 16, 17,
-        //
-        // 18, 19, 20,
-        // 21, 22, 23,
-        //
-        // 24, 25, 26,
-        // 27, 28, 29,
-        //
-        // 30, 31, 32,
-        // 33, 34, 35
+        6, 7, 8,
+        9, 10, 11,
+
+        12, 13, 14,
+        15, 16, 17,
+
+        18, 19, 20,
+        21, 22, 23,
+
+        24, 25, 26,
+        27, 28, 29,
+
+        30, 31, 32,
+        33, 34, 35
     ];
 
     // Create a buffer to put normals in
     var normalBuffer = gl.createBuffer();
     const normals = [
-        0, 0, 1,
-        0, 0, 1,
-        0, 0, 1,
-        0, 0, 1,
-        0, 0, 1,
-        0, 0, 1,
-
         0, 0, -1,
         0, 0, -1,
         0, 0, -1,
@@ -122,16 +115,16 @@ export default function initBuffers (gl: WebGL2RenderingContext):
         1, 0, 0,
         1, 0, 0,
         1, 0, 0,
-        1, 0, 0
+        1, 0, 0,
+
+        0, 0, 1,
+        0, 0, 1,
+        0, 0, 1,
+        0, 0, 1,
+        0, 0, 1,
+        0, 0, 1,
     ];
     var innerNormals = [
-        1, -1, -1,
-        -1, -1, -1,
-        -1, -1, 1,
-        1, -1, -1,
-        -1, -1, 1,
-        1, -1, 1,
-
         -1, 1, -1,
         -1, -1, -1,
         1, -1, -1,
@@ -146,6 +139,13 @@ export default function initBuffers (gl: WebGL2RenderingContext):
         -1, 1, 1,
         1, 1, -1,
 
+        1, -1, -1,
+        -1, -1, -1,
+        -1, -1, 1,
+        1, -1, -1,
+        -1, -1, 1,
+        1, -1, 1,
+
         -1, -1, 1,
         -1, -1, -1,
         -1, 1, -1,
@@ -158,7 +158,14 @@ export default function initBuffers (gl: WebGL2RenderingContext):
         1, -1, 1,
         1, 1, -1,
         1, -1, 1,
-        1, 1, 1
+        1, 1, 1,
+
+        1, -1, 1,
+        -1, -1, 1,
+        -1, 1, 1,
+        1, -1, 1,
+        -1, 1, 1,
+        1, 1, 1,
     ];
 
     // Define color buffer and color values (per vertex)

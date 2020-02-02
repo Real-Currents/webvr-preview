@@ -5,9 +5,9 @@ const context = {
     buffers: [],
     inVR: false,
     vrDisplay:  null,
-    viewPosition:  [0, 0, -25],
+    viewPosition:  [0, 0, 5],
     viewTarget: [0, 0, 0],
-    worldCameraPosition: [0, 0, -2.5]
+    worldCameraPosition: [0, 0, 5]
 }
 
 export default function createContext (

@@ -7,8 +7,8 @@ import initShaderProgram from "./modules/basic/basic-shaders";
 import initBuffers from "./modules/content/cube-buffers";
 import innerBuffers from "./modules/content/inner-cube-buffers";
 import outerBuffers from "./modules/content/outer-cube-buffers";
-import generateFace from "./modules/content/face-generator";
-// import generateFace from "./modules/content/grid-generator";
+// import generateFace from "./modules/content/face-generator";
+import generateFace from "./modules/content/grid-generator";
 
 const canvas: HTMLCanvasElement = (window.document.querySelector('canvas#cv') !== null) ?
     window.document.querySelector('canvas#cv') :
@@ -53,7 +53,7 @@ function main () {
         },
         viewPoints: [
             {
-                'viewPosition': [ 0, 0, -5 ],
+                'viewPosition': [ 0, 0, 25 ],
                 'viewTarget': [ 0, 0, 0 ]
             },
             {
@@ -104,8 +104,8 @@ function main () {
         img.id = '' + (i + 1);
 
         // Use 2d face generator to generate 6 images
-        generateFace(ctx, faceColor, textColor, text);
-        // generateFace(ctx, faceColor, 16);
+        // generateFace(ctx, faceColor, textColor, text);
+        generateFace(ctx, faceColor, 16);
 
         // Upload the canvas to the cubemap face.
         const level = 0;
@@ -152,15 +152,15 @@ function main () {
                                 outerBuffers,
                                 innerBuffers
                             ],
-                            'cameraDelta': [0, 0, +0.05],
+                            'cameraDelta': [0, 0, -0.5],
                             'viewPosition': camera.viewPoints[camera.current]['viewPosition'],
-                            'worldCameraPosition': [0, 0, -2.5]
+                            'worldCameraPosition': [0, 0, 2.5]
                         });
                     } else {
                         updateContext(gl, {
-                            'cameraDelta': [0, 0, +0.0375],
-                            'viewPosition': [0, 0, -1],
-                            'worldCameraPosition': [0, 0, -1]
+                            'cameraDelta': [0, 0, -0.2],
+                            'viewPosition': [0, 0, 5],
+                            'worldCameraPosition': [0, 0, 2.5]
                         });
                     }
                 }, 33);
@@ -237,6 +237,10 @@ function main () {
             e.preventDefault();
         });
     }
+
+    setTimeout(function () {
+        triggerMovement({});
+    }, 533)
 }
 
 main();
