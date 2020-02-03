@@ -77,12 +77,12 @@ function main () {
         };
 
         camera.viewPoints.push({
-            'viewPosition': [ 0, 0, 25 ],
+            'viewPosition': [ 0, 0, 15 ],
             'viewTarget': [ 0, 0, 0 ]
         });
 
         camera.viewPoints.push({
-            'viewPosition': [ 0.5, 0, 15 ],
+            'viewPosition': [ 0.5, 0, -15 ],
             'viewTarget': [ 0, 0, 0 ]
         });
 
@@ -128,7 +128,7 @@ function main () {
                                     outerBuffers,
                                     innerBuffers
                                 ],
-                                'cameraDelta': [0, 0, -0.5],
+                                'cameraDelta': [0, 0, -0.25],
                                 'viewPosition': [
                                     camera.viewPoint.viewPosition[0],
                                     camera.viewPoint.viewPosition[1],
@@ -138,7 +138,7 @@ function main () {
                             });
                         } else {
                             updateContext(gl, {
-                                'cameraDelta': [0, 0, -0.2],
+                                'cameraDelta': [0, 0, -0.15],
                                 'viewPosition': [0, 0, 5],
                                 'worldCameraPosition': [0, 0, 2.5]
                             });

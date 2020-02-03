@@ -1,4 +1,4 @@
-import { mat4, vec4 }  from 'gl-matrix';
+import { mat4 }  from 'gl-matrix';
 import { transformationBuffers} from "./transformation-buffers";
 import {stringify} from "querystring";
 

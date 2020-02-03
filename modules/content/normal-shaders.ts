@@ -95,7 +95,7 @@ out vec4 fragColor;
 
 void main() {
   // fragColor = vVertexColor;
-  fragColor = texture(uTexture, normalize(vVertexTextureCoords)) * vVertexColor;
+  fragColor = texture(uTexture, normalize(vVertexTextureCoords)); // * vVertexColor;
   
   // vec3 worldNormal = normalize(v_worldNormal);
   // vec3 eyeToSurfaceDir = normalize(v_worldPosition - uWorldCameraPosition);

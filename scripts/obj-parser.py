@@ -22,13 +22,15 @@ def createWebGLFile():
     partNumber = 1
 
     nor = OBJECTS['normals']
+    txt = OBJECTS['texture_coords']
 
     for obj in OBJECTS:
         if obj == 'normals':
             continue
+        if obj == 'texture_coords':
+            continue
 
         ver = OBJECTS[obj]['vertices']
-        txt = OBJECTS[obj]['texture_coords']
 
         allIndicesForObject = []
 
@@ -232,6 +234,7 @@ def parseGeometry(file, hasMaterials):
     MATERIAL_NAME = ''
 
     OBJECTS['normals'] = []
+    OBJECTS['texture_coords'] = []
 
     for line in open(file, 'r').readlines():
         nLine = nLine + 1
@@ -258,14 +261,14 @@ def parseGeometry(file, hasMaterials):
                 OBJECTS[OBJECT_NAME]['vertices'] = []
                 OBJECTS[OBJECT_NAME]['indices']        = []
                 OBJECTS[OBJECT_NAME]['normals_idx']    = []
-                OBJECTS[OBJECT_NAME]['texture_coords']    = []
                 OBJECTS[OBJECT_NAME]['texture_idx']    = []
 
-                vertices = OBJECTS[OBJECT_NAME]['vertices'] #aliasing
                 normals = OBJECTS['normals']                #aliasing
+                texture_coords = OBJECTS['texture_coords']  #aliasing
+
+                vertices = OBJECTS[OBJECT_NAME]['vertices'] #aliasing
                 indices = OBJECTS[OBJECT_NAME]['indices']          #aliasing so we can store here
                 normals_idx = OBJECTS[OBJECT_NAME]['normals_idx']    #aliasing so we can store here
-                texture_coords = OBJECTS[OBJECT_NAME]['texture_coords']    #aliasing so we can store here
                 texture_idx = OBJECTS[OBJECT_NAME]['texture_idx']    #aliasing so we can store here
 
                 print('\nObject: ' + OBJECT_NAME)
@@ -290,25 +293,21 @@ def parseGeometry(file, hasMaterials):
                     f = line[1:len(line)].split()
                     pl = len(f)
                     if (pl == 3):                                         #ideal case for WebGL: all faces are triangles
-                        print(f[0])
                         fa = int(f[0][0:f[0].find('/')])
                         fb = int(f[1][0:f[1].find('/')])
                         fc = int(f[2][0:f[2].find('/')])
-                        print(fa)
                         indices.append(fa)
                         indices.append(fb)
                         indices.append(fc)
                         ta = int(f[0][f[0].find('/')+1:f[0].rfind('/')])
                         tb = int(f[1][f[1].find('/')+1:f[1].rfind('/')])
                         tc = int(f[2][f[2].find('/')+1:f[2].rfind('/')])
-                        print(ta)
                         texture_idx.append(ta)
                         texture_idx.append(tb)
                         texture_idx.append(tc)
                         na = int(f[0][f[0].rfind('/')+1:len(f[0])])
                         nb = int(f[1][f[1].rfind('/')+1:len(f[1])])
                         nc = int(f[2][f[2].rfind('/')+1:len(f[2])])
-                        print(na)
                         normals_idx.append(na)
                         normals_idx.append(nb)
                         normals_idx.append(nc)
@@ -330,7 +329,6 @@ def parseGeometry(file, hasMaterials):
                         ta = int(f[0][f[0].find('/')+1:f[0].rfind('/')])
                         tb = int(f[1][f[1].find('/')+1:f[1].rfind('/')])
                         tc = int(f[2][f[2].find('/')+1:f[2].rfind('/')])
-                        print(ta)
                         texture_idx.append(ta)
                         texture_idx.append(tb)
                         texture_idx.append(tc)
@@ -348,7 +346,9 @@ def parseGeometry(file, hasMaterials):
                         vertices.append(float(v))
 
                 if line.startswith('vt '):                           #Add normals to current object
-                    for vt in line[3:len(line)].split():
+                    texture_line = line[3:len(line)].split()
+                    #print(texture_line)
+                    for vt in texture_line:
                         texture_coords.append(float(vt))
 
                 if line.startswith('vn '):                           #Add normals to current object
