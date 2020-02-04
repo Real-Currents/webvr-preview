@@ -21,9 +21,6 @@ def createWebGLFile():
     print('\n=== WebGL Output ===')
     partNumber = 1
 
-    nor = OBJECTS['normals']
-    txt = OBJECTS['texture_coords']
-
     for obj in OBJECTS:
         if obj == 'normals':
             continue
@@ -31,6 +28,8 @@ def createWebGLFile():
             continue
 
         ver = OBJECTS[obj]['vertices']
+        nor = OBJECTS[obj]['normals']
+        txt = OBJECTS[obj]['texture_coords']
 
         allIndicesForObject = []
 
@@ -68,7 +67,14 @@ def createWebGLFile():
                 numIndNormals = len(normals_idx)
                 numTextureIdx = len(texture_idx)
 
-                print('Writing file part'+ str(partNumber)+'.json > [ alias: '+grp+' vertices:' + str(numVertices/3) + ', indices: ' + str(numIndices) +']')
+                print('Writing file part'+ str(partNumber) + '.json > [ ' +
+                    'alias: ' + grp +
+                    ', vertices:' + str(numVertices/3) +
+                    ', indices: ' + str(numIndices) +
+                    ', normals: ' + str(len(nor)) +
+                    ', normal_idx: ' + str(numIndNormals) +
+                    ', texture_coords: ' + str(numTextureCoords) +
+                    ', texture_idx: ' + str(numTextureIdx) +' ]')
                 mf.write('part'+ str(partNumber)+'.json > alias: '+grp+'\n')
                 f = open('json/part'+str(partNumber)+'.json','w')
 
@@ -90,8 +96,12 @@ def createWebGLFile():
                 f.write('  "normals" : [')
 
                 for j in normals_idx[0:numIndNormals-1]:
-                    jk = 3 * (j-1)
-                    f.write(str(nor[jk])+','+str(nor[jk+1])+','+str(nor[jk+2])+',')
+                    try:
+                        jk = 3 * (j-1)
+                        f.write(str(nor[jk])+','+str(nor[jk+1])+','+str(nor[jk+2])+',')
+                    except:
+                        print('Could not find nor[' + str(jk) + '], nor[' + str(jk) + '], or nor[' + str(jk) + ']')
+                        raise
                 jk = 3 * (normals_idx[numIndNormals-1]-1)
                 f.write(str(nor[jk])+','+str(nor[jk+1])+','+str(nor[jk+2])+'],\n')
 
@@ -227,14 +237,18 @@ def parseGeometry(file, hasMaterials):
     texture_idx = []
     material    = {}
 
+    other_vertices = 0
+    other_normals = 0
+    other_coords = 0
+    total_vertices = 0
+    total_normals = 0
+    total_coords = 0
+
     nLine = 0
 
     OBJECT_NAME = ''
     GROUP_NAME = ''
     MATERIAL_NAME = ''
-
-    OBJECTS['normals'] = []
-    OBJECTS['texture_coords'] = []
 
     for line in open(file, 'r').readlines():
         nLine = nLine + 1
@@ -259,19 +273,24 @@ def parseGeometry(file, hasMaterials):
                 OBJECTS[OBJECT_NAME] = {}
                 OBJECTS[OBJECT_NAME]['group']    = {}
                 OBJECTS[OBJECT_NAME]['vertices'] = []
+                OBJECTS[OBJECT_NAME]['normals'] = []
+                OBJECTS[OBJECT_NAME]['texture_coords'] = []
                 OBJECTS[OBJECT_NAME]['indices']        = []
                 OBJECTS[OBJECT_NAME]['normals_idx']    = []
                 OBJECTS[OBJECT_NAME]['texture_idx']    = []
 
-                normals = OBJECTS['normals']                #aliasing
-                texture_coords = OBJECTS['texture_coords']  #aliasing
-
                 vertices = OBJECTS[OBJECT_NAME]['vertices'] #aliasing
-                indices = OBJECTS[OBJECT_NAME]['indices']          #aliasing so we can store here
-                normals_idx = OBJECTS[OBJECT_NAME]['normals_idx']    #aliasing so we can store here
-                texture_idx = OBJECTS[OBJECT_NAME]['texture_idx']    #aliasing so we can store here
+                normals = OBJECTS[OBJECT_NAME]['normals']                #aliasing
+                texture_coords = OBJECTS[OBJECT_NAME]['texture_coords']  #aliasing
+
+                total_vertices = other_vertices
+                total_coords = other_coords
+                total_normals = other_normals
 
                 print('\nObject: ' + OBJECT_NAME)
+                print('total_vertices: '+ str(total_vertices))
+                print('total_coords: '+ str(total_coords))
+                print('total_normals: '+ str(total_normals))
 
             elif line.startswith('g '):                                     #Processing a new group
                 GROUP_NAME = line.split()[1]
@@ -292,7 +311,7 @@ def parseGeometry(file, hasMaterials):
                 if line.startswith('f '):
                     f = line[1:len(line)].split()
                     pl = len(f)
-                    if (pl == 3):                                         #ideal case for WebGL: all faces are triangles
+                    if (pl == 3):                                   #ideal case for WebGL: all faces are triangles
                         fa = int(f[0][0:f[0].find('/')])
                         fb = int(f[1][0:f[1].find('/')])
                         fc = int(f[2][0:f[2].find('/')])
@@ -302,15 +321,18 @@ def parseGeometry(file, hasMaterials):
                         ta = int(f[0][f[0].find('/')+1:f[0].rfind('/')])
                         tb = int(f[1][f[1].find('/')+1:f[1].rfind('/')])
                         tc = int(f[2][f[2].find('/')+1:f[2].rfind('/')])
-                        texture_idx.append(ta)
-                        texture_idx.append(tb)
-                        texture_idx.append(tc)
+                        texture_idx.append(ta - total_coords/2)
+                        texture_idx.append(tb - total_coords/2)
+                        texture_idx.append(tc - total_coords/2)
                         na = int(f[0][f[0].rfind('/')+1:len(f[0])])
                         nb = int(f[1][f[1].rfind('/')+1:len(f[1])])
                         nc = int(f[2][f[2].rfind('/')+1:len(f[2])])
-                        normals_idx.append(na)
-                        normals_idx.append(nb)
-                        normals_idx.append(nc)
+                        print("normals "+ str(na - total_normals/3) +", "+ str(nb - total_normals/3) +", "+ str(nc - total_normals/3) )
+                        normals_idx.append(na - total_normals/3)
+                        normals_idx.append(nb - total_normals/3)
+                        normals_idx.append(nc - total_normals/3)
+                        if ((na - total_normals/3) <= 0):
+                            raise
                     else:
                         print('faces need to be triangular')
                         raise
@@ -329,31 +351,34 @@ def parseGeometry(file, hasMaterials):
                         ta = int(f[0][f[0].find('/')+1:f[0].rfind('/')])
                         tb = int(f[1][f[1].find('/')+1:f[1].rfind('/')])
                         tc = int(f[2][f[2].find('/')+1:f[2].rfind('/')])
-                        texture_idx.append(ta)
-                        texture_idx.append(tb)
-                        texture_idx.append(tc)
+                        texture_idx.append(ta - total_coords/2)
+                        texture_idx.append(tb - total_coords/2)
+                        texture_idx.append(tc - total_coords/2)
                         na = int(f[0][f[0].rfind('/')+1:len(f[0])])
                         nb = int(f[1][f[1].rfind('/')+1:len(f[1])])
                         nc = int(f[2][f[2].rfind('/')+1:len(f[2])])
-                        normals_idx.append(na)
-                        normals_idx.append(nb)
-                        normals_idx.append(nc)
+                        normals_idx.append(na - total_normals/3)
+                        normals_idx.append(nb - total_normals/3)
+                        normals_idx.append(nc - total_normals/3)
                     else:
                         print('faces need to be triangular')
 
                 if line.startswith('v '):                            #Add vertices to current object
                     for v in line[1:len(line)].split():
                         vertices.append(float(v))
+                        other_vertices += 1
 
                 if line.startswith('vt '):                           #Add normals to current object
                     texture_line = line[3:len(line)].split()
                     #print(texture_line)
                     for vt in texture_line:
                         texture_coords.append(float(vt))
+                        other_coords +=1
 
                 if line.startswith('vn '):                           #Add normals to current object
                     for vn in line[3:len(line)].split():
                         normals.append(float(vn))
+                        other_normals +=1
 
 
         except:

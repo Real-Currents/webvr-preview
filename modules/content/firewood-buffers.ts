@@ -80,8 +80,8 @@ export default function initBuffers (gl: WebGL2RenderingContext):
                 texture: textureBuffer, textureSize: textureCoords.length,
                 rotation: [ 0.0, 0.0, 0.0 ],
                 scale: [ 1.0, 1.0, 1.0 ],
-                translation: [ -7.5, 0.0, 5.0 ],
-                textureSource: 'data/world/super-mario-galaxy-the-library/Yellow Bron Mix.png'
+                translation: [ -0.5, 0.0, 5.0 ],
+                textureSource: 'data/world/super-mario-galaxy-the-library/Yellow Brown Mix.png'
             };
 
         });

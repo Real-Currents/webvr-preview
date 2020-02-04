@@ -83,7 +83,7 @@ function main () {
 
         camera.viewPoints.push({
             'viewPosition': [ 0.5, 0, -15 ],
-            'viewTarget': [ 0, 0, 0 ]
+            'viewTarget': [ 5.0, 0, 0 ]
         });
 
         console.log(camera.viewPoints);
@@ -123,6 +123,17 @@ function main () {
                         window['userTriggered'] = true;
 
                         if (++frame > 90) {
+                            updateContext(gl, {
+                                'cameraDelta': [0, 0, -0.25],
+                                'viewPosition': [
+                                    camera.viewPoint.viewPosition[0],
+                                    camera.viewPoint.viewPosition[1],
+                                    camera.viewPoint.viewPosition[2]
+                                ],
+                                'worldCameraPosition': [0, 0, -2.5]
+                            });
+                        } else if (89 < ++frame && frame >= 90) {
+                            // Only update buffers for one ~ two frames...
                             updateContext(gl, {
                                 'buffers': [
                                     outerBuffers,

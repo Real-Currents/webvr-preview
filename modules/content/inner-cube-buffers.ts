@@ -252,12 +252,12 @@ export default function initBuffers (gl: WebGL2RenderingContext):
             gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
 
             const faceInfos = [
-                { src: 'data/world/skybox-volume-2/DeepSpaceBlue/leftImage.png', target: gl.TEXTURE_CUBE_MAP_POSITIVE_X, faceColor: '#F00', textColor: '#0FF', text: '+X' },
-                { src: 'data/world/skybox-volume-2/DeepSpaceBlue/rightImage.png', target: gl.TEXTURE_CUBE_MAP_NEGATIVE_X, faceColor: '#FF0', textColor: '#00F', text: '-X' },
-                { src: 'data/world/skybox-volume-2/DeepSpaceBlue/upImage.png', target: gl.TEXTURE_CUBE_MAP_POSITIVE_Y, faceColor: '#0F0', textColor: '#F0F', text: '+Y' },
-                { src: 'data/world/skybox-volume-2/DeepSpaceBlue/downImage.png', target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Y, faceColor: '#0FF', textColor: '#F00', text: '-Y' },
-                { src: 'data/world/skybox-volume-2/DeepSpaceBlue/frontImage.png', target: gl.TEXTURE_CUBE_MAP_POSITIVE_Z, faceColor: '#00F', textColor: '#FF0', text: '+Z' },
-                { src: 'data/world/skybox-volume-2/DeepSpaceBlue/backImage.png', target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Z, faceColor: '#F0F', textColor: '#0F0', text: '-Z' },
+                { src: 'data/world/skybox-volume-2/DeepSpaceBlue/leftImage-small.png', target: gl.TEXTURE_CUBE_MAP_POSITIVE_X, faceColor: '#F00', textColor: '#0FF', text: '+X' },
+                { src: 'data/world/skybox-volume-2/DeepSpaceBlue/rightImage-small.png', target: gl.TEXTURE_CUBE_MAP_NEGATIVE_X, faceColor: '#FF0', textColor: '#00F', text: '-X' },
+                { src: 'data/world/skybox-volume-2/DeepSpaceBlue/upImage-small.png', target: gl.TEXTURE_CUBE_MAP_POSITIVE_Y, faceColor: '#0F0', textColor: '#F0F', text: '+Y' },
+                { src: 'data/world/skybox-volume-2/DeepSpaceBlue/downImage-small.png', target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Y, faceColor: '#0FF', textColor: '#F00', text: '-Y' },
+                { src: 'data/world/skybox-volume-2/DeepSpaceBlue/frontImage-small.png', target: gl.TEXTURE_CUBE_MAP_POSITIVE_Z, faceColor: '#00F', textColor: '#FF0', text: '+Z' },
+                { src: 'data/world/skybox-volume-2/DeepSpaceBlue/backImage-small.png', target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Z, faceColor: '#F0F', textColor: '#0F0', text: '-Z' },
             ];
 
             faceInfos.forEach((faceInfo, i, a) => {

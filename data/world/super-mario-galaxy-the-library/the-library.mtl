@@ -1,5 +1,5 @@
 # Blender MTL File: 'super-mario-galaxy-the-library.blend'
-# Material Count: 23
+# Material Count: 22
 
 newmtl Bricks
 Ns 0.000000
@@ -10,7 +10,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 1
-map_Kd /Users/jo088ha/Projects/Currents/Blender/super-mario-galaxy-the-library/Simple bricks.png
+map_Kd Simple bricks.png
 
 newmtl Grass_A
 Ns 0.000000
@@ -21,7 +21,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 1
-map_Kd /Users/jo088ha/Projects/Currents/Blender/super-mario-galaxy-the-library/Grass A.png
+map_Kd Grass A.png
 
 newmtl Grass_B
 Ns 0.000000
@@ -32,7 +32,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 1
-map_Kd /Users/jo088ha/Projects/Currents/Blender/super-mario-galaxy-the-library/Grass B.png
+map_Kd Grass B.png
 
 newmtl Lamp_Texture
 Ns 323.999994
@@ -53,7 +53,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 1
-map_Kd /Users/jo088ha/Projects/Currents/Blender/super-mario-galaxy-the-library/Library Books.png
+map_Kd Library Books.png
 
 newmtl Library_Texture_Wood
 Ns 0.000000
@@ -64,7 +64,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 1
-map_Kd /Users/jo088ha/Projects/Currents/Blender/super-mario-galaxy-the-library/Simple Wood.png
+map_Kd Simple Wood.png
 
 newmtl Marble
 Ns 0.000000
@@ -75,7 +75,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 1
-map_Kd /Users/jo088ha/Projects/Currents/Blender/super-mario-galaxy-the-library/Checkertile Shaded.png
+map_Kd Checkertile Shaded.png
 
 newmtl Oval_Frame_
 Ns 225.000000
@@ -86,7 +86,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 1
-map_Kd /Users/jo088ha/Projects/Currents/Blender/super-mario-galaxy-the-library/Oval Frame A.png
+map_Kd Oval Frame A.png
 
 newmtl Oval_Frame_2
 Ns 225.000000
@@ -97,7 +97,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 1
-map_Kd /Users/jo088ha/Projects/Currents/Blender/super-mario-galaxy-the-library/Oval Frame B.png
+map_Kd Oval Frame B.png
 
 newmtl Pot
 Ns 0.000000
@@ -108,7 +108,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 1
-map_Kd /Users/jo088ha/Projects/Currents/Blender/super-mario-galaxy-the-library/Brown.png
+map_Kd Brown.png
 
 newmtl Wood
 Ns 0.000000
@@ -119,7 +119,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 1
-map_Kd /Users/jo088ha/Projects/Currents/Blender/super-mario-galaxy-the-library/Texture Drained Brown.png
+map_Kd Texture Drained Brown.png
 
 newmtl Wooden_Decor_Pillar
 Ns 0.000000
@@ -130,7 +130,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 1
-map_Kd /Users/jo088ha/Projects/Currents/Blender/super-mario-galaxy-the-library/Texture Decored Wood.png
+map_Kd Texture Decored Wood.png
 
 newmtl Wooden_Wall_Color
 Ns 0.000000
@@ -141,7 +141,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 1
-map_Kd /Users/jo088ha/Projects/Currents/Blender/super-mario-galaxy-the-library/Simple Wood Stars.png
+map_Kd Simple Wood Stars.png
 
 newmtl Yellow_Stone
 Ns 0.000000
@@ -152,7 +152,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd /Users/jo088ha/Projects/Currents/Blender/super-mario-galaxy-the-library/Yellow Tile.png
+map_Kd Yellow Tile.png
 
 newmtl m1
 Ns 0.000000
@@ -163,7 +163,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 1
-map_Kd /Users/jo088ha/Projects/Currents/Blender/super-mario-galaxy-the-library/Textile Red.png
+map_Kd Textile Red.png
 
 newmtl m11
 Ns 0.000000
@@ -174,7 +174,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 1
-map_Kd /Users/jo088ha/Projects/Currents/Blender/super-mario-galaxy-the-library/Yellow Bron Mix.png
+map_Kd Yellow Brown Mix.png
 
 newmtl m12
 Ns 225.000000
@@ -185,7 +185,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd /Users/jo088ha/Projects/Currents/Blender/super-mario-galaxy-the-library/Picture Sky.png
+map_Kd Picture Sky.png
 
 newmtl m13
 Ns 225.000000
@@ -206,7 +206,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd /Users/jo088ha/Projects/Currents/Blender/super-mario-galaxy-the-library/Picture Rosalina.png
+map_Kd Picture Rosalina.png
 
 newmtl m18
 Ns 0.000000
@@ -217,7 +217,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 1
-map_Kd /Users/jo088ha/Projects/Currents/Blender/super-mario-galaxy-the-library/Textile Stars Red.png
+map_Kd Textile Stars Red.png
 
 newmtl m19
 Ns 254.547520
@@ -228,18 +228,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 1
-map_Kd /Users/jo088ha/Projects/Currents/Blender/super-mario-galaxy-the-library/Yellow.png
-
-newmtl m1Cube
-Ns 0.000000
-Ka 1.000000 1.000000 1.000000
-Kd 0.800000 0.800000 0.800000
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.450000
-d 1.000000
-illum 1
-map_Kd /Users/jo088ha/Projects/Currents/Blender/super-mario-galaxy-the-library/Textile Red.png
+map_Kd Yellow.png
 
 newmtl m2
 Ns 0.000000
@@ -250,4 +239,4 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 1
-map_Kd /Users/jo088ha/Projects/Currents/Blender/super-mario-galaxy-the-library/Textile Golden.png
+map_Kd Textile Golden.png
