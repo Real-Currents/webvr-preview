@@ -287,10 +287,11 @@ def parseGeometry(file, hasMaterials):
                 total_coords = other_coords
                 total_normals = other_normals
 
+                print('total_vertices parsed: '+ str(total_vertices))
+                print('total_coords parsed: '+ str(total_coords))
+                print('total_normals parsed: '+ str(total_normals))
+
                 print('\nObject: ' + OBJECT_NAME)
-                print('total_vertices: '+ str(total_vertices))
-                print('total_coords: '+ str(total_coords))
-                print('total_normals: '+ str(total_normals))
 
             elif line.startswith('g '):                                     #Processing a new group
                 GROUP_NAME = line.split()[1]
@@ -327,7 +328,6 @@ def parseGeometry(file, hasMaterials):
                         na = int(f[0][f[0].rfind('/')+1:len(f[0])])
                         nb = int(f[1][f[1].rfind('/')+1:len(f[1])])
                         nc = int(f[2][f[2].rfind('/')+1:len(f[2])])
-                        print("normals "+ str(na - total_normals/3) +", "+ str(nb - total_normals/3) +", "+ str(nc - total_normals/3) )
                         normals_idx.append(na - total_normals/3)
                         normals_idx.append(nb - total_normals/3)
                         normals_idx.append(nc - total_normals/3)
@@ -370,7 +370,6 @@ def parseGeometry(file, hasMaterials):
 
                 if line.startswith('vt '):                           #Add normals to current object
                     texture_line = line[3:len(line)].split()
-                    #print(texture_line)
                     for vt in texture_line:
                         texture_coords.append(float(vt))
                         other_coords +=1
@@ -380,13 +379,17 @@ def parseGeometry(file, hasMaterials):
                         normals.append(float(vn))
                         other_normals +=1
 
-
         except:
             print('ERROR while processing line:  '+str(nLine))
             print(line)
             raise
+
+    print('total_vertices parsed: '+ str(total_vertices))
+    print('total_coords parsed: '+ str(total_coords))
+    print('total_normals parsed: '+ str(total_normals))
     #pp = pprint.PrettyPrinter(indent=2, width=300)
     #pp.pprint(OBJECTS)
+
 
 def parseMaterials(file):
     if (len(file) == 0):
