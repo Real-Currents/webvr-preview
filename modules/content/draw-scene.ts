@@ -53,8 +53,7 @@ export default function drawScene (context: any, gl: WebGL2RenderingContext, sha
                 attribLocations: {
                     vertexNormal: gl.getAttribLocation(program, 'aVertexNormal'),
                     vertexPosition: gl.getAttribLocation(program, 'aVertexPosition'),
-                    vertexColor: gl.getAttribLocation(program, 'aVertexColor'),
-                    textureCoords: gl.getAttribLocation(program, 'aVertexTextureCoords'),
+                    vertexColor: gl.getAttribLocation(program, 'aVertexColor')
                 },
                 uniformLocations: {
                     modelViewMatrix: gl.getUniformLocation(program, 'uModelViewMatrix'),
@@ -196,10 +195,13 @@ export default function drawScene (context: any, gl: WebGL2RenderingContext, sha
             mat4.invert(normalMatrix, normalMatrix);
             mat4.transpose(normalMatrix, normalMatrix);
 
-            if (!!buffer['texture'] && !!buffer['textureSource'] && buffer['textureSource'].length > 0) {
-                gl.enableVertexAttribArray(programInfo.attribLocations.textureCoords);
-                gl.bindBuffer(gl.ARRAY_BUFFER, buffer['texture']);
-                gl.vertexAttribPointer(programInfo.attribLocations.textureCoords, 2, gl.FLOAT, false, 0, 0);
+            if (!!buffer['textureSource'] && buffer['textureSource'].length > 0) {
+                if (buffer['texture']) {
+                    programInfo.attribLocations['textureCoords'] = gl.getAttribLocation(program, 'aVertexTextureCoords')
+                    gl.enableVertexAttribArray(programInfo.attribLocations['textureCoords']);
+                    gl.bindBuffer(gl.ARRAY_BUFFER, buffer['texture']);
+                    gl.vertexAttribPointer(programInfo.attribLocations['textureCoords'], 2, gl.FLOAT, false, 0, 0);
+                }
 
                 if (!!textures[n]) {
                     gl.activeTexture(gl.TEXTURE0);

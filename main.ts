@@ -77,8 +77,8 @@ function main () {
         };
 
         camera.viewPoints.push({
-            'viewPosition': [ 0, 0, 15 ],
-            'viewTarget': [ 0, 0, 0 ]
+            'viewPosition': [ 0, 0, 12.5 ],
+            'viewTarget': [ 2.5, 0, 0 ]
         });
 
         camera.viewPoints.push({
@@ -132,14 +132,15 @@ function main () {
                                 ],
                                 'worldCameraPosition': [0, 0, -2.5]
                             });
-                        } else if (89 < ++frame && frame >= 90) {
+                        } else if (89 < frame) {
                             // Only update buffers for one ~ two frames...
+
                             updateContext(gl, {
                                 'buffers': [
                                     outerBuffers,
                                     innerBuffers
                                 ],
-                                'cameraDelta': [0, 0, -0.25],
+                                'cameraDelta': [0, 0, -0.15],
                                 'viewPosition': [
                                     camera.viewPoint.viewPosition[0],
                                     camera.viewPoint.viewPosition[1],
@@ -149,7 +150,7 @@ function main () {
                             });
                         } else {
                             updateContext(gl, {
-                                'cameraDelta': [0, 0, -0.15],
+                                'cameraDelta': [0, 0, -0.05],
                                 'viewPosition': [0, 0, 5],
                                 'worldCameraPosition': [0, 0, 2.5]
                             });
