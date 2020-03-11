@@ -78,7 +78,7 @@ export default function createContext (
 
     let then = 0;
 
-    gl.clearColor(0.0, 0.0, 0.0, 1.0);  // Clear to black, fully opaque
+    gl.clearColor(0.0, 0.0, 0.0, 0.0);  // Clear to fully transparent black
 
     const nonVRCallback = (now) => {
         if (inVR) {

@@ -6,9 +6,9 @@ import innerBuffers from "./modules/content/inner-cube-buffers";
 import initShaderProgram from "./modules/content/cubemap-shaders";
 import generateFace from "./modules/content/face-generator";
 
-const canvas: HTMLCanvasElement = (window.document.querySelector('canvas#cv') !== null) ?
-    window.document.querySelector('canvas#cv') :
-    window.document.createElement('canvas');
+const canvas: HTMLCanvasElement = (window.document.querySelector('canvas#fathers') !== null) ?
+    window.document.querySelector('canvas#fathers') :
+    window.document.querySelector('canvas') || window.document.createElement('canvas');
 
 //
 // Start here
@@ -16,7 +16,7 @@ const canvas: HTMLCanvasElement = (window.document.querySelector('canvas#cv') !=
 function main () {
 
     // Attach canvas to window
-    if (canvas.id !== 'cv') {
+    if (!canvas.id) {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         canvas.style.display = 'block';
@@ -196,12 +196,19 @@ function main () {
                     }
                 }
 
-                if (video.currentTime > 5 && !video.muted) {
+                if (video.currentTime > 10 && !video.muted) {
+                    updateContext(gl, {
+                        'buffers': innerBuffers,
+                        'cameraDelta': [ 0, 0, (video.currentTime % 20 < 10) ? -0.25 : +0.25 ],
+                        'viewPosition': null,
+                        'worldCameraPosition': [ 0, 0, (video.currentTime % 20 < 10) ? 2.5 : -8 ]
+                    });
+                } else if (video.currentTime > 5 && !video.muted) {
                     updateContext(gl, {
                         'buffers': innerBuffers,
                         'cameraDelta': [ 0, 0, +0.05 ],
                         'viewPosition': null,
-                        'worldCameraPosition': [ 0, 0, -1 ]
+                        'worldCameraPosition': [ 0, 0, -10 ]
                     });
                 } else if (video.currentTime > 1 && !video.muted) {
                     updateContext(gl, {
