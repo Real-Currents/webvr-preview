@@ -196,25 +196,52 @@ function main () {
                     }
                 }
 
+                var zoomExtents = [ -10, 0 ];
+                var vTime = Math.floor( video.currentTime * 15.03 ) - 6;
+
                 if (video.currentTime > 10 && !video.muted) {
-                    updateContext(gl, {
-                        'buffers': innerBuffers,
-                        'cameraDelta': [ 0, 0, (video.currentTime % 20 < 10) ? -0.25 : +0.25 ],
-                        'viewPosition': null,
-                        'worldCameraPosition': [ 0, 0, (video.currentTime % 20 < 10) ? 2.5 : -8 ]
-                    });
+
+                    /* Draw bars for the eq levels (fft) data */
+                    if (!!window['canvasApp'] && !!window['canvasApp'].vBuffer) try {
+                        var vbuf = window['canvasApp'].vBuffer;
+                        var z = Math.abs(zoomExtents[1] - zoomExtents[0]);
+                        var vOffset = Math.max.apply(Math, vbuf[vTime].map(d => parseFloat(d))) * z;
+                        window['updateContext']  = {
+                            'buffers': innerBuffers,
+                            'cameraDelta': [ 0, 0, (video.currentTime % 20 < 10) ? -vOffset : +vOffset ],
+                            'viewPosition': null,
+                            'worldCameraPosition': [ 0, 0, (video.currentTime % 20 < 10) ? zoomExtents[1] : zoomExtents[0] ]
+                        };
+                        updateContext(gl, {
+                            'buffers': innerBuffers,
+                            'cameraDelta': [ 0, 0, (video.currentTime % 20 < 10) ? -vOffset : +vOffset ],
+                            'viewPosition': null,
+                            'worldCameraPosition': [ 0, 0, (video.currentTime % 20 < 10) ? zoomExtents[1] : zoomExtents[0] ]
+                        });
+
+                    } catch (e) {
+                        console.log(e);
+
+                    } else {
+                        updateContext(gl, {
+                            'buffers': innerBuffers,
+                            'cameraDelta': [0, 0, (video.currentTime % 20 < 10) ? -0.25 : +0.25],
+                            'viewPosition': null,
+                            'worldCameraPosition': [0, 0, (video.currentTime % 20 < 10) ? zoomExtents[1] : zoomExtents[0]]
+                        });
+                    }
                 } else if (video.currentTime > 5 && !video.muted) {
                     updateContext(gl, {
                         'buffers': innerBuffers,
                         'cameraDelta': [ 0, 0, +0.05 ],
                         'viewPosition': null,
-                        'worldCameraPosition': [ 0, 0, -10 ]
+                        'worldCameraPosition': [ 0, 0, zoomExtents[0] ]
                     });
                 } else if (video.currentTime > 1 && !video.muted) {
                     updateContext(gl, {
                         'cameraDelta': [ 0, 0, +0.025 ],
                         'viewPosition': [ 0, 0, -1 ],
-                        'worldCameraPosition': [ 0, 0, -1 ]
+                        'worldCameraPosition': [ 0, 0, -2.5 ]
                     });
                 }
             }, 33);

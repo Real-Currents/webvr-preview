@@ -13,15 +13,16 @@
 
   <body>
     <div id="header-canvas" style="text-align: center;">
-      <canvas id='fathers' width='1280' height='720'  style="display: inline-block; image-rendering:optimizespeed ! important;">
+      <canvas id='fathers' width='1280' height='720'  style='display: inline-block; image-rendering:optimizespeed ! important;'>
         <div id='main-header'>
           <h1>Happy Birthday, Dad!</h1>
           Please play in a new web browser, like Firefox or Chrome.
         </div>
       </canvas>
+      <canvas id='cv'></canvas>
     </div>
     <div style="text-align: center;">
-      <br /><a id="aud1_play" href="#" onclick="(function(evt) { playVideo(); aud1.currentTime=0; aud1.muted=false; userTriggered=true; evt.target.innerHTML='Now Playing'; } (event));">Play</a>
+      <br /><a id="aud1_play" href="#" onclick="(function(evt) { playVideo(); aud1.currentTime=0; aud1.muted=false; evt.target.innerHTML='Now Playing'; userTriggered=true; var control=window.document.querySelector('div#control'); control.innerHTML='Hide Control'; control.onclick=''} (event));">Play</a>
       <br /><a href="http://www.w3.org/2010/05/video/mediaevents.html" target="_blank">Media Help</a>
     </div>
 
@@ -35,6 +36,8 @@
     </div>
 
     <script type="text/javascript" src="app.js"></script>
+  
+    <script type="text/javascript" id="cvSrc" src="/scripts/interact-visualizer.js"></script>
 
   </body>
 </html>
