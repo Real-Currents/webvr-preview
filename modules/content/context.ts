@@ -118,6 +118,57 @@ function updateContext (gl: WebGL2RenderingContext, contextProperties: any) {
             }
         }
 
+        if (prop === 'viewOrbitDelta' && !!Array.isArray(contextProperties['viewOrbitDelta'])) {
+            const vod: [number, number] = contextProperties['viewOrbitDelta'] as [number, number];
+
+            const round = function (number, decimals) {
+                return parseFloat(
+                    Number((Math.round(parseFloat(number + "e" + decimals))  + "e-" + decimals)).toFixed(decimals)
+                );
+            };
+
+            if (vod[0] !== 0 && vod[1] !== 0) {
+                const delta_x = vod[0];
+                const delta_y = vod[1];
+
+                // Multiply all by 1000000 to perform the trig with rounded figures
+                const dx = (context.viewPosition[0] - context.viewTarget[0]) * 1000000,
+                    dy = (context.viewPosition[1] - context.viewTarget[1]) * 1000000,
+                    dz = (context.viewPosition[2] - context.viewTarget[2]) * 1000000;
+                const radius = Math.sqrt((
+                    Math.pow(dx, 2) +
+                    Math.pow(dy, 2) +
+                    Math.pow(dz, 2)
+                ));
+
+                const theta = Math.asin(Math.round(dx / radius));
+                const phi = Math.acos(Math.round(dz / radius));
+
+                console.log([
+                    context.viewPosition[0],
+                    context.viewPosition[1],
+                    context.viewPosition[2]
+                ]);
+
+                console.log(dx / radius);
+
+                console.log(dz / radius);
+
+                console.log('radius: ', radius / 1000000, ' theta: ', theta * (Math.PI / 180), ' phi: ', phi * (Math.PI / 180));
+
+                console.log([
+                    context.viewTarget[0] + (Math.sin(theta) * (radius / 1000000)),
+                    context.viewPosition[1],
+                    context.viewTarget[2] + (Math.cos(phi) * (radius / 1000000))
+                ]);
+
+                if (radius === radius && theta === theta && phi === phi) {
+                    context.viewPosition[0] = context.viewTarget[0] + (Math.sin(theta) * (radius / 1000000));
+                    context.viewPosition[2] = context.viewTarget[2] + (Math.cos(phi) * (radius / 1000000));
+                }
+            }
+        }
+
         if (prop === 'viewPosition' && !!Array.isArray(contextProperties['viewPosition'])) {
             const vp: [number] = contextProperties['viewPosition'] as [number];
 

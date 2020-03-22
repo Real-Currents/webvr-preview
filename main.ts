@@ -40,6 +40,10 @@ function main () {
     window.document.body.style.margin = '0px';
     window.document.body.style.overflow = 'hidden';
 
+    let mouse_down = false;
+    let mouse_x = canvas.width / 2;
+    let mouse_y = canvas.height / 2;
+
     // Get A 2D context for dynamic textures
     /** @type {Canvas2DRenderingContext} */
     const ctx = document.createElement("canvas").getContext("2d");
@@ -194,17 +198,28 @@ function main () {
     };
 
     const mouseHit = function mouseHit(event) {
-        console.log('mouse coords captured', event.clientX, ',', event.clientY);
-        // mouse_x = (event.clientX - cv_pos.left + doc.scrollLeft()) * cv_w;
-        // mouse_y = (event.clientY - cv_pos.top + doc.scrollTop()) * cv_h;
+        const delta_x = (mouse_down) ? event.clientX - mouse_x : 0;
+        const delta_y = (mouse_down) ? event.clientY - mouse_y : 0;
+        // if (!mouse_down) {
+        //     console.log('mouse coords captured (', event.clientX, ',', event.clientY, ')');
+        // } else {
+        //     console.log('mouse movement (', delta_x, ',', delta_y, ')');
+        // }
+        mouse_x = event.clientX; // (event.clientX - cv_pos.left + document.scrollLeft()) * cv_w;
+        mouse_y = event.clientY; // (event.clientY - cv_pos.top + document.scrollTop()) * cv_h;
+        if (!!mouse_down) {
+            updateContext(gl, {
+                'viewOrbitDelta': [ delta_x, delta_y ]
+            });
+        }
     };
 
     if ('ontouchmove' in document.createElement('div'))  {
         canvas.addEventListener('touchstart', function(e){
             console.log('MouseDown');
-            // mouse_down = true;
-            // mouse_up = false;
             touchHit(e);
+            mouse_down = true;
+            // mouse_up = false;
             e.preventDefault();
         });
         canvas.addEventListener('touchmove', function(e){
@@ -213,9 +228,9 @@ function main () {
         });
         canvas.addEventListener('touchend', function(e){
             console.log('MouseUp');
-            // mouse_down = false;
+            mouse_down = false;
             // mouse_up = true;
-            triggerMovement(e);
+            // triggerMovement(e);
             e.preventDefault();
         });
         console.log('touch is present');
@@ -223,17 +238,17 @@ function main () {
     } else {
         canvas.addEventListener('mousedown', function(e) {
             console.log('MouseDown');
-            // mouse_down = true;
-            // mouse_up = false;
             mouseHit(e);
+            mouse_down = true;
+            // mouse_up = false;
             e.preventDefault();
         });
         canvas.addEventListener('mousemove', mouseHit);
         canvas.addEventListener('mouseup', function (e) {
             console.log('MouseUp');
-            // mouse_down = false;
+            mouse_down = false;
             // mouse_up = true;
-            triggerMovement(e);
+            // triggerMovement(e);
             e.preventDefault();
         });
     }
