@@ -57,7 +57,7 @@ function main () {
         },
         viewPoints: [
             {
-                'viewPosition': [ 0, 0, 25 ],
+                'viewPosition': [ 0.25, 0, 25 ],
                 'viewTarget': [ 0, 0, 0 ]
             },
             {
@@ -156,9 +156,9 @@ function main () {
                                 outerBuffers,
                                 innerBuffers
                             ],
-                            'cameraDelta': [0, 0, -0.5],
+                            'cameraDelta': [+0.025, 0, -0.5],
                             'viewPosition': camera.viewPoints[camera.current]['viewPosition'],
-                            'worldCameraPosition': [0, 0, 2.5]
+                            'worldCameraPosition': [0.25, 0, 2.5]
                         });
                     } else {
                         updateContext(gl, {
@@ -198,8 +198,8 @@ function main () {
     };
 
     const mouseHit = function mouseHit(event) {
-        const delta_x = (mouse_down) ? event.clientX - mouse_x : 0;
-        const delta_y = (mouse_down) ? event.clientY - mouse_y : 0;
+        const delta_x = (mouse_down) ? (event.clientX - mouse_x) / canvas.width : 0.0;
+        const delta_y = (mouse_down) ? (event.clientY - mouse_y) / canvas.height : 0.0;
         // if (!mouse_down) {
         //     console.log('mouse coords captured (', event.clientX, ',', event.clientY, ')');
         // } else {
