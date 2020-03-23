@@ -147,6 +147,26 @@ function updateContext (gl: WebGL2RenderingContext, contextProperties: any) {
 
                 const theta = Math.asin((1.0 > (dx / radius) || (dx / radius) < -1.0) ? (dx / radius) : Math.round(dx / radius));
                 const phi = Math.acos((1.0 > (dz / radius) || (dz / radius) < -1.0) ? (dz / radius) : Math.round(dz / radius));
+                const rotate_xz = 3;
+                const delta_x = (vod[0] > 0) ?
+                    //(theta > 0) ?
+                    rotate_xz : //-rotate_xz :
+                    (vod[0] < 0) ?
+                        //(theta > 0) ?
+                        -rotate_xz : //rotate_xz :
+                        0;
+                // const delta_z = (vod[0] > 0) ?
+                //     //(phi > 0) ?
+                //     rotate_xz : //-rotate_xz :
+                //     (vod[0] < 0) ?
+                //         //(phi > 0) ?
+                //         -rotate_xz : //rotate_xz :
+                //         0;
+                // const delta_y = (vod[1] > 0) ?
+                //     3 :
+                //     (vod[1] < 0) ?
+                //         -3 :
+                //         0;
 
                 console.log([
                     context.viewPosition[0],
@@ -169,8 +189,8 @@ function updateContext (gl: WebGL2RenderingContext, contextProperties: any) {
                 // ]);
 
                 if (radius === radius && theta === theta && phi === phi) {
-                    context.viewPosition[0] = context.viewTarget[0] + (Math.sin(theta + (delta_xz * Math.PI / 180)) * (radius / 1000000)); // + (delta_xz * Math.PI / 180)
-                    context.viewPosition[2] = context.viewTarget[2] + (Math.cos(phi + (delta_xz * Math.PI / 180)) * (radius / 1000000)); // + (delta_xz * Math.PI / 180)
+                    context.viewPosition[0] = context.viewTarget[0] + (Math.sin(((theta < (-Math.PI / 8)) ? phi : theta ) + (delta_x * Math.PI / 180)) * (radius / 1000000)); // + (delta_xz * Math.PI / 180)
+                    context.viewPosition[2] = context.viewTarget[2] + (Math.cos(((theta < (-Math.PI / 8) || (7 * Math.PI / 8) < phi) ? -theta : phi) + (delta_xz * Math.PI / 180)) * (radius / 1000000)); // + (delta_xz * Math.PI / 180)
                 }
             }
         }
