@@ -120,6 +120,12 @@ function updateContext (gl: WebGL2RenderingContext, contextProperties: any) {
             }
         }
 
+        if (prop === 'viewTarget' && !!Array.isArray(contextProperties['viewTarget'])) {
+            const wct: [number] = contextProperties['viewTarget'] as [number];
+
+            wct.forEach((v, i, a) => context.viewTarget[i] = v);
+        }
+
         if (prop === 'viewPosition' && !!Array.isArray(contextProperties['viewPosition'])) {
             const vp: [number] = contextProperties['viewPosition'] as [number];
 
@@ -174,7 +180,6 @@ function updateContext (gl: WebGL2RenderingContext, contextProperties: any) {
 
             } else {
                 wcp.forEach((v, i, a) => context.worldCameraPosition[i] = v);
-                saveOrbitState()
             }
         }
 
@@ -203,17 +208,27 @@ function updateContext (gl: WebGL2RenderingContext, contextProperties: any) {
                     Math.pow(dz, 2)
                 ));
 
-                theta = ((theta + delta_xz) < (-Math.PI * 2) || (theta + delta_xz) < (Math.PI * 2)) ?
-                    (theta + delta_xz) % 360 :
-                    theta + delta_xz; // Math.asin((1.0 > (dx / radius) || (dx / radius) < -1.0) ? (dx / radius) : Math.round(dx / radius));
-                phi = ((phi + delta_xz) < (-Math.PI * 2) || (phi + delta_xz) < (Math.PI * 2)) ?
-                    (phi + delta_xz) % 360 :
-                    phi + delta_xz; // Math.acos((1.0 > (dz / radius) || (dz / radius) < -1.0) ? (dz / radius) : Math.round(dz / radius));
+                theta = (theta + delta_xz) < (-Math.PI * 2) ?
+                    (Math.PI * 2) + (theta + delta_xz) :
+                    (Math.PI * 2) < (theta + delta_xz) ?
+                        (theta + delta_xz) - (Math.PI * 2) :
+                        theta + delta_xz; // Math.acos((1.0 > (dx / radius) || (dx / radius) < -1.0) ? (dx / radius) : Math.round(dx / radius));
+                phi = (phi + delta_y) < (-Math.PI * 2) ?
+                    (Math.PI * 2) + (phi + delta_y) :
+                    (Math.PI * 2) < (phi + delta_y) ?
+                        (phi + delta_y) - (Math.PI * 2) :
+                        phi + delta_y; // Math.asin((1.0 > (dz / radius) || (dz / radius) < -1.0) ? (dz / radius) : Math.round(dz / radius));
 
+                // console.log(
+                //     'radius: ', radius / 1000000,
+                //     ' theta: ', theta,
+                //     ' phi: ', phi
+                // );
 
                 if (radius === radius && theta === theta && phi === phi) {
                     context.viewPosition[0] = context.viewTarget[0] + (Math.cos(theta) * (radius / 1000000)); // + (delta_xz * Math.PI / 180)
-                    context.viewPosition[2] = context.viewTarget[2] + (Math.sin(phi) * (radius / 1000000)); // + (delta_xz * Math.PI / 180)
+                    // context.viewPosition[1] = context.viewTarget[1] + (Math.tan(phi) * (radius / 1000000)); // + (delta_xz * Math.PI / 180)
+                    context.viewPosition[2] = context.viewTarget[2] + (Math.sin(theta) * (radius / 1000000)); // + (delta_xz * Math.PI / 180)
                 }
             }
         }
@@ -231,32 +246,32 @@ function saveOrbitState () {
             Math.pow(dz, 2)
         ));
 
-    // theta = Math.acos((1.0 > (dx / radius) || (dx / radius) < -1.0) ? (dx / radius) : Math.round(dx / radius));
+    theta = Math.acos((1.0 > (dx / radius) || (dx / radius) < -1.0) ? (dx / radius) : Math.round(dx / radius));
     // phi = Math.asin((1.0 > (dz / radius) || (dz / radius) < -1.0) ? (dz / radius) : Math.round(dz / radius));
 
-    console.log(
-        'radius: ', radius / 1000000,
-        ' theta: ', theta,
-        ' phi: ', phi
-    );
+    // console.log(
+    //     'radius: ', radius / 1000000,
+    //     ' theta: ', theta,
+    //     ' phi: ', phi
+    // );
 
-    console.log('target: ', [
-        context.viewTarget[0],
-        context.viewTarget[1],
-        context.viewTarget[2]
-    ]);
+    // console.log('target: ', [
+    //     context.viewTarget[0],
+    //     context.viewTarget[1],
+    //     context.viewTarget[2]
+    // ]);
 
-    console.log('old position: ', [
-        context.viewPosition[0],
-        context.viewPosition[1],
-        context.viewPosition[2]
-    ]);
+    // console.log('old position: ', [
+    //     context.viewPosition[0],
+    //     context.viewPosition[1],
+    //     context.viewPosition[2]
+    // ]);
 
-    console.log('new position: ', [
-        context.viewTarget[0] + (Math.cos(theta) * (radius / 1000000)),
-        context.viewPosition[1],
-        context.viewTarget[2] + (Math.sin(phi) * (radius / 1000000))
-    ]);
+    // console.log('new position: ', [
+    //     context.viewTarget[0] + (Math.cos(theta) * (radius / 1000000)),
+    //     context.viewPosition[1],
+    //     context.viewTarget[2] + (Math.sin(phi) * (radius / 1000000))
+    // ]);
 }
 
 // entry point for non-WebVR rendering

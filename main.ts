@@ -140,8 +140,9 @@ function main () {
                         // Disable interaction
                         mouse_disabled = true;
 
-                        if (++frame > 90) {
+                        if (++frame > 50) {
                             updateContext(gl, {
+                                // 'viewOrbitDelta': [ +0.1, +0.1 ],
                                 'worldCameraPosition': [0, 0, 2.5]
                             });
                             clearInterval(timeout);
@@ -149,7 +150,7 @@ function main () {
                             // Enable interaction
                             mouse_disabled = false;
 
-                        } else if (89 < frame) {
+                        } else if (49 < frame) {
                             // Only update buffers for one ~ two frames...
 
                             updateContext(gl, {
@@ -170,10 +171,10 @@ function main () {
 
                         } else {
                             updateContext(gl, {
-                                'cameraDelta': [0, 0, -0.05],
-                                'viewPosition': [0, 0, 5],
-                                'viewTarget': [ 0, 0, 0 ],
-                                'worldCameraPosition': [0, 0, 2.5]
+                                'cameraDelta': [0, 0, -0.25],
+                                'viewPosition': [0, 0, 0.5],
+                                'viewTarget': [ 0, 0, -5 ],
+                                'worldCameraPosition': [0, 0, -2.5]
                             });
                         }
                     }, 33);
