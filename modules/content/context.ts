@@ -139,14 +139,17 @@ function updateContext (gl: WebGL2RenderingContext, contextProperties: any) {
                 });
 
                 // console.log("Move view", viewPosition);
+                saveOrbitState();
 
             } else {
                 vp.forEach((v, i, a) => context.viewPosition[i] = v);
+                saveOrbitState();
             }
 
         } else if (prop === 'viewPosition' ) {
             context.viewPosition = contextProperties['viewPosition'];
             // console.log("Hold position");
+            saveOrbitState();
         }
 
         if (prop === 'worldCameraPosition' && !!Array.isArray(contextProperties['worldCameraPosition'])) {
@@ -167,9 +170,11 @@ function updateContext (gl: WebGL2RenderingContext, contextProperties: any) {
                 });
 
                 // console.log("Move camera", worldCameraPosition);
+                saveOrbitState()
 
             } else {
                 wcp.forEach((v, i, a) => context.worldCameraPosition[i] = v);
+                saveOrbitState()
             }
         }
 
@@ -198,36 +203,13 @@ function updateContext (gl: WebGL2RenderingContext, contextProperties: any) {
                     Math.pow(dz, 2)
                 ));
 
-                // console.log(dx / radius);
+                theta = ((theta + delta_xz) < (-Math.PI * 2) || (theta + delta_xz) < (Math.PI * 2)) ?
+                    (theta + delta_xz) % 360 :
+                    theta + delta_xz; // Math.asin((1.0 > (dx / radius) || (dx / radius) < -1.0) ? (dx / radius) : Math.round(dx / radius));
+                phi = ((phi + delta_xz) < (-Math.PI * 2) || (phi + delta_xz) < (Math.PI * 2)) ?
+                    (phi + delta_xz) % 360 :
+                    phi + delta_xz; // Math.acos((1.0 > (dz / radius) || (dz / radius) < -1.0) ? (dz / radius) : Math.round(dz / radius));
 
-                // console.log(dz / radius);
-
-                theta = theta + delta_xz; // Math.asin((1.0 > (dx / radius) || (dx / radius) < -1.0) ? (dx / radius) : Math.round(dx / radius));
-                phi = phi + delta_xz; // Math.acos((1.0 > (dz / radius) || (dz / radius) < -1.0) ? (dz / radius) : Math.round(dz / radius));
-
-                // console.log([
-                //     context.viewPosition[0],
-                //     context.viewPosition[1],
-                //     context.viewPosition[2]
-                // ]);
-
-                // console.log(
-                //     'radius: ', radius / 1000000,
-                //     ' theta: ',  (theta != 0) ? theta : 0,
-                //     ' phi: ', (phi != 0) ? phi : 0
-                // );
-
-                // console.log([
-                //     context.viewTarget[0] + (Math.sin(theta) * (radius / 1000000)),
-                //     context.viewPosition[1],
-                //     context.viewTarget[2] + (Math.cos(theta) * (radius / 1000000))
-                // ]);
-
-                // console.log([
-                //     context.viewTarget[0] + (Math.sin(theta + (delta_xz * Math.PI / 180)) * (radius / 1000000)),
-                //     context.viewPosition[1],
-                //     context.viewTarget[2] + (Math.cos(phi + (delta_xz * Math.PI / 180)) * (radius / 1000000))
-                // ]);
 
                 if (radius === radius && theta === theta && phi === phi) {
                     context.viewPosition[0] = context.viewTarget[0] + (Math.cos(theta) * (radius / 1000000)); // + (delta_xz * Math.PI / 180)
@@ -236,6 +218,45 @@ function updateContext (gl: WebGL2RenderingContext, contextProperties: any) {
             }
         }
     }
+}
+
+function saveOrbitState () {
+    // Multiply all by 1000000 to perform the trig with rounded figures
+    const dx = (context.viewPosition[0] - context.viewTarget[0]) * 1000000,
+        dy = (context.viewPosition[1] - context.viewTarget[1]) * 1000000,
+        dz = (context.viewPosition[2] - context.viewTarget[2]) * 1000000,
+        radius = Math.sqrt((
+            Math.pow(dx, 2) +
+            Math.pow(dy, 2) +
+            Math.pow(dz, 2)
+        ));
+
+    // theta = Math.acos((1.0 > (dx / radius) || (dx / radius) < -1.0) ? (dx / radius) : Math.round(dx / radius));
+    // phi = Math.asin((1.0 > (dz / radius) || (dz / radius) < -1.0) ? (dz / radius) : Math.round(dz / radius));
+
+    console.log(
+        'radius: ', radius / 1000000,
+        ' theta: ', theta,
+        ' phi: ', phi
+    );
+
+    console.log('target: ', [
+        context.viewTarget[0],
+        context.viewTarget[1],
+        context.viewTarget[2]
+    ]);
+
+    console.log('old position: ', [
+        context.viewPosition[0],
+        context.viewPosition[1],
+        context.viewPosition[2]
+    ]);
+
+    console.log('new position: ', [
+        context.viewTarget[0] + (Math.cos(theta) * (radius / 1000000)),
+        context.viewPosition[1],
+        context.viewTarget[2] + (Math.sin(phi) * (radius / 1000000))
+    ]);
 }
 
 // entry point for non-WebVR rendering

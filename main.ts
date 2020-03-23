@@ -41,6 +41,7 @@ function main () {
         window.document.body.style.margin = '0px';
         window.document.body.style.overflow = 'hidden';
 
+        let mouse_disabled = false;
         let mouse_down = false;
         let mouse_x = canvas.width / 2;
         let mouse_y = canvas.height / 2;
@@ -81,12 +82,12 @@ function main () {
         };
 
         camera.viewPoints.push({
-            'viewPosition': [ 0.25, 0, 25 ],
+            'viewPosition': [ 0, 0, 12.5 ],
             'viewTarget': [ 0, 0, 0 ]
         });
 
         camera.viewPoints.push({
-            'viewPosition': [ 0.5, 0, 2.5 ],
+            'viewPosition': [ 0.5, 0, -15 ],
             'viewTarget': [ 0, 0, 0 ]
         });
 
@@ -95,22 +96,32 @@ function main () {
         const { gl, updateContext } = await createContext(
             {
                 canvas,
-                viewPosition: [
+                'viewPosition': [
                     camera.viewPoint.viewPosition[0],
                     camera.viewPoint.viewPosition[1],
                     camera.viewPoint.viewPosition[2]
                 ],
-                viewTarget: [
-                    camera.viewPoint.viewTarget[0],
-                    camera.viewPoint.viewTarget[1],
-                    camera.viewPoint.viewTarget[2]
-                ]
+                'viewTarget': [ 2.5, 0, 0 ]
             },
             [
                 outerBuffers,
                 initBuffers
             ],
-            initShaderProgram);
+            initShaderProgram
+        );
+
+        updateContext(gl, {
+            'viewPosition': [
+                camera.viewPoint.viewPosition[0],
+                camera.viewPoint.viewPosition[1],
+                camera.viewPoint.viewPosition[2]
+            ],
+            'viewTarget': [
+                camera.viewPoint.viewTarget[0],
+                camera.viewPoint.viewTarget[1],
+                camera.viewPoint.viewTarget[2]
+            ]
+        });
 
         let frame = 0;
         let timeout = null;
@@ -126,10 +137,18 @@ function main () {
                     timeout = setInterval(() => {
                         window['userTriggered'] = true;
 
+                        // Disable interaction
+                        mouse_disabled = true;
+
                         if (++frame > 90) {
                             updateContext(gl, {
                                 'worldCameraPosition': [0, 0, 2.5]
                             });
+                            clearInterval(timeout);
+
+                            // Enable interaction
+                            mouse_disabled = false;
+
                         } else if (89 < frame) {
                             // Only update buffers for one ~ two frames...
 
@@ -138,28 +157,33 @@ function main () {
                                     outerBuffers,
                                     innerBuffers
                                 ],
-                                'cameraDelta': [0, 0, -0.15],
+                                'cameraDelta': [ 0, 0, -0.15 ],
                                 'viewOrbitDelta': [ +0.1, +0.1 ],
                                 'viewPosition': [
                                     camera.viewPoint.viewPosition[0],
                                     camera.viewPoint.viewPosition[1],
                                     camera.viewPoint.viewPosition[2]
                                 ],
+                                'viewTarget': [ 0, 0, 0 ],
                                 'worldCameraPosition': [0, 0, 2.5]
                             });
+
                         } else {
                             updateContext(gl, {
                                 'cameraDelta': [0, 0, -0.05],
-                                'viewOrbitDelta': [ +0.1, +0.1 ],
                                 'viewPosition': [0, 0, 5],
+                                'viewTarget': [ 0, 0, 0 ],
                                 'worldCameraPosition': [0, 0, 2.5]
                             });
                         }
                     }, 33);
 
                 } else {
-                    window['userTriggered'] = false;
+                    // window['userTriggered'] = false;
                     clearInterval(timeout);
+
+                    // Enable interaction
+                    mouse_disabled = false;
                 }
 
             }
@@ -198,63 +222,77 @@ function main () {
         });
 
         const touchHit = function touchHit(event) {
-            console.log(event.touches);
-            // mouse_x = (event.touches[0].clientX - cv_pos.left + doc.scrollLeft()) * cv_w;
-            // mouse_y = (event.touches[0].clientY - cv_pos.top + doc.scrollTop()) * cv_h;
+            if (!mouse_disabled) {
+                console.log(event.touches);
+                // mouse_x = (event.touches[0].clientX - cv_pos.left + doc.scrollLeft()) * cv_w;
+                // mouse_y = (event.touches[0].clientY - cv_pos.top + doc.scrollTop()) * cv_h;
+            }
         };
 
         const mouseHit = function mouseHit(event) {
-            const delta_x = (mouse_down) ? (event.clientX - mouse_x) / canvas.width : 0.0;
-            const delta_y = (mouse_down) ? (event.clientY - mouse_y) / canvas.height : 0.0;
-            // if (!mouse_down) {
-            //     console.log('mouse coords captured (', event.clientX, ',', event.clientY, ')');
-            // } else {
-            //     console.log('mouse movement (', delta_x, ',', delta_y, ')');
-            // }
-            mouse_x = event.clientX; // (event.clientX - cv_pos.left + document.scrollLeft()) * cv_w;
-            mouse_y = event.clientY; // (event.clientY - cv_pos.top + document.scrollTop()) * cv_h;
-            if (!!mouse_down) {
-                updateContext(gl, {
-                    'viewOrbitDelta': [ delta_x, delta_y ]
-                });
+            if (!mouse_disabled) {
+                const delta_x = (mouse_down) ? (event.clientX - mouse_x) / canvas.width : 0.0;
+                const delta_y = (mouse_down) ? (event.clientY - mouse_y) / canvas.height : 0.0;
+                // if (!mouse_down) {
+                //     console.log('mouse coords captured (', event.clientX, ',', event.clientY, ')');
+                // } else {
+                //     console.log('mouse movement (', delta_x, ',', delta_y, ')');
+                // }
+                mouse_x = event.clientX; // (event.clientX - cv_pos.left + document.scrollLeft()) * cv_w;
+                mouse_y = event.clientY; // (event.clientY - cv_pos.top + document.scrollTop()) * cv_h;
+                if (!!mouse_down) {
+                    updateContext(gl, {
+                        'viewOrbitDelta': [delta_x, delta_y]
+                    });
+                }
             }
         };
 
         if ('ontouchmove' in document.createElement('div'))  {
             canvas.addEventListener('touchstart', function(e){
-                console.log('MouseDown');
-                touchHit(e);
-                mouse_down = true;
-                // mouse_up = false;
+                if (!mouse_disabled) {
+                    console.log('MouseDown');
+                    touchHit(e);
+                    mouse_down = true;
+                    // mouse_up = false;
+                }
                 e.preventDefault();
             });
             canvas.addEventListener('touchmove', function(e){
-                touchHit(e);
+                if (!mouse_disabled) {
+                    touchHit(e);
+                }
                 e.preventDefault();
             });
             canvas.addEventListener('touchend', function(e){
-                console.log('MouseUp');
-                mouse_down = false;
-                // mouse_up = true;
-                if (camera.current === 0) triggerMovement(e);
+                if (!mouse_disabled) {
+                    console.log('MouseUp');
+                    mouse_down = false;
+                    // mouse_up = true;
+                    if (camera.current === 0) triggerMovement(e);
+                }
                 e.preventDefault();
             });
             console.log('touch is present');
 
         } else {
             canvas.addEventListener('mousedown', function(e) {
-                console.log('MouseDown');
-                mouseHit(e);
-                mouse_down = true;
-                // mouse_up = false;
+                if (!mouse_disabled) {
+                    console.log('MouseDown');
+                    mouseHit(e);
+                    mouse_down = true;
+                    // mouse_up = false;
+                }
                 e.preventDefault();
             });
             canvas.addEventListener('mousemove', mouseHit);
             canvas.addEventListener('mouseup', function (e) {
-                console.log('MouseUp');
-                mouse_down = false;
-                // mouse_up = true;
-                if (camera.current === 0) triggerMovement(e);
+                if (!mouse_disabled) {
+                    console.log('MouseUp');
+                    mouse_down = false;
+                    // mouse_up = true;
+                    if (camera.current === 0) triggerMovement(e);
+                }
                 e.preventDefault();
             });
         }
