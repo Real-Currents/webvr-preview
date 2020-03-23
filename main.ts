@@ -81,13 +81,13 @@ function main () {
         };
 
         camera.viewPoints.push({
-            'viewPosition': [ 0, 0, 12.5 ],
-            'viewTarget': [ 2.5, 0, 0 ]
+            'viewPosition': [ 0.25, 0, 25 ],
+            'viewTarget': [ 0, 0, 0 ]
         });
 
         camera.viewPoints.push({
-            'viewPosition': [ 0.5, 0, -15 ],
-            'viewTarget': [ 5.0, 0, 0 ]
+            'viewPosition': [ 0.5, 0, 2.5 ],
+            'viewTarget': [ 0, 0, 0 ]
         });
 
         console.log(camera.viewPoints);
@@ -128,13 +128,7 @@ function main () {
 
                         if (++frame > 90) {
                             updateContext(gl, {
-                                'cameraDelta': [0, 0, -0.25],
-                                'viewPosition': [
-                                    camera.viewPoint.viewPosition[0],
-                                    camera.viewPoint.viewPosition[1],
-                                    camera.viewPoint.viewPosition[2]
-                                ],
-                                'worldCameraPosition': [0, 0, -2.5]
+                                'worldCameraPosition': [0, 0, 2.5]
                             });
                         } else if (89 < frame) {
                             // Only update buffers for one ~ two frames...
@@ -151,11 +145,12 @@ function main () {
                                     camera.viewPoint.viewPosition[1],
                                     camera.viewPoint.viewPosition[2]
                                 ],
-                                'worldCameraPosition': [0, 0, -2.5]
+                                'worldCameraPosition': [0, 0, 2.5]
                             });
                         } else {
                             updateContext(gl, {
                                 'cameraDelta': [0, 0, -0.05],
+                                'viewOrbitDelta': [ +0.1, +0.1 ],
                                 'viewPosition': [0, 0, 5],
                                 'worldCameraPosition': [0, 0, 2.5]
                             });
