@@ -10,6 +10,8 @@ const context = {
     worldCameraPosition: [0, 0, 5]
 }
 
+let theta = 0, phi = 0, psi = 0;
+
 export default function createContext (
     initContext: any = {
         canvas: window.document.createElement('canvas'),
@@ -118,83 +120,6 @@ function updateContext (gl: WebGL2RenderingContext, contextProperties: any) {
             }
         }
 
-        if (prop === 'viewOrbitDelta' && !!Array.isArray(contextProperties['viewOrbitDelta'])) {
-            const vod: [number, number] = contextProperties['viewOrbitDelta'] as [number, number];
-
-            const round = function (number, decimals) {
-                return parseFloat(
-                    Number((Math.round(parseFloat(number + "e" + decimals))  + "e-" + decimals)).toFixed(decimals)
-                );
-            };
-
-            if (vod[0] !== 0 && vod[1] !== 0) {
-                const delta_xz = (vod[0] > 0) ? 3 : (vod[0] < 0) ? -3 : 0;
-                const delta_y = (vod[1] > 0) ? 3 : (vod[1] < 0) ? -3 : 0;
-
-                // Multiply all by 1000000 to perform the trig with rounded figures
-                const dx = (context.viewPosition[0] - context.viewTarget[0]) * 1000000,
-                    dy = (context.viewPosition[1] - context.viewTarget[1]) * 1000000,
-                    dz = (context.viewPosition[2] - context.viewTarget[2]) * 1000000;
-                const radius = Math.sqrt((
-                    Math.pow(dx, 2) +
-                    Math.pow(dy, 2) +
-                    Math.pow(dz, 2)
-                ));
-
-                console.log(dx / radius);
-
-                console.log(dz / radius);
-
-                const theta = Math.asin((1.0 > (dx / radius) || (dx / radius) < -1.0) ? (dx / radius) : Math.round(dx / radius));
-                const phi = Math.acos((1.0 > (dz / radius) || (dz / radius) < -1.0) ? (dz / radius) : Math.round(dz / radius));
-                const rotate_xz = 3;
-                const delta_x = (vod[0] > 0) ?
-                    //(theta > 0) ?
-                    rotate_xz : //-rotate_xz :
-                    (vod[0] < 0) ?
-                        //(theta > 0) ?
-                        -rotate_xz : //rotate_xz :
-                        0;
-                // const delta_z = (vod[0] > 0) ?
-                //     //(phi > 0) ?
-                //     rotate_xz : //-rotate_xz :
-                //     (vod[0] < 0) ?
-                //         //(phi > 0) ?
-                //         -rotate_xz : //rotate_xz :
-                //         0;
-                // const delta_y = (vod[1] > 0) ?
-                //     3 :
-                //     (vod[1] < 0) ?
-                //         -3 :
-                //         0;
-
-                console.log([
-                    context.viewPosition[0],
-                    context.viewPosition[1],
-                    context.viewPosition[2]
-                ]);
-
-                console.log('radius: ', radius / 1000000, ' theta: ',  (theta != 0) ? theta : 0, ' phi: ', (phi != 0) ? phi : 0);
-
-                console.log([
-                    context.viewTarget[0] + (Math.sin(theta) * (radius / 1000000)),
-                    context.viewPosition[1],
-                    context.viewTarget[2] + (Math.cos(phi) * (radius / 1000000))
-                ]);
-
-                // console.log([
-                //     context.viewTarget[0] + (Math.sin(theta + (delta_xz * Math.PI / 180)) * (radius / 1000000)),
-                //     context.viewPosition[1],
-                //     context.viewTarget[2] + (Math.cos(phi + (delta_xz * Math.PI / 180)) * (radius / 1000000))
-                // ]);
-
-                if (radius === radius && theta === theta && phi === phi) {
-                    context.viewPosition[0] = context.viewTarget[0] + (Math.sin(((theta < (-Math.PI / 8)) ? phi : theta ) + (delta_x * Math.PI / 180)) * (radius / 1000000)); // + (delta_xz * Math.PI / 180)
-                    context.viewPosition[2] = context.viewTarget[2] + (Math.cos(((theta < (-Math.PI / 8) || (7 * Math.PI / 8) < phi) ? -theta : phi) + (delta_xz * Math.PI / 180)) * (radius / 1000000)); // + (delta_xz * Math.PI / 180)
-                }
-            }
-        }
-
         if (prop === 'viewPosition' && !!Array.isArray(contextProperties['viewPosition'])) {
             const vp: [number] = contextProperties['viewPosition'] as [number];
 
@@ -245,6 +170,69 @@ function updateContext (gl: WebGL2RenderingContext, contextProperties: any) {
 
             } else {
                 wcp.forEach((v, i, a) => context.worldCameraPosition[i] = v);
+            }
+        }
+
+
+
+        if (prop === 'viewOrbitDelta' && !!Array.isArray(contextProperties['viewOrbitDelta'])) {
+            const vod: [number, number] = contextProperties['viewOrbitDelta'] as [number, number];
+
+            const round = function (number, decimals) {
+                return parseFloat(
+                    Number((Math.round(parseFloat(number + "e" + decimals))  + "e-" + decimals)).toFixed(decimals)
+                );
+            };
+
+            if (vod[0] !== 0 && vod[1] !== 0) {
+                const delta_xz = (vod[0] > 0) ? (3 * Math.PI/180) : (vod[0] < 0) ? -(3 * Math.PI/180) : 0;
+                const delta_y = (vod[1] > 0) ? (3 * Math.PI/180) : (vod[1] < 0) ? -(3 * Math.PI/180) : 0;
+
+                // Multiply all by 1000000 to perform the trig with rounded figures
+                const dx = (context.viewPosition[0] - context.viewTarget[0]) * 1000000,
+                    dy = (context.viewPosition[1] - context.viewTarget[1]) * 1000000,
+                    dz = (context.viewPosition[2] - context.viewTarget[2]) * 1000000;
+                const radius = Math.sqrt((
+                    Math.pow(dx, 2) +
+                    Math.pow(dy, 2) +
+                    Math.pow(dz, 2)
+                ));
+
+                // console.log(dx / radius);
+
+                // console.log(dz / radius);
+
+                theta = theta + delta_xz; // Math.asin((1.0 > (dx / radius) || (dx / radius) < -1.0) ? (dx / radius) : Math.round(dx / radius));
+                phi = phi + delta_xz; // Math.acos((1.0 > (dz / radius) || (dz / radius) < -1.0) ? (dz / radius) : Math.round(dz / radius));
+
+                // console.log([
+                //     context.viewPosition[0],
+                //     context.viewPosition[1],
+                //     context.viewPosition[2]
+                // ]);
+
+                // console.log(
+                //     'radius: ', radius / 1000000,
+                //     ' theta: ',  (theta != 0) ? theta : 0,
+                //     ' phi: ', (phi != 0) ? phi : 0
+                // );
+
+                // console.log([
+                //     context.viewTarget[0] + (Math.sin(theta) * (radius / 1000000)),
+                //     context.viewPosition[1],
+                //     context.viewTarget[2] + (Math.cos(theta) * (radius / 1000000))
+                // ]);
+
+                // console.log([
+                //     context.viewTarget[0] + (Math.sin(theta + (delta_xz * Math.PI / 180)) * (radius / 1000000)),
+                //     context.viewPosition[1],
+                //     context.viewTarget[2] + (Math.cos(phi + (delta_xz * Math.PI / 180)) * (radius / 1000000))
+                // ]);
+
+                if (radius === radius && theta === theta && phi === phi) {
+                    context.viewPosition[0] = context.viewTarget[0] + (Math.cos(theta) * (radius / 1000000)); // + (delta_xz * Math.PI / 180)
+                    context.viewPosition[2] = context.viewTarget[2] + (Math.sin(phi) * (radius / 1000000)); // + (delta_xz * Math.PI / 180)
+                }
             }
         }
     }

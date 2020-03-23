@@ -163,6 +163,7 @@ function main () {
                     } else {
                         updateContext(gl, {
                             'cameraDelta': [0, 0, -0.2],
+                            'viewOrbitDelta': [ +0.1, +0.1 ],
                             'viewPosition': [0, 0, 5],
                             'worldCameraPosition': [0, 0, 2.5]
                         });
