@@ -206,7 +206,7 @@ function main () {
 
     const mouseHit = function mouseHit(event) {
         const delta_x = (event.clientX - mouse_x); // (mouse_down) ? (event.clientX - mouse_x) / canvas.width : 0.0;
-        const delta_y = (event.clientX - mouse_x); // (mouse_down) ? (event.clientY - mouse_y) / canvas.height : 0.0;
+        const delta_y = (event.clientY - mouse_y); // (mouse_down) ? (event.clientY - mouse_y) / canvas.height : 0.0;
         // if (!mouse_down) {
         //     console.log('mouse coords captured (', event.clientX, ',', event.clientY, ')');
         // } else {
