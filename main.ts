@@ -9,6 +9,7 @@ import innerBuffers from "./modules/content/inner-cube-buffers";
 import outerBuffers from "./modules/content/outer-cube-buffers";
 // import generateFace from "./modules/content/face-generator";
 import generateFace from "./modules/content/grid-generator";
+import TexImage2DTarget = WebGLRenderingContextStrict.TexImage2DTarget;
 
 const canvas: HTMLCanvasElement = (window.document.querySelector('canvas#cv') !== null) ?
     window.document.querySelector('canvas#cv') :
@@ -126,7 +127,7 @@ function main () {
         img.addEventListener('load', function() {
             // Now that the image has loaded make copy it to the texture.
             gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
-            gl.texImage2D(target, level, internalFormat, format, type, img);
+            gl.texImage2D((<TexImage2DTarget>target), level, internalFormat, format, type, img);
             gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
         });
         // document.body.appendChild(img);
@@ -136,10 +137,10 @@ function main () {
         });
 
         // Setup each face so it's immediately renderable
-        gl.texImage2D(target, level, internalFormat, width, height, 0, format, type, null);
+        gl.texImage2D((<TexImage2DTarget>target), level, internalFormat, width, height, 0, format, type, null);
     });
     gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
-    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR); // gl.LINEAR_MIPMAP_LINEAR);
 
     const triggerMovement = function (event) {
         // console.log(lastKeyPress, ((new Date()).getTime() - lastKeyPress));
@@ -168,7 +169,7 @@ function main () {
 
                     } else {
                         updateContext(gl, {
-                            'cameraDelta': [0, 0, -0.5],
+                            'cameraDelta': [0, 0, -0.45],
                             'viewPosition': [0, 0, 5],
                             'worldCameraPosition': [0, 0, 2.5]
                         });
@@ -204,8 +205,8 @@ function main () {
     };
 
     const mouseHit = function mouseHit(event) {
-        const delta_x = (mouse_down) ? (event.clientX - mouse_x) / canvas.width : 0.0;
-        const delta_y = (mouse_down) ? (event.clientY - mouse_y) / canvas.height : 0.0;
+        const delta_x = (event.clientX - mouse_x); // (mouse_down) ? (event.clientX - mouse_x) / canvas.width : 0.0;
+        const delta_y = (event.clientX - mouse_x); // (mouse_down) ? (event.clientY - mouse_y) / canvas.height : 0.0;
         // if (!mouse_down) {
         //     console.log('mouse coords captured (', event.clientX, ',', event.clientY, ')');
         // } else {
@@ -213,26 +214,26 @@ function main () {
         // }
         mouse_x = event.clientX; // (event.clientX - cv_pos.left + document.scrollLeft()) * cv_w;
         mouse_y = event.clientY; // (event.clientY - cv_pos.top + document.scrollTop()) * cv_h;
-        if (!!mouse_down) {
+        // if (!!mouse_down) {
             updateContext(gl, {
                 'viewOrbitDelta': [ delta_x, delta_y ]
             });
-        }
+        // }
     };
 
     if ('ontouchmove' in document.createElement('div'))  {
-        canvas.addEventListener('touchstart', function(e){
+        window.addEventListener('touchstart', function(e){
             console.log('MouseDown');
             touchHit(e);
             mouse_down = true;
             // mouse_up = false;
             e.preventDefault();
         });
-        canvas.addEventListener('touchmove', function(e){
+        window.addEventListener('touchmove', function(e){
             touchHit(e);
             e.preventDefault();
         });
-        canvas.addEventListener('touchend', function(e){
+        window.addEventListener('touchend', function(e){
             console.log('MouseUp');
             mouse_down = false;
             // mouse_up = true;
@@ -242,15 +243,15 @@ function main () {
         console.log('touch is present');
 
     } else {
-        canvas.addEventListener('mousedown', function(e) {
+        window.addEventListener('mousedown', function(e) {
             console.log('MouseDown');
             mouseHit(e);
             mouse_down = true;
             // mouse_up = false;
             e.preventDefault();
         });
-        canvas.addEventListener('mousemove', mouseHit);
-        canvas.addEventListener('mouseup', function (e) {
+        window.addEventListener('mousemove', mouseHit);
+        window.addEventListener('mouseup', function (e) {
             console.log('MouseUp');
             mouse_down = false;
             // mouse_up = true;
