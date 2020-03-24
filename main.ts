@@ -152,6 +152,72 @@ function main () {
                     window['userTriggered'] = true;
 
                     if (++frame > 90) {
+
+                        const touchHit = function touchHit(event) {
+                            console.log(event.touches);
+                            event['clientX'] = event.touches[0].clientX;
+                            event['clientY'] = event.touches[0].clientY;
+                            // mouse_x = (event.touches[0].clientX - cv_pos.left + doc.scrollLeft()) * cv_w;
+                            // mouse_y = (event.touches[0].clientY - cv_pos.top + doc.scrollTop()) * cv_h;
+                            mouseHit(event);
+                        };
+
+                        const mouseHit = function mouseHit(event) {
+                            const delta_x = (event.clientX - mouse_x); // (mouse_down) ? (event.clientX - mouse_x) / canvas.width : 0.0;
+                            const delta_y = (event.clientY - mouse_y); // (mouse_down) ? (event.clientY - mouse_y) / canvas.height : 0.0;
+                            // if (!mouse_down) {
+                            //     console.log('mouse coords captured (', event.clientX, ',', event.clientY, ')');
+                            // } else {
+                            //     console.log('mouse movement (', delta_x, ',', delta_y, ')');
+                            // }
+                            mouse_x = event.clientX; // (event.clientX - cv_pos.left + document.scrollLeft()) * cv_w;
+                            mouse_y = event.clientY; // (event.clientY - cv_pos.top + document.scrollTop()) * cv_h;
+                            // if (!!mouse_down) {
+                            updateContext(gl, {
+                                'viewOrbitDelta': [ delta_x, delta_y ]
+                            });
+                            // }
+                        };
+
+                        if ('ontouchmove' in document.createElement('div'))  {
+                            window.addEventListener('touchstart', function(e){
+                                console.log('MouseDown');
+                                touchHit(e);
+                                mouse_down = true;
+                                // mouse_up = false;
+                                e.preventDefault();
+                            });
+                            window.addEventListener('touchmove', function(e){
+                                touchHit(e);
+                                e.preventDefault();
+                            });
+                            window.addEventListener('touchend', function(e){
+                                console.log('MouseUp');
+                                mouse_down = false;
+                                // mouse_up = true;
+                                // triggerMovement(e);
+                                e.preventDefault();
+                            });
+                            console.log('touch is present');
+
+                        } else {
+                            window.addEventListener('mousedown', function(e) {
+                                console.log('MouseDown');
+                                mouseHit(e);
+                                mouse_down = true;
+                                // mouse_up = false;
+                                e.preventDefault();
+                            });
+                            window.addEventListener('mousemove', mouseHit);
+                            window.addEventListener('mouseup', function (e) {
+                                console.log('MouseUp');
+                                mouse_down = false;
+                                // mouse_up = true;
+                                // triggerMovement(e);
+                                e.preventDefault();
+                            });
+                        }
+
                         updateContext(gl, {
                             'worldCameraPosition': [0.25, 0, 2.5]
                         });
@@ -189,7 +255,7 @@ function main () {
         // console.log(startVideo);
 
         if (kbEvent['keyCode'] === 32) { // this is the spacebar
-            triggerMovement(event)
+            triggerMovement(event);
 
             kbEvent.preventDefault();
 
@@ -197,68 +263,6 @@ function main () {
 
         } else return false;
     });
-
-    const touchHit = function touchHit(event) {
-        console.log(event.touches);
-        // mouse_x = (event.touches[0].clientX - cv_pos.left + doc.scrollLeft()) * cv_w;
-        // mouse_y = (event.touches[0].clientY - cv_pos.top + doc.scrollTop()) * cv_h;
-    };
-
-    const mouseHit = function mouseHit(event) {
-        const delta_x = (event.clientX - mouse_x); // (mouse_down) ? (event.clientX - mouse_x) / canvas.width : 0.0;
-        const delta_y = (event.clientX - mouse_x); // (mouse_down) ? (event.clientY - mouse_y) / canvas.height : 0.0;
-        // if (!mouse_down) {
-        //     console.log('mouse coords captured (', event.clientX, ',', event.clientY, ')');
-        // } else {
-        //     console.log('mouse movement (', delta_x, ',', delta_y, ')');
-        // }
-        mouse_x = event.clientX; // (event.clientX - cv_pos.left + document.scrollLeft()) * cv_w;
-        mouse_y = event.clientY; // (event.clientY - cv_pos.top + document.scrollTop()) * cv_h;
-        // if (!!mouse_down) {
-            updateContext(gl, {
-                'viewOrbitDelta': [ delta_x, delta_y ]
-            });
-        // }
-    };
-
-    if ('ontouchmove' in document.createElement('div'))  {
-        window.addEventListener('touchstart', function(e){
-            console.log('MouseDown');
-            touchHit(e);
-            mouse_down = true;
-            // mouse_up = false;
-            e.preventDefault();
-        });
-        window.addEventListener('touchmove', function(e){
-            touchHit(e);
-            e.preventDefault();
-        });
-        window.addEventListener('touchend', function(e){
-            console.log('MouseUp');
-            mouse_down = false;
-            // mouse_up = true;
-            // triggerMovement(e);
-            e.preventDefault();
-        });
-        console.log('touch is present');
-
-    } else {
-        window.addEventListener('mousedown', function(e) {
-            console.log('MouseDown');
-            mouseHit(e);
-            mouse_down = true;
-            // mouse_up = false;
-            e.preventDefault();
-        });
-        window.addEventListener('mousemove', mouseHit);
-        window.addEventListener('mouseup', function (e) {
-            console.log('MouseUp');
-            mouse_down = false;
-            // mouse_up = true;
-            // triggerMovement(e);
-            e.preventDefault();
-        });
-    }
 
     setTimeout(function () {
         triggerMovement({});
