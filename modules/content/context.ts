@@ -8,7 +8,7 @@ const context = {
     viewPosition:  [0, 0, 5],
     viewTarget: [0, 0, 0],
     worldCameraPosition: [0, 0, 5]
-}
+};
 
 let theta = 0, phi = 0, psi = 0;
 
@@ -120,6 +120,12 @@ function updateContext (gl: WebGL2RenderingContext, contextProperties: any) {
             }
         }
 
+        if (prop === 'viewTarget' && !!Array.isArray(contextProperties['viewTarget'])) {
+            const wct: [number] = contextProperties['viewTarget'] as [number];
+
+            wct.forEach((v, i, a) => context.viewTarget[i] = v);
+        }
+
         if (prop === 'viewPosition' && !!Array.isArray(contextProperties['viewPosition'])) {
             const vp: [number] = contextProperties['viewPosition'] as [number];
 
@@ -139,14 +145,17 @@ function updateContext (gl: WebGL2RenderingContext, contextProperties: any) {
                 });
 
                 // console.log("Move view", viewPosition);
+                saveOrbitState();
 
             } else {
                 vp.forEach((v, i, a) => context.viewPosition[i] = v);
+                saveOrbitState();
             }
 
         } else if (prop === 'viewPosition' ) {
             context.viewPosition = contextProperties['viewPosition'];
             // console.log("Hold position");
+            saveOrbitState();
         }
 
         if (prop === 'worldCameraPosition' && !!Array.isArray(contextProperties['worldCameraPosition'])) {
@@ -167,6 +176,7 @@ function updateContext (gl: WebGL2RenderingContext, contextProperties: any) {
                 });
 
                 // console.log("Move camera", worldCameraPosition);
+                saveOrbitState()
 
             } else {
                 wcp.forEach((v, i, a) => context.worldCameraPosition[i] = v);
@@ -198,44 +208,70 @@ function updateContext (gl: WebGL2RenderingContext, contextProperties: any) {
                     Math.pow(dz, 2)
                 ));
 
-                // console.log(dx / radius);
-
-                // console.log(dz / radius);
-
-                theta = theta + delta_xz; // Math.asin((1.0 > (dx / radius) || (dx / radius) < -1.0) ? (dx / radius) : Math.round(dx / radius));
-                phi = phi + delta_xz; // Math.acos((1.0 > (dz / radius) || (dz / radius) < -1.0) ? (dz / radius) : Math.round(dz / radius));
-
-                // console.log([
-                //     context.viewPosition[0],
-                //     context.viewPosition[1],
-                //     context.viewPosition[2]
-                // ]);
+                theta = (theta + delta_xz) < (-Math.PI * 2) ?
+                    (Math.PI * 2) + (theta + delta_xz) :
+                    (Math.PI * 2) < (theta + delta_xz) ?
+                        (theta + delta_xz) - (Math.PI * 2) :
+                        theta + delta_xz; // Math.acos((1.0 > (dx / radius) || (dx / radius) < -1.0) ? (dx / radius) : Math.round(dx / radius));
+                phi = (phi + delta_y) < (-Math.PI * 2) ?
+                    (Math.PI * 2) + (phi + delta_y) :
+                    (Math.PI * 2) < (phi + delta_y) ?
+                        (phi + delta_y) - (Math.PI * 2) :
+                        phi + delta_y; // Math.asin((1.0 > (dz / radius) || (dz / radius) < -1.0) ? (dz / radius) : Math.round(dz / radius));
 
                 // console.log(
                 //     'radius: ', radius / 1000000,
-                //     ' theta: ',  (theta != 0) ? theta : 0,
-                //     ' phi: ', (phi != 0) ? phi : 0
+                //     ' theta: ', theta,
+                //     ' phi: ', phi
                 // );
-
-                // console.log([
-                //     context.viewTarget[0] + (Math.sin(theta) * (radius / 1000000)),
-                //     context.viewPosition[1],
-                //     context.viewTarget[2] + (Math.cos(theta) * (radius / 1000000))
-                // ]);
-
-                // console.log([
-                //     context.viewTarget[0] + (Math.sin(theta + (delta_xz * Math.PI / 180)) * (radius / 1000000)),
-                //     context.viewPosition[1],
-                //     context.viewTarget[2] + (Math.cos(phi + (delta_xz * Math.PI / 180)) * (radius / 1000000))
-                // ]);
 
                 if (radius === radius && theta === theta && phi === phi) {
                     context.viewPosition[0] = context.viewTarget[0] + (Math.cos(theta) * (radius / 1000000)); // + (delta_xz * Math.PI / 180)
-                    context.viewPosition[2] = context.viewTarget[2] + (Math.sin(phi) * (radius / 1000000)); // + (delta_xz * Math.PI / 180)
+                    // context.viewPosition[1] = context.viewTarget[1] + (Math.tan(phi) * (radius / 1000000)); // + (delta_xz * Math.PI / 180)
+                    context.viewPosition[2] = context.viewTarget[2] + (Math.sin(theta) * (radius / 1000000)); // + (delta_xz * Math.PI / 180)
                 }
             }
         }
     }
+}
+
+function saveOrbitState () {
+    // Multiply all by 1000000 to perform the trig with rounded figures
+    const dx = (context.viewPosition[0] - context.viewTarget[0]) * 1000000,
+        dy = (context.viewPosition[1] - context.viewTarget[1]) * 1000000,
+        dz = (context.viewPosition[2] - context.viewTarget[2]) * 1000000,
+        radius = Math.sqrt((
+            Math.pow(dx, 2) +
+            Math.pow(dy, 2) +
+            Math.pow(dz, 2)
+        ));
+
+    theta = Math.acos((1.0 > (dx / radius) || (dx / radius) < -1.0) ? (dx / radius) : Math.round(dx / radius));
+    // phi = Math.asin((1.0 > (dz / radius) || (dz / radius) < -1.0) ? (dz / radius) : Math.round(dz / radius));
+
+    // console.log(
+    //     'radius: ', radius / 1000000,
+    //     ' theta: ', theta,
+    //     ' phi: ', phi
+    // );
+
+    // console.log('target: ', [
+    //     context.viewTarget[0],
+    //     context.viewTarget[1],
+    //     context.viewTarget[2]
+    // ]);
+
+    // console.log('old position: ', [
+    //     context.viewPosition[0],
+    //     context.viewPosition[1],
+    //     context.viewPosition[2]
+    // ]);
+
+    // console.log('new position: ', [
+    //     context.viewTarget[0] + (Math.cos(theta) * (radius / 1000000)),
+    //     context.viewPosition[1],
+    //     context.viewTarget[2] + (Math.sin(phi) * (radius / 1000000))
+    // ]);
 }
 
 // entry point for non-WebVR rendering
@@ -312,14 +348,14 @@ function renderEye(canvas: HTMLCanvasElement, gl: WebGL2RenderingContext, shader
 // Set up the VR display and callbacks
 function vrSetup(canvas, gl, programInfo, buffers, noVRRender, vrCallback) {
     if (typeof navigator.getVRDisplays !== 'function') {
-        (<any>window).alert("Your browser does not support WebVR");
+        console.error("Your browser does not support WebVR");
         return;
     }
 
     navigator.getVRDisplays().then(displays => {
         if (displays !== null && displays.length > 0) {
             // Assign last returned display to vrDisplay
-            context.vrDisplay = displays[displays.length - 1];
+            context.vrDisplay = displays[displays.length - 1] as VRDisplay;
 
             // optional, but recommended
             context.vrDisplay.depthNear = 0.1;

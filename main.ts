@@ -152,6 +152,11 @@ function main () {
 
                     if (++frame > 90) {
                         updateContext(gl, {
+                            'worldCameraPosition': [0.25, 0, 2.5]
+                        });
+
+                    } else if (++frame > 89) {
+                        updateContext(gl, {
                             'buffers': [
                                 outerBuffers,
                                 innerBuffers
@@ -160,10 +165,10 @@ function main () {
                             'viewPosition': camera.viewPoints[camera.current]['viewPosition'],
                             'worldCameraPosition': [0.25, 0, 2.5]
                         });
+
                     } else {
                         updateContext(gl, {
-                            'cameraDelta': [0, 0, -0.2],
-                            'viewOrbitDelta': [ +0.1, +0.1 ],
+                            'cameraDelta': [0, 0, -0.5],
                             'viewPosition': [0, 0, 5],
                             'worldCameraPosition': [0, 0, 2.5]
                         });
