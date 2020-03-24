@@ -3,9 +3,9 @@ import { gl, mat4 }  from 'gl-matrix';
 let cubeRotation: number = 0.0;
 
 export default function createContext (canvas: HTMLCanvasElement): WebGLRenderingContext {
-    const gl: WebGLRenderingContext = (
+    const gl: WebGL2RenderingContext = (
       (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')
-    ) as any as WebGLRenderingContextStrict) as any as WebGLRenderingContext;
+    ) as any as WebGLRenderingContextStrict) as any as WebGL2RenderingContext;
 
     // If we don't have a GL context, give up now
 
@@ -67,6 +67,8 @@ export default function createContext (canvas: HTMLCanvasElement): WebGLRenderin
 
     let then = 0;
 
+    gl.clearColor(0.0, 0.0, 0.0, 1.0);  // Clear to black, fully opaque
+
     // Draw the scene repeatedly
     function renderCallback(now) {
         now *= 0.001;  // convert to seconds
@@ -90,7 +92,7 @@ export default function createContext (canvas: HTMLCanvasElement): WebGLRenderin
 // Initialize the buffers we'll need. For this demo, we just
 // have one object -- a simple three-dimensional cube.
 //
-function initBuffers(gl) {
+function initBuffers(gl: WebGL2RenderingContext) {
 
     // Create a buffer for the cube's vertex positions.
 
@@ -138,7 +140,6 @@ function initBuffers(gl) {
 // Draw the scene.
 //
 function drawScene(gl, programInfo, buffers, deltaTime) {
-    gl.clearColor(0.0, 0.0, 0.0, 1.0);  // Clear to black, fully opaque
     gl.clearDepth(1.0);                 // Clear everything
     gl.enable(gl.DEPTH_TEST);           // Enable depth testing
     gl.depthFunc(gl.LEQUAL);            // Near things obscure far things
