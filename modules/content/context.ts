@@ -217,7 +217,7 @@ function updateContext (gl: WebGL2RenderingContext, contextProperties: any) {
                     (Math.PI * 2) + (phi + delta_y) :
                     (Math.PI * 2) < (phi + delta_y) ?
                         (phi + delta_y) - (Math.PI * 2) :
-                        phi + delta_y; // Math.asin((1.0 > (dz / radius) || (dz / radius) < -1.0) ? (dz / radius) : Math.round(dz / radius));
+                        phi + delta_y; // Math.asin((1.0 > (dy / radius) || (dy / radius) < -1.0) ? (dy / radius) : Math.round(dy / radius));
 
                 // console.log(
                 //     'radius: ', radius / 1000000,
@@ -226,9 +226,9 @@ function updateContext (gl: WebGL2RenderingContext, contextProperties: any) {
                 // );
 
                 if (radius === radius && theta === theta && phi === phi) {
-                    context.viewPosition[0] = context.viewTarget[0] + (Math.cos(theta) * (radius / 1000000)); // + (delta_xz * Math.PI / 180)
-                    // context.viewPosition[1] = context.viewTarget[1] + (Math.tan(phi) * (radius / 1000000)); // + (delta_xz * Math.PI / 180)
-                    context.viewPosition[2] = context.viewTarget[2] + (Math.sin(theta) * (radius / 1000000)); // + (delta_xz * Math.PI / 180)
+                    context.viewPosition[0] = context.viewTarget[0] + (Math.cos(theta) * (radius / 1000000));
+                    // context.viewPosition[1] = context.viewTarget[1] + (Math.tan(phi) * (radius / 1000000));
+                    context.viewPosition[2] = context.viewTarget[2] + (Math.sin(theta) * (radius / 1000000));
                 }
             }
         }

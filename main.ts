@@ -149,12 +149,13 @@ function main () {
         if (((new Date()).getTime() - lastKeyPress) > 500) {
             if (!window['userTriggered']) {
                 timeout = setInterval(() => {
-                    window['userTriggered'] = true;
 
                     if (++frame > 90) {
                         updateContext(gl, {
                             'worldCameraPosition': [0.25, 0, 2.5]
                         });
+
+                        window['userTriggered'] = true;
 
                     } else if (++frame > 89) {
                         updateContext(gl, {
@@ -199,9 +200,10 @@ function main () {
     });
 
     const touchHit = function touchHit(event) {
-        console.log(event.touches);
+        // console.log(event.touches);
         // mouse_x = (event.touches[0].clientX - cv_pos.left + doc.scrollLeft()) * cv_w;
         // mouse_y = (event.touches[0].clientY - cv_pos.top + doc.scrollTop()) * cv_h;
+        mouseHit(event.touches[0]);
     };
 
     const mouseHit = function mouseHit(event) {
@@ -214,11 +216,13 @@ function main () {
         // }
         mouse_x = event.clientX; // (event.clientX - cv_pos.left + document.scrollLeft()) * cv_w;
         mouse_y = event.clientY; // (event.clientY - cv_pos.top + document.scrollTop()) * cv_h;
-        // if (!!mouse_down) {
+        if (!!window['userTriggered']) {
+            // if (!!mouse_down) {
             updateContext(gl, {
-                'viewOrbitDelta': [ delta_x, delta_y ]
+                'viewOrbitDelta': [delta_x, delta_y]
             });
-        // }
+            // }
+        }
     };
 
     if ('ontouchmove' in document.createElement('div'))  {
@@ -260,9 +264,9 @@ function main () {
         });
     }
 
-    setTimeout(function () {
-        triggerMovement({});
-    }, 533)
+    // setTimeout(function () {
+    //     triggerMovement({});
+    // }, 533)
 }
 
 main();
