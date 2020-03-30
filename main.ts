@@ -56,9 +56,7 @@ function main () {
                 const viewPoints = this.viewPoints;
                 this.current = (++this.current < viewPoints.length) ? this.current : 0;
                 console.log(this.current, this.viewPoints);
-                const x = this.viewPoint.viewPosition[0]
-                const y = this.viewPoint.viewPosition[1]
-                const z = this.viewPoint.viewPosition[2]
+
                 updateContext(gl, {
                     viewPosition: [
                         this.viewPoint.viewPosition[0],
@@ -71,6 +69,7 @@ function main () {
                 const viewPoints = this.viewPoints;
                 this.current = (--this.current > -1) ? this.current : viewPoints.length - 1;
                 console.log(this.current, this.viewPoints);
+
                 updateContext(gl, {
                     viewPosition: [
                         this.viewPoint.viewPosition[0],
@@ -82,7 +81,7 @@ function main () {
         };
 
         camera.viewPoints.push({
-            'viewPosition': [ 0, 0, 12.5 ],
+            'viewPosition': [ 0, 0, 7.5 ],
             'viewTarget': [ 0, 0, 0 ]
         });
 
@@ -223,17 +222,21 @@ function main () {
         });
 
         const touchHit = function touchHit(event) {
-            if (!mouse_disabled) {
-                console.log(event.touches);
-                // mouse_x = (event.touches[0].clientX - cv_pos.left + doc.scrollLeft()) * cv_w;
-                // mouse_y = (event.touches[0].clientY - cv_pos.top + doc.scrollTop()) * cv_h;
-            }
+            // console.log(event.touches);
+            // mouse_x = (event.touches[0].clientX - cv_pos.left + doc.scrollLeft()) * cv_w;
+            // mouse_y = (event.touches[0].clientY - cv_pos.top + doc.scrollTop()) * cv_h;
+            mouseHit(event.touches[0]);
         };
 
         const mouseHit = function mouseHit(event) {
             if (!mouse_disabled) {
-                const delta_x = (mouse_down) ? (event.clientX - mouse_x) / canvas.width : 0.0;
-                const delta_y = (mouse_down) ? (event.clientY - mouse_y) / canvas.height : 0.0;
+                if (!window['userTriggered']) {
+                    var delta_x = (event.clientX - mouse_x);
+                    var delta_y = (event.clientY - mouse_y);
+                } else {
+                    var delta_x = (mouse_down) ? (event.clientX - mouse_x) / canvas.width : 0.0;
+                    var delta_y = (mouse_down) ? (event.clientY - mouse_y) / canvas.height : 0.0;
+                }
                 // if (!mouse_down) {
                 //     console.log('mouse coords captured (', event.clientX, ',', event.clientY, ')');
                 // } else {
@@ -241,7 +244,7 @@ function main () {
                 // }
                 mouse_x = event.clientX; // (event.clientX - cv_pos.left + document.scrollLeft()) * cv_w;
                 mouse_y = event.clientY; // (event.clientY - cv_pos.top + document.scrollTop()) * cv_h;
-                if (!!mouse_down) {
+                if (!!mouse_down || !window['userTriggered']) {
                     updateContext(gl, {
                         'viewOrbitDelta': [delta_x, delta_y]
                     });
