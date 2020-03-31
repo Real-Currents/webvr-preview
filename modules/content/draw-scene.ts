@@ -214,6 +214,9 @@ export default function drawScene (context: any, gl: WebGL2RenderingContext, sha
             {
                 // gl.drawArrays(gl.TRIANGLES, 0, buffer['positionSize'] / 3);
                 gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffer['index']);
+                // gl.drawElements(gl.LINES, buffer['indexSize'], gl.UNSIGNED_SHORT, 0);
+                // gl.drawElements(gl.LINE_STRIP, buffer['indexSize'], gl.UNSIGNED_SHORT, 0);
+                // gl.drawElements(gl.LINE_LOOP, buffer['indexSize'], gl.UNSIGNED_SHORT, 0);
                 gl.drawElements(gl.TRIANGLES, buffer['indexSize'], gl.UNSIGNED_SHORT, 0);
                 gl.bindBuffer(gl.ARRAY_BUFFER, null);
                 gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
