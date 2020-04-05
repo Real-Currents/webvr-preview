@@ -190,7 +190,7 @@ function main () {
         // console.log(startVideo);
 
         if (kbEvent['keyCode'] === 32) { // this is the spacebar
-            triggerMovement(event)
+            triggerMovement(event);
 
             kbEvent.preventDefault();
 

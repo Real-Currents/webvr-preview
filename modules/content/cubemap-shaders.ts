@@ -5,8 +5,8 @@ export default function initShaderProgram(gl: WebGL2RenderingContext) {
     const vertexShader = loadShader(gl, gl.VERTEX_SHADER,`#version 300 es
 precision mediump float;
 
-in vec4 aVertexColor;
-in vec3 aVertexNormal;
+in vec4 aVertexColor; // attribute index = 0
+in vec3 aVertexNormal; // attribute index = 1
 in vec3 aVertexPosition;
 
 uniform mat4 uModelViewMatrix;
@@ -56,6 +56,8 @@ void main() {
   
   // Multiply the position by the matrix.
   gl_Position = uProjectionMatrix * uModelViewMatrix * uWorldMatrix * vec4(aVertexPosition, 1.0);
+  
+  gl_PointSize = 10.0;
    
   // send the view position to the fragment shader
   v_worldPosition = (uWorldMatrix * vec4(aVertexPosition, 1.0)).xyz;

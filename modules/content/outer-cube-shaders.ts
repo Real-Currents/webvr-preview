@@ -5,8 +5,8 @@ export default function initShaderProgram(gl: WebGL2RenderingContext) {
     const vertexShader = loadShader(gl, gl.VERTEX_SHADER,`#version 300 es
 precision mediump float;
 
-in vec4 aVertexColor;
-in vec3 aVertexNormal;
+in vec4 aVertexColor; // attribute index = 0
+in vec3 aVertexNormal; // attribute index = 1
 in vec3 aVertexPosition;
 
 uniform mat4 uModelViewMatrix;

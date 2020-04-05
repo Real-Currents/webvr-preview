@@ -94,18 +94,16 @@ export default function drawScene (context: any, gl: WebGL2RenderingContext, sha
                 const normalize = false;
                 const stride = 0;
                 const offset = 0;
-                gl.enableVertexAttribArray(
-                    programInfo.attribLocations.vertexColor);
+                gl.enableVertexAttribArray(0);
+                    // programInfo.attribLocations.vertexColor);
                 gl.bindBuffer(gl.ARRAY_BUFFER, buffer['color']);
-                gl.vertexAttribPointer(
-                    programInfo.attribLocations.vertexColor,
+                gl.vertexAttribPointer(0,
+                    // programInfo.attribLocations.vertexColor,
                     numComponents,
                     type,
                     normalize,
                     stride,
                     offset);
-                gl.enableVertexAttribArray(
-                    programInfo.attribLocations.vertexColor);
             }
 
             // Tell WebGL how to pull normals out of normalBuffer (ARRAY_BUFFER)
@@ -115,12 +113,12 @@ export default function drawScene (context: any, gl: WebGL2RenderingContext, sha
                 const normalize = false; // normalize the data (convert from 0-255 to 0-1)
                 const stride = 0;        // 0 = move forward size * sizeof(type) each iteration to get the next position
                 const offset = 0;        // start at the beginning of the buffer
-                gl.enableVertexAttribArray(
-                    programInfo.attribLocations.vertexNormal);
+                gl.enableVertexAttribArray(1);
+                    // programInfo.attribLocations.vertexNormal);
                 // Bind the normal buffer.
                 gl.bindBuffer(gl.ARRAY_BUFFER, buffer['normal']);
-                gl.vertexAttribPointer(
-                    programInfo.attribLocations.vertexNormal,
+                gl.vertexAttribPointer(1,
+                    // programInfo.attribLocations.vertexNormal,
                     numComponents,
                     type,
                     normalize,
@@ -212,8 +210,10 @@ export default function drawScene (context: any, gl: WebGL2RenderingContext, sha
             gl.uniform1i(programInfo.uniformLocations.textureLocation, 0);
 
             {
+                // gl.drawArrays(gl.POINTS, 0, buffer['positionSize'] / 3);
                 // gl.drawArrays(gl.TRIANGLES, 0, buffer['positionSize'] / 3);
                 gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffer['index']);
+                // gl.drawElements(gl.POINTS, buffer['indexSize'], gl.UNSIGNED_SHORT, 0);
                 // gl.drawElements(gl.LINES, buffer['indexSize'], gl.UNSIGNED_SHORT, 0);
                 // gl.drawElements(gl.LINE_STRIP, buffer['indexSize'], gl.UNSIGNED_SHORT, 0);
                 // gl.drawElements(gl.LINE_LOOP, buffer['indexSize'], gl.UNSIGNED_SHORT, 0);
